@@ -17,7 +17,10 @@ public class User {
   @Column(name = "user_type", nullable = false, length = Integer.MAX_VALUE)
   private String userType;
 
-  @ManyToMany(mappedBy = "user")
+  @ManyToMany
+  @JoinTable(name = "user_role",
+          joinColumns = @JoinColumn(name = "user_id"),
+          inverseJoinColumns = @JoinColumn(name = "role_id"))
   private Set<Role> roles = new LinkedHashSet<>();
 
   public UUID getId() {
