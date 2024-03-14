@@ -1,12 +1,13 @@
-CREATE EXTENSION IF NOT EXISTS citext;
+CREATE SCHEMA IF NOT EXISTS hsse_tech;
+SET SCHEMA 'hsse_tech';
 
-DO $$
-    BEGIN
-        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'email') THEN
-            CREATE DOMAIN email AS citext
-                CHECK ( value ~ '^[a-zA-Z0-9.!#$%&''*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$' );
-        END IF;
-END$$;
+DROP EXTENSION IF EXISTS citext CASCADE ;
+CREATE EXTENSION citext;
+
+DROP DOMAIN IF EXISTS email;
+
+CREATE DOMAIN email AS citext
+    CHECK ( value ~ '^[a-zA-Z0-9.!#$%&''*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$' );
 
 CREATE TABLE IF NOT EXISTS item_type (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
