@@ -6,7 +6,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "rent", schema = "hsse_tech")
+@Table(name = "rent")
 public class Rent {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)

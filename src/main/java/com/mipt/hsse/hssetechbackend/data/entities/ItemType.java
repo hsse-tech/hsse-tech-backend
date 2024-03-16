@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
-@Table(name = "item_type", schema = "hsse_tech")
+@Table(name = "item_type")
 public class ItemType {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)

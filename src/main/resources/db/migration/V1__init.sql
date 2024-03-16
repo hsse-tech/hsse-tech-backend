@@ -1,6 +1,3 @@
-CREATE SCHEMA hsse_tech;
-SET SCHEMA 'hsse_tech';
-
 CREATE EXTENSION citext;
 
 CREATE DOMAIN email AS citext

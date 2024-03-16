@@ -9,7 +9,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "transaction", schema = "hsse_tech")
+@Table(name = "transaction")
 public class Transaction {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)

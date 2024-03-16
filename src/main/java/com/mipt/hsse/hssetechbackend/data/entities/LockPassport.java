@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import java.util.UUID;
 
 @Entity
-@Table(name = "lock_passport", schema = "hsse_tech")
+@Table(name = "lock_passport")
 public class LockPassport {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)

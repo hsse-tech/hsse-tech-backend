@@ -3,7 +3,7 @@ package com.mipt.hsse.hssetechbackend.data.entities;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "user_role", schema = "hsse_tech")
+@Table(name = "user_role")
 public class UserRole {
   @EmbeddedId
   private UserRoleId id;

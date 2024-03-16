@@ -7,7 +7,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import java.util.UUID;
 
 @Entity
-@Table(name = "wallet", schema = "hsse_tech")
+@Table(name = "wallet")
 public class Wallet {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)

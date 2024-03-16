@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Table(name = "\"user\"", schema = "hsse_tech")
+@Table(name = "\"user\"")
 public class User {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
@@ -22,6 +22,12 @@ public class User {
           joinColumns = @JoinColumn(name = "user_id"),
           inverseJoinColumns = @JoinColumn(name = "role_id"))
   private Set<Role> roles = new LinkedHashSet<>();
+
+  protected User() {}
+
+  public User(String userType) {
+    this.userType = userType;
+  }
 
   public UUID getId() {
     return id;

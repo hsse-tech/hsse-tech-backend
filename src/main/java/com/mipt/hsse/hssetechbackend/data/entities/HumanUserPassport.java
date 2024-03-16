@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import java.util.UUID;
 
 @Entity
-@Table(name = "human_user_passport", schema = "hsse_tech")
+@Table(name = "human_user_passport")
 public class HumanUserPassport {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
@@ -29,7 +29,7 @@ public class HumanUserPassport {
   @Column(name = "is_banned", nullable = false)
   private Boolean isBanned = false;
 
-  @Column(name = "email", columnDefinition = "email(0, 0) not null")
+  @Column(name = "email", columnDefinition = "email")
   private String email;
 
   public String getEmail() {
