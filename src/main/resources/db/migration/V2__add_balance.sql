@@ -1,0 +1,2 @@
+ALTER TABLE wallet
+    ADD balance NUMERIC(9, 2) NOT NULL DEFAULT 0;

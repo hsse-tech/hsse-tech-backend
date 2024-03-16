@@ -8,7 +8,6 @@ import java.util.UUID;
 @Table(name = "human_user_passport")
 public class HumanUserPassport {
   @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
   @Column(name = "original_id", nullable = false)
   private UUID id;
 
@@ -31,6 +30,17 @@ public class HumanUserPassport {
 
   @Column(name = "email", columnDefinition = "email")
   private String email;
+
+  public HumanUserPassport(Long yandexId, String firstName, String lastName, String email) {
+    this.yandexId = yandexId;
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.email = email;
+  }
+
+  public HumanUserPassport() {
+
+  }
 
   public String getEmail() {
     return email;
