@@ -1,13 +1,22 @@
 package com.mipt.hsse.hssetechbackend.data.entities;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.time.Instant;
 import java.util.UUID;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "rent")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Rent {
   @Id
+  @Setter(AccessLevel.NONE)
   @GeneratedValue(strategy = GenerationType.UUID)
   @Column(name = "id", nullable = false)
   private UUID id;
@@ -29,9 +38,6 @@ public class Rent {
   @Column(name = "ended_at")
   private Instant endedAt;
 
-
-  protected Rent() {}
-
   public Rent(Instant from, Instant to, User renter, Item item) {
     this.from = from;
     this.to = to;
@@ -39,47 +45,8 @@ public class Rent {
     this.renter = renter;
   }
 
-  public UUID getId() {
-    return id;
-  }
-
-  public void setId(UUID id) {
-    this.id = id;
-  }
-
-  public Instant getFrom() {
-    return from;
-  }
-
-  public void setFrom(Instant from) {
-    this.from = from;
-  }
-
-  public Instant getTo() {
-    return to;
-  }
-
-  public void setTo(Instant to) {
-    this.to = to;
-  }
-
-  public Item getItem() {
-    return item;
-  }
-
-  public void setItem(Item item) {
-    this.item = item;
-  }
-
-  public Instant getEndedAt() {
-    return endedAt;
-  }
-
-  public void setEndedAt(Instant endedAt) {
+  public Rent(Instant from, Instant to, User renter, Item item, Instant endedAt) {
+    this(from, to, renter, item);
     this.endedAt = endedAt;
-  }
-
-  public User getRenter() {
-    return renter;
   }
 }

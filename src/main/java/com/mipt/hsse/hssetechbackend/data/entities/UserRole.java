@@ -1,11 +1,17 @@
 package com.mipt.hsse.hssetechbackend.data.entities;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "user_role")
 public class UserRole {
   @EmbeddedId
+  @Setter(AccessLevel.NONE)
   private UserRoleId id;
 
   @MapsId("userId")
@@ -17,28 +23,4 @@ public class UserRole {
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "role_id", nullable = false)
   private Role role;
-
-  public UserRoleId getId() {
-    return id;
-  }
-
-  public void setId(UserRoleId id) {
-    this.id = id;
-  }
-
-  public User getUser() {
-    return user;
-  }
-
-  public void setUser(User user) {
-    this.user = user;
-  }
-
-  public Role getRole() {
-    return role;
-  }
-
-  public void setRole(Role role) {
-    this.role = role;
-  }
 }

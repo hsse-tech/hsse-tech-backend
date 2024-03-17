@@ -1,6 +1,9 @@
 package com.mipt.hsse.hssetechbackend.data.entities;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -8,10 +11,13 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "transaction")
 public class Transaction {
   @Id
+  @Setter(AccessLevel.NONE)
   @GeneratedValue(strategy = GenerationType.UUID)
   @Column(name = "id", nullable = false)
   private UUID id;
@@ -35,60 +41,4 @@ public class Transaction {
   @OnDelete(action = OnDeleteAction.CASCADE)
   @JoinColumn(name = "wallet_id", nullable = false)
   private Wallet wallet;
-
-  public UUID getId() {
-    return id;
-  }
-
-  public void setId(UUID id) {
-    this.id = id;
-  }
-
-  public BigDecimal getAmount() {
-    return amount;
-  }
-
-  public void setAmount(BigDecimal amount) {
-    this.amount = amount;
-  }
-
-  public Boolean getIsSuccess() {
-    return isSuccess;
-  }
-
-  public void setIsSuccess(Boolean isSuccess) {
-    this.isSuccess = isSuccess;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public String getDescription() {
-    return description;
-  }
-
-  public void setDescription(String description) {
-    this.description = description;
-  }
-
-  public Instant getCommittedAt() {
-    return committedAt;
-  }
-
-  public void setCommittedAt(Instant committedAt) {
-    this.committedAt = committedAt;
-  }
-
-  public Wallet getWallet() {
-    return wallet;
-  }
-
-  public void setWallet(Wallet wallet) {
-    this.wallet = wallet;
-  }
 }

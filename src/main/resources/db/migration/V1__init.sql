@@ -1,4 +1,4 @@
-CREATE EXTENSION citext;
+CREATE EXTENSION IF NOT EXISTS citext;
 
 CREATE DOMAIN email AS citext
     CHECK ( value ~

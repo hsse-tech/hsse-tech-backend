@@ -1,14 +1,20 @@
 package com.mipt.hsse.hssetechbackend.data.entities;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "role")
 public class Role {
   @Id
+  @Setter(AccessLevel.NONE)
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id", nullable = false)
   private Integer id;
@@ -18,28 +24,4 @@ public class Role {
 
   @ManyToMany(mappedBy = "roles")
   private Set<User> users = new LinkedHashSet<>();
-
-  public Integer getId() {
-    return id;
-  }
-
-  public void setId(Integer id) {
-    this.id = id;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public Set<User> getUsers() {
-    return users;
-  }
-
-  public void setUsers(Set<User> users) {
-    this.users = users;
-  }
 }

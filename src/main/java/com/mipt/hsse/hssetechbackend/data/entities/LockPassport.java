@@ -1,13 +1,19 @@
 package com.mipt.hsse.hssetechbackend.data.entities;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.UUID;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "lock_passport")
 public class LockPassport {
   @Id
+  @Setter(AccessLevel.NONE)
   @GeneratedValue(strategy = GenerationType.UUID)
   @Column(name = "original_id", nullable = false)
   private UUID id;
@@ -20,28 +26,4 @@ public class LockPassport {
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "item_id")
   private Item item;
-
-  public UUID getId() {
-    return id;
-  }
-
-  public void setId(UUID id) {
-    this.id = id;
-  }
-
-  public User getUser() {
-    return user;
-  }
-
-  public void setUser(User user) {
-    this.user = user;
-  }
-
-  public Item getItem() {
-    return item;
-  }
-
-  public void setItem(Item item) {
-    this.item = item;
-  }
 }
