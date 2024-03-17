@@ -1,7 +1,6 @@
 package com.mipt.hsse.hssetechbackend.data.entities;
 
 import jakarta.persistence.*;
-
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -22,6 +21,9 @@ public class ItemType {
   @Column(name = "max_rent_time_minutes")
   private Integer maxRentTimeMinutes;
 
+  @Column(name = "is_photo_required_on_finish")
+  private boolean isPhotoRequiredOnFinish;
+  
   public UUID getId() {
     return id;
   }
@@ -52,5 +54,13 @@ public class ItemType {
 
   public void setMaxRentTimeMinutes(Integer maxRentTimeMinutes) {
     this.maxRentTimeMinutes = maxRentTimeMinutes;
+  }
+
+  public boolean isPhotoRequiredOnFinish() {
+    return isPhotoRequiredOnFinish;
+  }
+
+  public boolean isPaymentRequired() {
+    return cost.compareTo(BigDecimal.ZERO) > 0;
   }
 }

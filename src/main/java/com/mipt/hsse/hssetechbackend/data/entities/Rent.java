@@ -1,7 +1,6 @@
 package com.mipt.hsse.hssetechbackend.data.entities;
 
 import jakarta.persistence.*;
-
 import java.time.Instant;
 import java.util.UUID;
 
@@ -19,12 +18,26 @@ public class Rent {
   @Column(name = "\"to\"", nullable = false)
   private Instant to;
 
+  @ManyToOne
+  @JoinColumn(name = "user_id")
+  private User renter;
+
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "item_id", nullable = false)
   private Item item;
 
   @Column(name = "ended_at")
   private Instant endedAt;
+
+
+  protected Rent() {}
+
+  public Rent(Instant from, Instant to, User renter, Item item) {
+    this.from = from;
+    this.to = to;
+    this.item = item;
+    this.renter = renter;
+  }
 
   public UUID getId() {
     return id;
@@ -64,5 +77,9 @@ public class Rent {
 
   public void setEndedAt(Instant endedAt) {
     this.endedAt = endedAt;
+  }
+
+  public User getRenter() {
+    return renter;
   }
 }
