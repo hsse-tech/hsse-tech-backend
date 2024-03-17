@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ItemService {
-  private JpaItemTypeRepository itemTypeRepository;
-  private JpaItemRepository itemRepository;
+  private final JpaItemTypeRepository itemTypeRepository;
+  private final JpaItemRepository itemRepository;
 
   public ItemService(JpaItemTypeRepository itemTypeRepository, JpaItemRepository itemRepository) {
     this.itemTypeRepository = itemTypeRepository;

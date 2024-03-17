@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping("/api/renting")
 public class ItemController {
-  private ItemService itemService;
+  private final ItemService itemService;
 
   public ItemController(ItemService itemService) {
     this.itemService = itemService;
