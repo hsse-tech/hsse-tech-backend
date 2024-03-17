@@ -1,4 +1,4 @@
-package com.mipt.hsse.hssetechbackend.rent.RentProcessing.CreateRentProcessing;
+package com.mipt.hsse.hssetechbackend.rent.rentProcessing.createRentProcessing;
 
 /**
  * Provides interface to perform any required actions before a rent is created, i.e. added to the database. <br>

@@ -1,4 +1,4 @@
-package com.mipt.hsse.hssetechbackend.rent.RentProcessing.DeleteRentProcessing;
+package com.mipt.hsse.hssetechbackend.rent.rentProcessing.deleteRentProcessing;
 
 /**
  * Provides interface to perform any required actions before a rent gets deleted from the rent database.<br>
