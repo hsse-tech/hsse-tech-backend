@@ -53,7 +53,8 @@ CREATE TABLE rent
 CREATE TABLE wallet
 (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    owner_yandex_id BIGINT NOT NULL REFERENCES human_user_passport (yandex_id) ON DELETE CASCADE
+    owner_yandex_id BIGINT NOT NULL REFERENCES human_user_passport (yandex_id) ON DELETE CASCADE,
+    balance NUMERIC(9, 2) NOT NULL DEFAULT 0
 );
 
 CREATE TABLE transaction
