@@ -1,5 +1,4 @@
-package com.mipt.hsse.hssetechbackend.data.DTOs.RentingDTOs;
-
+package com.mipt.hsse.hssetechbackend.rent.controllers.requests;
 
 public record CreateItemTypeRequest(
     String name,
@@ -7,4 +6,3 @@ public record CreateItemTypeRequest(
     boolean isPhotoConfirmationRequired,
     int maxRentTime,
     boolean hasLock) {}
-

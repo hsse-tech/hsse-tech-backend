@@ -1,4 +1,4 @@
-package com.mipt.hsse.hssetechbackend.data.DTOs.RentingDTOs;
+package com.mipt.hsse.hssetechbackend.rent.controllers.requests;
 
 import java.util.UUID;
 

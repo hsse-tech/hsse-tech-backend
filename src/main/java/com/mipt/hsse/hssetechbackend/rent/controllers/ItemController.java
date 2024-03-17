@@ -1,7 +1,7 @@
 package com.mipt.hsse.hssetechbackend.rent.controllers;
 
-import com.mipt.hsse.hssetechbackend.data.DTOs.RentingDTOs.CreateItemRequest;
-import com.mipt.hsse.hssetechbackend.data.DTOs.RentingDTOs.CreateItemTypeRequest;
+import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
+import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemTypeRequest;
 import com.mipt.hsse.hssetechbackend.data.entities.Item;
 import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
 import com.mipt.hsse.hssetechbackend.rent.services.ItemService;

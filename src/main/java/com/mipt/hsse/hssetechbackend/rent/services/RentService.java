@@ -1,16 +1,16 @@
 package com.mipt.hsse.hssetechbackend.rent.services;
 
-import com.mipt.hsse.hssetechbackend.data.DTOs.RentingDTOs.RentItemRequest;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaRentRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaUserRepository;
-import com.mipt.hsse.hssetechbackend.rent.rentProcessing.createRentProcessing.CreateRentProcessData;
-import com.mipt.hsse.hssetechbackend.rent.rentProcessing.createRentProcessing.CreateRentProcessor;
-import com.mipt.hsse.hssetechbackend.rent.rentProcessing.deleteRentProcessing.DeleteRentProcessData;
-import com.mipt.hsse.hssetechbackend.rent.rentProcessing.deleteRentProcessing.DeleteRentProcessor;
-import com.mipt.hsse.hssetechbackend.rent.customExceptions.EntityNotFoundException;
-import com.mipt.hsse.hssetechbackend.rent.customExceptions.RentProcessingException;
+import com.mipt.hsse.hssetechbackend.rent.controllers.requests.RentItemRequest;
+import com.mipt.hsse.hssetechbackend.rent.customexceptions.EntityNotFoundException;
+import com.mipt.hsse.hssetechbackend.rent.customexceptions.RentProcessingException;
+import com.mipt.hsse.hssetechbackend.rent.rentprocessing.createRentProcessing.CreateRentProcessData;
+import com.mipt.hsse.hssetechbackend.rent.rentprocessing.createRentProcessing.CreateRentProcessor;
+import com.mipt.hsse.hssetechbackend.rent.rentprocessing.deleteRentProcessing.DeleteRentProcessData;
+import com.mipt.hsse.hssetechbackend.rent.rentprocessing.deleteRentProcessing.DeleteRentProcessor;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.UUID;

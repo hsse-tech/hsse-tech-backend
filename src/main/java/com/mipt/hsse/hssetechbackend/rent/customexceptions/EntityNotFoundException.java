@@ -1,6 +1,4 @@
-package com.mipt.hsse.hssetechbackend.rent.customExceptions;
-
-
+package com.mipt.hsse.hssetechbackend.rent.customexceptions;
 
 public class EntityNotFoundException extends RuntimeException {
   public EntityNotFoundException() {
@@ -14,7 +12,7 @@ public class EntityNotFoundException extends RuntimeException {
     super(message, cause);
   }
   
-  public <ID_T> EntityNotFoundException(Class<?> clas, ID_T id) {
+  public <ID> EntityNotFoundException(Class<?> clas, ID id) {
     this("Not found entity of class " + clas.getName() + " with given id: " + id.toString());
   }
 }

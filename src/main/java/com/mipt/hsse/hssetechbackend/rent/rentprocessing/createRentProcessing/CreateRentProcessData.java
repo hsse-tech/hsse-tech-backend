@@ -1,4 +1,4 @@
-package com.mipt.hsse.hssetechbackend.rent.rentProcessing.createRentProcessing;
+package com.mipt.hsse.hssetechbackend.rent.rentprocessing.createRentProcessing;
 
 import com.mipt.hsse.hssetechbackend.data.entities.Rent;
 

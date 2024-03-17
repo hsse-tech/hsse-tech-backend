@@ -82,7 +82,7 @@ CREATE TABLE user_role
     CONSTRAINT pk PRIMARY KEY (user_id, role_id)
 );
 
-CREATE TABLE rent_finish_photo_confirmations
+CREATE TABLE rent_finish_photo_confirmation
 (
     id       UUID PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
     photo_id BIGINT           NOT NULL

@@ -1,8 +1,10 @@
 package com.mipt.hsse.hssetechbackend.rent.controllers;
 
-import com.mipt.hsse.hssetechbackend.data.DTOs.RentingDTOs.*;
 import com.mipt.hsse.hssetechbackend.data.entities.Rent;
-import com.mipt.hsse.hssetechbackend.rent.customExceptions.ClientServerError;
+import com.mipt.hsse.hssetechbackend.rent.controllers.requests.*;
+import com.mipt.hsse.hssetechbackend.rent.controllers.responses.RentInfoResponse;
+import com.mipt.hsse.hssetechbackend.rent.controllers.responses.ShortRentInfo;
+import com.mipt.hsse.hssetechbackend.rent.customexceptions.ClientServerError;
 import com.mipt.hsse.hssetechbackend.rent.services.RentService;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.UUID;
