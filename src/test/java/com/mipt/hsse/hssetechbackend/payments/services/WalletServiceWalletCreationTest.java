@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Import(WalletService.class)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class WalletServiceTest extends DatabaseSuite {
+class WalletServiceWalletCreationTest extends DatabaseSuite {
   @Autowired
   private JpaUserRepository userRepository;
 
