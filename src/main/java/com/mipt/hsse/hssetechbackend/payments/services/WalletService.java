@@ -5,6 +5,8 @@ import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepos
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaWalletRepository;
 import com.mipt.hsse.hssetechbackend.payments.exceptions.WalletCreationException;
 import java.util.UUID;
+
+import com.mipt.hsse.hssetechbackend.payments.exceptions.WalletNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,5 +35,16 @@ public class WalletService {
 
     walletRepository.save(wallet);
     return wallet;
+  }
+
+  @Transactional(propagation = Propagation.REQUIRED)
+  public Wallet getWallet(UUID id) {
+    var targetWalletOpt = walletRepository.findById(id);
+
+    if (targetWalletOpt.isEmpty()) {
+      throw new WalletNotFoundException("Wallet not found");
+    }
+
+    return targetWalletOpt.get();
   }
 }
