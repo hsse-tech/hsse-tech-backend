@@ -22,10 +22,10 @@ public class Rent {
   private UUID id;
 
   @Column(name = "\"from\"", nullable = false)
-  private Instant from;
+  private Instant startAt;
 
   @Column(name = "\"to\"", nullable = false)
-  private Instant to;
+  private Instant endedAt;
 
   @ManyToOne
   @JoinColumn(name = "user_id")
@@ -36,17 +36,17 @@ public class Rent {
   private Item item;
 
   @Column(name = "ended_at")
-  private Instant endedAt;
+  private Instant factEndedAt;
 
-  public Rent(Instant from, Instant to, User renter, Item item) {
-    this.from = from;
-    this.to = to;
+  public Rent(Instant startAt, Instant endedAt, User renter, Item item) {
+    this.startAt = startAt;
+    this.endedAt = endedAt;
     this.item = item;
     this.renter = renter;
   }
 
-  public Rent(Instant from, Instant to, User renter, Item item, Instant endedAt) {
-    this(from, to, renter, item);
-    this.endedAt = endedAt;
+  public Rent(Instant startAt, Instant endedAt, User renter, Item item, Instant factEndedAt) {
+    this(startAt, endedAt, renter, item);
+    this.factEndedAt = factEndedAt;
   }
 }

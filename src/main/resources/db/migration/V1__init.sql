@@ -23,7 +23,7 @@ CREATE TABLE item
 CREATE TABLE "user"
 (
     id        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_type TEXT NOT NULL CHECK (user_type = any ('lock', 'user'))
+    user_type TEXT NOT NULL
 );
 
 CREATE TABLE human_user_passport
