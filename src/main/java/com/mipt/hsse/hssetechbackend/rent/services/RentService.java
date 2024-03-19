@@ -6,7 +6,6 @@ import com.mipt.hsse.hssetechbackend.data.repositories.JpaRentRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaUserRepository;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.RentItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.customexceptions.EntityNotFoundException;
-import com.mipt.hsse.hssetechbackend.rent.customexceptions.RentProcessingException;
 import com.mipt.hsse.hssetechbackend.rent.rentprocessing.createRentProcessing.CreateRentProcessData;
 import com.mipt.hsse.hssetechbackend.rent.rentprocessing.createRentProcessing.CreateRentProcessor;
 import com.mipt.hsse.hssetechbackend.rent.rentprocessing.deleteRentProcessing.DeleteRentProcessData;
@@ -59,7 +58,7 @@ public class RentService {
       for (var processor : createRentProcessors) {
         processor.processCreate(processData);
       }
-    } catch (RentProcessingException e) {
+    } catch (NumberFormatException e) {
       throw new RestClientException("Failed to create a new rent: processing stage failed");
     }
 

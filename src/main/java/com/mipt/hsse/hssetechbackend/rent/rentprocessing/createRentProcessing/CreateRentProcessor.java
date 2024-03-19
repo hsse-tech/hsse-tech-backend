@@ -1,5 +1,7 @@
 package com.mipt.hsse.hssetechbackend.rent.rentprocessing.createRentProcessing;
 
+import com.mipt.hsse.hssetechbackend.rent.customexceptions.RentProcessingException;
+
 /**
  * Provides interface to perform any required actions before a rent is created, i.e. added to the database. <br>
  * The processors are launched as a single transaction.
@@ -7,5 +9,5 @@ package com.mipt.hsse.hssetechbackend.rent.rentprocessing.createRentProcessing;
  */
 @FunctionalInterface
 public interface CreateRentProcessor {
-  void processCreate(CreateRentProcessData createRentData);
+  void processCreate(CreateRentProcessData createRentData) throws RentProcessingException;
 }
