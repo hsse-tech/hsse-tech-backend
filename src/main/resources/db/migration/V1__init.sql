@@ -64,7 +64,7 @@ CREATE TABLE transaction
     is_success   BOOLEAN       NOT NULL,
     name         TEXT          NOT NULL,
     description  TEXT          NULL,
-    committed_at TIMESTAMP     NOT NULL DEFAULT now(),
+    committed_at TIMESTAMP     NOT NULL,
     wallet_id    UUID          NOT NULL REFERENCES wallet (id) ON DELETE CASCADE
 );
 

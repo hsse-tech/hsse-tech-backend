@@ -28,13 +28,24 @@ public class Transaction {
   @Column(name = "description", length = Integer.MAX_VALUE)
   private String description;
 
-  @Column(name = "committed_at", nullable = false)
+  @Column(name = "committed_at")
   private Instant committedAt;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @OnDelete(action = OnDeleteAction.CASCADE)
   @JoinColumn(name = "wallet_id", nullable = false)
   private Wallet wallet;
+
+  public Transaction(BigDecimal amount, String name, String description) {
+    this.amount = amount;
+    this.name = name;
+    this.description = description;
+    this.committedAt = Instant.now();
+  }
+
+  public Transaction() {
+
+  }
 
   public UUID getId() {
     return id;

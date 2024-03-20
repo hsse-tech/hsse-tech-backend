@@ -2,9 +2,8 @@ package com.mipt.hsse.hssetechbackend.data.entities;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -24,8 +23,8 @@ public class Wallet {
   @Column(name = "balance", nullable = false, precision = 9, scale = 2)
   private BigDecimal balance = BigDecimal.ZERO;
 
-  @OneToMany(mappedBy = "wallet")
-  private Set<Transaction> transactions = new LinkedHashSet<>();
+  @OneToMany(mappedBy = "wallet", orphanRemoval = true, cascade = CascadeType.PERSIST)
+  private List<Transaction> transactions = new ArrayList<>();
 
   public UUID getId() {
     return id;
@@ -51,12 +50,7 @@ public class Wallet {
     this.balance = balance;
   }
 
-  public Set<Transaction> getTransactions() {
+  public List<Transaction> getTransactions() {
     return transactions;
   }
-
-  public void setTransactions(Set<Transaction> transactions) {
-    this.transactions = transactions;
-  }
-
 }
