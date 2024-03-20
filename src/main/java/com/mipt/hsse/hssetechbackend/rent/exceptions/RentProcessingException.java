@@ -1,4 +1,4 @@
-package com.mipt.hsse.hssetechbackend.rent.customexceptions;
+package com.mipt.hsse.hssetechbackend.rent.exceptions;
 
 public class RentProcessingException extends RuntimeException {
   public RentProcessingException() {

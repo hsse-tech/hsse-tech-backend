@@ -1,7 +1,7 @@
-package com.mipt.hsse.hssetechbackend.rent.rentprocessing.createRentProcessing;
+package com.mipt.hsse.hssetechbackend.rent.rentprocessing.createrentprocessing;
 
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaRentRepository;
-import com.mipt.hsse.hssetechbackend.rent.customexceptions.RentProcessingException;
+import com.mipt.hsse.hssetechbackend.rent.exceptions.RentProcessingException;
 import org.springframework.stereotype.Component;
 
 /**

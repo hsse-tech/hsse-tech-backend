@@ -1,4 +1,4 @@
-package com.mipt.hsse.hssetechbackend.rent.customexceptions;
+package com.mipt.hsse.hssetechbackend.rent.exceptions;
 
 public class EntityNotFoundException extends RuntimeException {
   public EntityNotFoundException() {

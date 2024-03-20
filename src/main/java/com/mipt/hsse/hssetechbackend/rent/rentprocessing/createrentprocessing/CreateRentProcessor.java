@@ -1,6 +1,6 @@
-package com.mipt.hsse.hssetechbackend.rent.rentprocessing.createRentProcessing;
+package com.mipt.hsse.hssetechbackend.rent.rentprocessing.createrentprocessing;
 
-import com.mipt.hsse.hssetechbackend.rent.customexceptions.RentProcessingException;
+import com.mipt.hsse.hssetechbackend.rent.exceptions.RentProcessingException;
 
 /**
  * Provides interface to perform any required actions before a rent is created, i.e. added to the database. <br>

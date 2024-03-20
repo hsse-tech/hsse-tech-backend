@@ -6,7 +6,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 public record ShortRentInfo(UUID id, User renter, Instant startTime, Instant endTime) {
-  public static ShortRentInfo GetFromRent(Rent rent) {
+  public static ShortRentInfo getFromRent(Rent rent) {
     return new ShortRentInfo(rent.getId(), rent.getRenter(), rent.getStartAt(), rent.getEndedAt());
   }
 }

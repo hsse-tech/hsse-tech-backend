@@ -1,4 +1,4 @@
-package com.mipt.hsse.hssetechbackend.rent.rentprocessing.deleteRentProcessing;
+package com.mipt.hsse.hssetechbackend.rent.rentprocessing.deleterentprocessing;
 
 import com.mipt.hsse.hssetechbackend.data.entities.Rent;
 
