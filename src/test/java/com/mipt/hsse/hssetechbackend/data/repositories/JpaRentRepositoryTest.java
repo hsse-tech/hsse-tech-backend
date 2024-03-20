@@ -40,19 +40,16 @@ class JpaRentRepositoryTest extends DatabaseSuite {
   Instant largeRentFrom = Instant.ofEpochSecond(0);
   Instant largeRentTo = Instant.ofEpochSecond(150);
 
-
   private final User user = new User("user");
   private final ItemType itemType = new ItemType(BigDecimal.ZERO, "name", 200, false);
   private final Item item1 = new Item("item1", itemType);
   private final Item item2 = new Item("item2", itemType);
-
 
   private final Rent firstRentForItem1 = new Rent(firstFrom, firstTo, user, item1);
   private final Rent secondRentForItem1 = new Rent(secondFrom, secondTo, user, item1);
   private final Rent thirdRentForItem1 = new Rent(thirdFrom, thirdTo, user, item1);
   private final Rent largeRentForItem1 = new Rent(largeRentFrom, largeRentTo, user, item1);
   private final Rent largeRentForItem2 = new Rent(largeRentFrom, largeRentTo, user, item2);
-
 
   @BeforeEach
   void save() {
@@ -67,8 +64,8 @@ class JpaRentRepositoryTest extends DatabaseSuite {
     rentRepository.save(firstRentForItem1);
     rentRepository.save(thirdRentForItem1);
 
-    assertEquals(0,
-        rentRepository.countRentsIntersectingTimeBounds(
+    assertTrue(
+        rentRepository.isDisjointWithOtherRentsOfSameItem(
             secondRentForItem1.getItem(),
             secondRentForItem1.getStartAt(),
             secondRentForItem1.getEndedAt()));
@@ -79,8 +76,8 @@ class JpaRentRepositoryTest extends DatabaseSuite {
     rentRepository.save(largeRentForItem1);
     rentRepository.save(thirdRentForItem1);
 
-    assertEquals(1,
-        rentRepository.countRentsIntersectingTimeBounds(
+    assertFalse(
+        rentRepository.isDisjointWithOtherRentsOfSameItem(
             secondRentForItem1.getItem(),
             secondRentForItem1.getStartAt(),
             secondRentForItem1.getEndedAt()));
@@ -90,10 +87,11 @@ class JpaRentRepositoryTest extends DatabaseSuite {
   void checkRentsForOtherItemsDoNotInterfere() {
     rentRepository.save(firstRentForItem1);
     rentRepository.save(thirdRentForItem1);
-    rentRepository.save(largeRentForItem2); // this rent intersects with secondRent, but it is for another item
+    rentRepository.save(
+        largeRentForItem2); // this rent intersects with secondRent, but it is for another item
 
-    assertEquals(0,
-        rentRepository.countRentsIntersectingTimeBounds(
+    assertTrue(
+        rentRepository.isDisjointWithOtherRentsOfSameItem(
             secondRentForItem1.getItem(),
             secondRentForItem1.getStartAt(),
             secondRentForItem1.getEndedAt()));
@@ -103,8 +101,8 @@ class JpaRentRepositoryTest extends DatabaseSuite {
   void failedRentOnTopOfAnother() {
     rentRepository.save(largeRentForItem1);
 
-    assertEquals(1,
-        rentRepository.countRentsIntersectingTimeBounds(
+    assertFalse(
+        rentRepository.isDisjointWithOtherRentsOfSameItem(
             largeRentForItem1.getItem(),
             largeRentForItem1.getStartAt(),
             largeRentForItem1.getEndedAt()));

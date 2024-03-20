@@ -8,6 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 public interface JpaRentRepository extends JpaRepository<Rent, UUID> {
-  @Query("select count(*) from Rent where item = :item and not (endedAt <= :from or startAt >= :to)")
-  int countRentsIntersectingTimeBounds(Item item, Instant from, Instant to);
+  @Query("select (count(*) = 0) from Rent where item = :item and not (endedAt <= :from or startAt >= :to)")
+  boolean isDisjointWithOtherRentsOfSameItem(Item item, Instant from, Instant to);
 }

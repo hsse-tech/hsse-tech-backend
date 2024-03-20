@@ -22,9 +22,9 @@ public class UnoccupiedTimeCreateRentProcessor implements CreateRentProcessor {
     var item = createRentData.rent().getItem();
     var from = createRentData.rent().getStartAt();
     var to = createRentData.rent().getEndedAt();
-    int countIntersecting = rentRepository.countRentsIntersectingTimeBounds(item, from, to);
+    boolean isDisjointWithOtherRents = rentRepository.isDisjointWithOtherRentsOfSameItem(item, from, to);
 
-    if (countIntersecting > 0)
+    if (!isDisjointWithOtherRents)
       throw new RentProcessingException(
           "Unoccupied time check failed:\nTime from "
               + from
