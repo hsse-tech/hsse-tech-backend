@@ -84,6 +84,7 @@ public class RentService {
     rentRepository.delete(rent);
   }
 
+  @Transactional
   public Rent findById(UUID rentId) {
     return rentRepository
         .findById(rentId)
