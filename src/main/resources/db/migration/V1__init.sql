@@ -61,7 +61,7 @@ CREATE TABLE transaction
 (
     id           UUID PRIMARY KEY       DEFAULT gen_random_uuid(),
     amount       NUMERIC(9, 2) NOT NULL CHECK (amount BETWEEN 0 AND 1000000.00),
-    is_success   BOOLEAN       NOT NULL,
+    is_success   BOOLEAN       NULL,
     name         TEXT          NOT NULL,
     description  TEXT          NULL,
     committed_at TIMESTAMP     NOT NULL,

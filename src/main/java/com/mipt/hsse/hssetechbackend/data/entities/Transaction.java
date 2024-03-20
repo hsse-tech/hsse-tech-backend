@@ -19,7 +19,7 @@ public class Transaction {
   @Column(name = "amount", nullable = false, precision = 9, scale = 2)
   private BigDecimal amount;
 
-  @Column(name = "is_success", nullable = false)
+  @Column(name = "is_success")
   private Boolean isSuccess = false;
 
   @Column(name = "name", nullable = false, length = Integer.MAX_VALUE)

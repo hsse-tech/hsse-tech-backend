@@ -3,6 +3,7 @@ package com.mipt.hsse.hssetechbackend.payments.services;
 import com.mipt.hsse.hssetechbackend.data.entities.Transaction;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaTransactionRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaWalletRepository;
+import com.mipt.hsse.hssetechbackend.payments.exceptions.TransactionNotFoundException;
 import com.mipt.hsse.hssetechbackend.payments.exceptions.WalletNotFoundException;
 import com.mipt.hsse.hssetechbackend.payments.services.dto.TransactionInfo;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Service
 public class TransactionService {
@@ -36,5 +38,26 @@ public class TransactionService {
     jpaTransactionRepository.save(transaction);
 
     return transaction;
+  }
+
+  @Transactional(propagation = Propagation.REQUIRED)
+  public Transaction setTransactionStatus(UUID id, ClientTransactionStatus status) {
+    var targetTransactionOpt = jpaTransactionRepository.findById(id);
+
+    if (targetTransactionOpt.isEmpty()) {
+      throw new TransactionNotFoundException("Transaction for status update not found");
+    }
+
+    var targetTransaction = targetTransactionOpt.get();
+
+    switch (status) {
+      case SUCCESS -> targetTransaction.setIsSuccess(true);
+      case IN_PROCESS -> targetTransaction.setIsSuccess(null);
+      case FAILED -> targetTransaction.setIsSuccess(false);
+    }
+
+    jpaTransactionRepository.save(targetTransaction);
+
+    return targetTransaction;
   }
 }
