@@ -2,6 +2,7 @@ package com.mipt.hsse.hssetechbackend.data.repositories;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.mipt.hsse.hssetechbackend.DatabaseSuite;
 import com.mipt.hsse.hssetechbackend.data.entities.Item;
 import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
 import com.mipt.hsse.hssetechbackend.data.entities.Rent;
@@ -19,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 @DataJpaTest
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class JpaRentRepositoryTest {
+class JpaRentRepositoryTest extends DatabaseSuite {
   @Autowired private JpaRentRepository rentRepository;
   @Autowired private JpaItemRepository itemRepository;
   @Autowired private JpaUserRepository userRepository;
