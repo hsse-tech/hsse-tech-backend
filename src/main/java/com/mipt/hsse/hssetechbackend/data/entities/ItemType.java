@@ -1,17 +1,18 @@
 package com.mipt.hsse.hssetechbackend.data.entities;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.math.BigDecimal;
 import java.util.UUID;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "item_type")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ItemType {
   @Id
   @Setter(AccessLevel.NONE)
@@ -31,6 +32,16 @@ public class ItemType {
   @Column(name = "is_photo_required_on_finish")
   private boolean isPhotoRequiredOnFinish;
 
+  public ItemType(
+      BigDecimal cost,
+      String displayName,
+      Integer maxRentTimeMinutes,
+      boolean isPhotoRequiredOnFinish) {
+    this.cost = cost;
+    this.displayName = displayName;
+    this.maxRentTimeMinutes = maxRentTimeMinutes;
+    this.isPhotoRequiredOnFinish = isPhotoRequiredOnFinish;
+  }
 
   public boolean isPhotoRequiredOnFinish() {
     return isPhotoRequiredOnFinish;

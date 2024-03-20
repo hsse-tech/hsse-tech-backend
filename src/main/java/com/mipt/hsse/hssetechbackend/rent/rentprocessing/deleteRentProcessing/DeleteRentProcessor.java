@@ -1,5 +1,7 @@
 package com.mipt.hsse.hssetechbackend.rent.rentprocessing.deleteRentProcessing;
 
+import com.mipt.hsse.hssetechbackend.rent.customexceptions.RentProcessingException;
+
 /**
  * Provides interface to perform any required actions before a rent gets deleted from the rent database.<br>
  * The processors are launched as a single transaction.
@@ -7,5 +9,5 @@ package com.mipt.hsse.hssetechbackend.rent.rentprocessing.deleteRentProcessing;
  */
 @FunctionalInterface
 public interface DeleteRentProcessor {
-  void processDelete(DeleteRentProcessData deleteRentData);
+  void processDelete(DeleteRentProcessData deleteRentData) throws RentProcessingException;
 }

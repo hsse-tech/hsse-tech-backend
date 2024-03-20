@@ -10,7 +10,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
-@Table(name = "rent_finish_photo_confirmations")
+@Table(name = "rent_finish_photo_confirmation")
 public class RentFinishPhotoConfirmation {
   @Id
   @Setter(AccessLevel.NONE)
