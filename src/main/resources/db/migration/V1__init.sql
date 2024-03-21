@@ -1,4 +1,4 @@
-CREATE EXTENSION citext;
+CREATE EXTENSION IF NOT EXISTS citext;
 
 CREATE DOMAIN email AS citext
     CHECK ( value ~
@@ -6,10 +6,11 @@ CREATE DOMAIN email AS citext
 
 CREATE TABLE item_type
 (
-    id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    cost                  NUMERIC(9, 2) NOT NULL CHECK (cost BETWEEN 0 AND 1000000.00),
-    display_name          TEXT          NOT NULL,
-    max_rent_time_minutes INT           NULL
+    id                          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    cost                        NUMERIC(9, 2) NOT NULL CHECK (cost BETWEEN 0 AND 1000000.00),
+    display_name                TEXT          NOT NULL,
+    max_rent_time_minutes       INT           NULL,
+    is_photo_required_on_finish BOOLEAN          DEFAULT FALSE
 );
 
 CREATE TABLE item
@@ -47,7 +48,8 @@ CREATE TABLE rent
     "from"   TIMESTAMP NOT NULL,
     "to"     TIMESTAMP NOT NULL,
     item_id  UUID      NOT NULL REFERENCES item (id),
-    ended_at TIMESTAMP
+    ended_at TIMESTAMP,
+    user_id  UUID    NOT NULL REFERENCES "user" (id)
 );
 
 CREATE TABLE wallet
@@ -78,4 +80,10 @@ CREATE TABLE user_role
     user_id UUID REFERENCES "user" (id),
     role_id SERIAL REFERENCES role (id),
     CONSTRAINT pk PRIMARY KEY (user_id, role_id)
+);
+
+CREATE TABLE rent_finish_photo_confirmation
+(
+    id       UUID PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
+    photo_id BIGINT           NOT NULL
 );

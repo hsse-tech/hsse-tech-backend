@@ -1,14 +1,21 @@
 package com.mipt.hsse.hssetechbackend.data.entities;
 
 import jakarta.persistence.*;
-
 import java.math.BigDecimal;
 import java.util.UUID;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "item_type")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ItemType {
   @Id
+  @Setter(AccessLevel.NONE)
   @GeneratedValue(strategy = GenerationType.UUID)
   @Column(name = "id", nullable = false)
   private UUID id;
@@ -22,35 +29,25 @@ public class ItemType {
   @Column(name = "max_rent_time_minutes")
   private Integer maxRentTimeMinutes;
 
-  public UUID getId() {
-    return id;
-  }
+  @Column(name = "is_photo_required_on_finish")
+  private boolean isPhotoRequiredOnFinish;
 
-  public void setId(UUID id) {
-    this.id = id;
-  }
-
-  public BigDecimal getCost() {
-    return cost;
-  }
-
-  public void setCost(BigDecimal cost) {
+  public ItemType(
+      BigDecimal cost,
+      String displayName,
+      Integer maxRentTimeMinutes,
+      boolean isPhotoRequiredOnFinish) {
     this.cost = cost;
-  }
-
-  public String getDisplayName() {
-    return displayName;
-  }
-
-  public void setDisplayName(String displayName) {
     this.displayName = displayName;
-  }
-
-  public Integer getMaxRentTimeMinutes() {
-    return maxRentTimeMinutes;
-  }
-
-  public void setMaxRentTimeMinutes(Integer maxRentTimeMinutes) {
     this.maxRentTimeMinutes = maxRentTimeMinutes;
+    this.isPhotoRequiredOnFinish = isPhotoRequiredOnFinish;
+  }
+
+  public boolean isPhotoRequiredOnFinish() {
+    return isPhotoRequiredOnFinish;
+  }
+
+  public boolean isPaymentRequired() {
+    return cost.compareTo(BigDecimal.ZERO) > 0;
   }
 }
