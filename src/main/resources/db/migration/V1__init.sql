@@ -49,7 +49,7 @@ CREATE TABLE rent
     "to"     TIMESTAMP NOT NULL,
     item_id  UUID      NOT NULL REFERENCES item (id),
     ended_at TIMESTAMP,
-    user_id  UUID    NOT NULL REFERENCES "user" (id)
+    user_id  UUID    NOT NULL REFERENCES "user" (id) ON DELETE CASCADE
 );
 
 CREATE TABLE wallet
