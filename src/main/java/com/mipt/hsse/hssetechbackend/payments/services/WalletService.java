@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class WalletService {
+public class WalletService implements WalletServiceBase {
   private final JpaWalletRepository walletRepository;
   private final JpaHumanUserPassportRepository userRepository;
 
@@ -22,6 +22,7 @@ public class WalletService {
     this.userRepository = userRepository;
   }
 
+  @Override
   @Transactional(propagation = Propagation.REQUIRED)
   public Wallet createWallet(UUID ownerId) {
     var owner = userRepository.findById(ownerId);
@@ -37,6 +38,7 @@ public class WalletService {
     return wallet;
   }
 
+  @Override
   @Transactional(propagation = Propagation.REQUIRED)
   public Wallet getWallet(UUID id) {
     var targetWalletOpt = walletRepository.findById(id);

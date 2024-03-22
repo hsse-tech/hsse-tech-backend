@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 @Service
-public class TransactionService {
+public class TransactionService implements TransactionServiceBase {
 
   private final JpaWalletRepository jpaWalletRepository;
   private final JpaTransactionRepository jpaTransactionRepository;
@@ -25,6 +25,7 @@ public class TransactionService {
     this.jpaTransactionRepository = jpaTransactionRepository;
   }
 
+  @Override
   @Transactional(propagation = Propagation.REQUIRED)
   public Transaction createTransaction(TransactionInfo transactionInfo) {
     var walletOpt = jpaWalletRepository.findById(transactionInfo.walletId());
@@ -40,6 +41,7 @@ public class TransactionService {
     return transaction;
   }
 
+  @Override
   @Transactional(propagation = Propagation.REQUIRED)
   public Transaction setTransactionStatus(UUID id, ClientTransactionStatus status) {
     var targetTransactionOpt = jpaTransactionRepository.findById(id);
