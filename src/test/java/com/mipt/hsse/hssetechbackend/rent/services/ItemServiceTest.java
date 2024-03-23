@@ -72,6 +72,6 @@ class ItemServiceTest extends DatabaseSuite {
   void testFailDeleteAbsentItem() {
     final UUID id = UUID.randomUUID();
 
-    assertThrows(EntityNotFoundException.class, () -> itemService.deleteItemType(id));
+    assertThrows(EntityNotFoundException.class, () -> itemService.deleteItem(id));
   }
 }

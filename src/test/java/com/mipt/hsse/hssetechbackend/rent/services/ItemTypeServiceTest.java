@@ -21,11 +21,11 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @DataJpaTest
-@Import(ItemService.class)
+@Import({ItemService.class, ItemTypeService.class})
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class ItemTypeServiceTest extends DatabaseSuite {
-  @Autowired private ItemService itemService;
+  @Autowired private ItemTypeService itemTypeService;
   @Autowired private JpaItemTypeRepository itemTypeRepository;
 
   @AfterEach
@@ -40,7 +40,7 @@ class ItemTypeServiceTest extends DatabaseSuite {
 
     var createItemTypeRequest = new CreateItemTypeRequest(cost, name, 60, false);
 
-    ItemType itemType = itemService.createItemType(createItemTypeRequest);
+    ItemType itemType = itemTypeService.createItemType(createItemTypeRequest);
 
     ItemType extractedItemType = itemTypeRepository.findById(itemType.getId()).orElseThrow();
 
@@ -55,9 +55,9 @@ class ItemTypeServiceTest extends DatabaseSuite {
     var request1 = new CreateItemTypeRequest(BigDecimal.ZERO, name, 60, false);
     var request2 = new CreateItemTypeRequest(BigDecimal.valueOf(100), name, 120, true);
 
-    itemService.createItemType(request1);
+    itemTypeService.createItemType(request1);
 
-    assertThrows(DataIntegrityViolationException.class, () -> itemService.createItemType(request2));
+    assertThrows(DataIntegrityViolationException.class, () -> itemTypeService.createItemType(request2));
   }
 
   @Test
@@ -66,7 +66,7 @@ class ItemTypeServiceTest extends DatabaseSuite {
 
     var createRequest = new CreateItemTypeRequest(BigDecimal.ZERO, name, null, false);
 
-    ItemType itemType = itemService.createItemType(createRequest);
+    ItemType itemType = itemTypeService.createItemType(createRequest);
 
     ItemType extractedItemType = itemTypeRepository.findById(itemType.getId()).orElseThrow();
 
@@ -79,7 +79,7 @@ class ItemTypeServiceTest extends DatabaseSuite {
 
     var createRequest = new CreateItemTypeRequest(BigDecimal.valueOf(-1), name, null, false);
 
-    assertThrows(TransactionSystemException.class, () -> itemService.createItemType(createRequest));
+    assertThrows(TransactionSystemException.class, () -> itemTypeService.createItemType(createRequest));
   }
   
   @Test
@@ -88,9 +88,9 @@ class ItemTypeServiceTest extends DatabaseSuite {
     final BigDecimal cost = BigDecimal.valueOf(100);
 
     var createItemTypeRequest = new CreateItemTypeRequest(cost, name, 60, false);
-    ItemType itemType = itemService.createItemType(createItemTypeRequest);
+    ItemType itemType = itemTypeService.createItemType(createItemTypeRequest);
 
-    itemService.deleteItemType(itemType.getId());
+    itemTypeService.deleteItemType(itemType.getId());
     
     assertTrue(itemTypeRepository.findById(itemType.getId()).isEmpty());
   }
@@ -99,6 +99,6 @@ class ItemTypeServiceTest extends DatabaseSuite {
   void testFailDeleteAbsentItemType() {
     final UUID id = UUID.randomUUID();
     
-    assertThrows(EntityNotFoundException.class, () -> itemService.deleteItemType(id));
+    assertThrows(EntityNotFoundException.class, () -> itemTypeService.deleteItemType(id));
   }
 }
