@@ -8,6 +8,7 @@ import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemTypeRepository;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
+import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -53,6 +54,23 @@ class ItemServiceTest extends DatabaseSuite {
 
     Item extractedItem = itemRepository.findById(item.getId()).orElseThrow();
     assertEquals(itemName, extractedItem.getDisplayName());
+    assertEquals(itemType.getId(), extractedItem.getType().getId());
+  }
+
+  @Test
+  void updateItem() {
+    // Create item
+    final String itemName = "Particular item name";
+    var createItemRequest = new CreateItemRequest(itemName, itemType);
+    Item item = itemService.createItem(createItemRequest);
+
+    // Update item
+    final String newItemName = "New item name";
+    var updateItemRequest = new UpdateItemRequest(newItemName);
+    itemService.updateItem(item.getId(), updateItemRequest);
+
+    Item extractedItem = itemRepository.findById(item.getId()).orElseThrow();
+    assertEquals(newItemName, extractedItem.getDisplayName());
     assertEquals(itemType.getId(), extractedItem.getType().getId());
   }
 

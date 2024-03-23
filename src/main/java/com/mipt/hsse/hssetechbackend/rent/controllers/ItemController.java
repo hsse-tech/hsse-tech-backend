@@ -2,6 +2,7 @@ package com.mipt.hsse.hssetechbackend.rent.controllers;
 
 import com.mipt.hsse.hssetechbackend.data.entities.Item;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
+import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.services.ItemService;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,12 @@ public class ItemController {
   @ResponseStatus(HttpStatus.CREATED)
   public Item createItem(@RequestBody CreateItemRequest request) {
     return itemService.createItem(request);
+  }
+
+  @PatchMapping("/items/{id}")
+  @ResponseStatus(HttpStatus.OK)
+  public void updateItem(@PathVariable("id") UUID itemId, @RequestBody UpdateItemRequest request) {
+    itemService.updateItem(itemId, request);
   }
 
   @DeleteMapping("/delete-item/{itemId}")

@@ -3,6 +3,7 @@ package com.mipt.hsse.hssetechbackend.rent.services;
 import com.mipt.hsse.hssetechbackend.data.entities.Item;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemRepository;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
+import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import java.util.UUID;
@@ -21,6 +22,15 @@ public class ItemService {
     Item item = request.getItem();
 
     return itemRepository.save(item);
+  }
+  
+  @Transactional
+  public void updateItem(UUID itemId, UpdateItemRequest request) {
+    Item item = itemRepository.findById(itemId).orElseThrow(() -> new EntityNotFoundException(Item.class, itemId));
+
+    item.setDisplayName(request.newDisplayName());
+
+    itemRepository.save(item);
   }
 
   @Transactional
