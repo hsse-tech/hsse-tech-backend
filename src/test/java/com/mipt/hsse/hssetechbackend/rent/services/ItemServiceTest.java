@@ -8,7 +8,9 @@ import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemTypeRepository;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
+import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import java.math.BigDecimal;
+import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,5 +54,24 @@ class ItemServiceTest extends DatabaseSuite {
     Item extractedItem = itemRepository.findById(item.getId()).orElseThrow();
     assertEquals(itemName, extractedItem.getDisplayName());
     assertEquals(itemType.getId(), extractedItem.getType().getId());
+  }
+
+  @Test
+  void testDeleteItem() {
+    final String itemName = "Particular item name";
+
+    var createItemRequest = new CreateItemRequest(itemName, itemType);
+    Item item = itemService.createItem(createItemRequest);
+
+    itemService.deleteItem(item.getId());
+
+    assertTrue(itemRepository.findById(item.getId()).isEmpty());
+  }
+
+  @Test
+  void testFailDeleteAbsentItem() {
+    final UUID id = UUID.randomUUID();
+
+    assertThrows(EntityNotFoundException.class, () -> itemService.deleteItemType(id));
   }
 }

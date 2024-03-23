@@ -6,7 +6,9 @@ import com.mipt.hsse.hssetechbackend.DatabaseSuite;
 import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemTypeRepository;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemTypeRequest;
+import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import java.math.BigDecimal;
+import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,5 +80,25 @@ class ItemTypeServiceTest extends DatabaseSuite {
     var createRequest = new CreateItemTypeRequest(BigDecimal.valueOf(-1), name, null, false);
 
     assertThrows(TransactionSystemException.class, () -> itemService.createItemType(createRequest));
+  }
+  
+  @Test
+  void testDeleteItemType() {
+    final String name = "Item type name";
+    final BigDecimal cost = BigDecimal.valueOf(100);
+
+    var createItemTypeRequest = new CreateItemTypeRequest(cost, name, 60, false);
+    ItemType itemType = itemService.createItemType(createItemTypeRequest);
+
+    itemService.deleteItemType(itemType.getId());
+    
+    assertTrue(itemTypeRepository.findById(itemType.getId()).isEmpty());
+  }
+
+  @Test
+  void testFailDeleteAbsentItemType() {
+    final UUID id = UUID.randomUUID();
+    
+    assertThrows(EntityNotFoundException.class, () -> itemService.deleteItemType(id));
   }
 }
