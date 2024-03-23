@@ -3,9 +3,12 @@ package com.mipt.hsse.hssetechbackend.rent.controllers;
 import com.mipt.hsse.hssetechbackend.data.entities.Item;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
+import com.mipt.hsse.hssetechbackend.rent.exceptions.ClientServerError;
 import com.mipt.hsse.hssetechbackend.rent.services.ItemService;
+import jakarta.persistence.EntityNotFoundException;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,5 +43,10 @@ public class ItemController {
   @ResponseStatus(HttpStatus.OK)
   public void createItem(@PathVariable("itemId") UUID itemId) {
     itemService.deleteItem(itemId);
+  }
+
+  @ExceptionHandler
+  public ResponseEntity<ClientServerError> entityNotFoundExceptionHandler(EntityNotFoundException e) {
+    return new ResponseEntity<>(new ClientServerError(e.getMessage()), HttpStatus.NOT_FOUND);
   }
 }

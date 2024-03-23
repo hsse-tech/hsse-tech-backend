@@ -3,8 +3,11 @@ package com.mipt.hsse.hssetechbackend.rent.controllers;
 import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemTypeRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemTypeRequest;
+import com.mipt.hsse.hssetechbackend.rent.exceptions.ClientServerError;
 import com.mipt.hsse.hssetechbackend.rent.services.ItemTypeService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,5 +44,10 @@ public class ItemTypeController {
   @GetMapping("/item-type/{itemTypeId}")
   public Optional<ItemType> getItemType(@PathVariable("itemTypeId") UUID itemTypeId) {
     return itemTypeService.getItemType(itemTypeId);
+  }
+
+  @ExceptionHandler
+  public ResponseEntity<ClientServerError> entityNotFoundExceptionHandler(EntityNotFoundException e) {
+    return new ResponseEntity<>(new ClientServerError(e.getMessage()), HttpStatus.NOT_FOUND);
   }
 }
