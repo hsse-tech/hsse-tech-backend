@@ -30,6 +30,12 @@ public class ItemController {
     itemService.updateItem(itemId, request);
   }
 
+  @GetMapping("/items/{item_id}/qr")
+  public void getItemBookingQRCode(@PathVariable("item_id") UUID itemId) {
+    throw new UnsupportedOperationException();
+  }
+
+
   @DeleteMapping("/delete-item/{itemId}")
   @ResponseStatus(HttpStatus.OK)
   public void createItem(@PathVariable("itemId") UUID itemId) {

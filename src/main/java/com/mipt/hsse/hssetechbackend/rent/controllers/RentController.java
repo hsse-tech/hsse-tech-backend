@@ -62,11 +62,6 @@ public class RentController {
     return rentService.findById(rentId);
   }
 
-  @GetMapping("/items/{item_id}/qr")
-  public void getItemBookingQRCode(@PathVariable("item_id") UUID itemId) {
-    throw new UnsupportedOperationException();
-  }
-
   @GetMapping("/{rent_id}")
   public ShortRentInfo getRentInfo(@PathVariable("rent_id") UUID rentId) {
     throw new UnsupportedOperationException();
