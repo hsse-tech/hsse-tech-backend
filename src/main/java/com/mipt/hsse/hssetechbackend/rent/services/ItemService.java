@@ -28,7 +28,8 @@ public class ItemService {
   public void updateItem(UUID itemId, UpdateItemRequest request) {
     Item item = itemRepository.findById(itemId).orElseThrow(() -> new EntityNotFoundException(Item.class, itemId));
 
-    item.setDisplayName(request.newDisplayName());
+    if (request.newDisplayName() != null)
+      item.setDisplayName(request.newDisplayName());
 
     itemRepository.save(item);
   }

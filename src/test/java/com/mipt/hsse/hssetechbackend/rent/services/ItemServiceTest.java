@@ -75,6 +75,20 @@ class ItemServiceTest extends DatabaseSuite {
   }
 
   @Test
+  void testEmptyUpdateHasNoEffect() {
+    // Create item
+    final String itemName = "Particular item name";
+    var createItemRequest = new CreateItemRequest(itemName, itemType);
+    Item item = itemService.createItem(createItemRequest);
+
+    var updateItemRequest = new UpdateItemRequest(null);
+    itemService.updateItem(item.getId(), updateItemRequest);
+
+    Item extractedItem = itemRepository.findById(item.getId()).orElseThrow();
+    assertEquals(itemName, extractedItem.getDisplayName());
+  }
+
+  @Test
   void testDeleteItem() {
     final String itemName = "Particular item name";
 

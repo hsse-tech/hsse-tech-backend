@@ -72,17 +72,6 @@ public class RentController {
     throw new UnsupportedOperationException();
   }
 
-  @PatchMapping("/types/{id}")
-  public void updateItemType(
-      @PathVariable("id") UUID itemTypeId, @RequestBody UpdateItemTypeRequest request) {
-    throw new UnsupportedOperationException();
-  }
-
-  @PatchMapping("/items/{id}")
-  public void updateItem(@PathVariable UUID id, @RequestBody UpdateItemRequest request) {
-    throw new UnsupportedOperationException();
-  }
-
   @PostMapping("/items/{id}/open")
   public void requestOpenItem(@PathVariable("id") long itemId) {}
 

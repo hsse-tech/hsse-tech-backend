@@ -2,6 +2,7 @@ package com.mipt.hsse.hssetechbackend.rent.controllers;
 
 import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemTypeRequest;
+import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemTypeRequest;
 import com.mipt.hsse.hssetechbackend.rent.services.ItemTypeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -23,6 +24,12 @@ public class ItemTypeController {
   @ResponseStatus(HttpStatus.CREATED)
   public ItemType createItemType(@RequestBody CreateItemTypeRequest request) {
     return itemTypeService.createItemType(request);
+  }
+
+  @PatchMapping("/types/{id}")
+  @ResponseStatus(HttpStatus.OK)
+  public void updateItemType(@PathVariable("id") UUID itemTypeId, @RequestBody UpdateItemTypeRequest request) {
+    itemTypeService.updateItemType(itemTypeId, request);
   }
 
   @DeleteMapping("/delete-item-type/{itemTypeId}")

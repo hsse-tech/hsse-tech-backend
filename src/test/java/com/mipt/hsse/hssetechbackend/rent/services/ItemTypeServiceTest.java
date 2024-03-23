@@ -6,6 +6,7 @@ import com.mipt.hsse.hssetechbackend.DatabaseSuite;
 import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemTypeRepository;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemTypeRequest;
+import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemTypeRequest;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -81,7 +82,49 @@ class ItemTypeServiceTest extends DatabaseSuite {
 
     assertThrows(TransactionSystemException.class, () -> itemTypeService.createItemType(createRequest));
   }
-  
+
+  @Test
+  void testUpdateItemType() {
+    final String name = "Item type name";
+    final BigDecimal cost = BigDecimal.valueOf(100);
+    var createItemTypeRequest = new CreateItemTypeRequest(cost, name, 60, false);
+    ItemType itemType = itemTypeService.createItemType(createItemTypeRequest);
+
+    final String newName = "New type name";
+    final BigDecimal newCost = BigDecimal.valueOf(200);
+    final Boolean newPhotoConfirm = true;
+    final Integer newMaxRentTime = 120;
+    var updateItemTypeRequest = new UpdateItemTypeRequest(newName, newCost, newPhotoConfirm, newMaxRentTime);
+    itemTypeService.updateItemType(itemType.getId(), updateItemTypeRequest);
+
+    ItemType extractedItemType = itemTypeRepository.findById(itemType.getId()).orElseThrow();
+
+    assertEquals(0, newCost.compareTo(extractedItemType.getCost()));
+    assertEquals(newName, extractedItemType.getDisplayName());
+    assertEquals(newMaxRentTime, extractedItemType.getMaxRentTimeMinutes());
+    assertEquals(newPhotoConfirm, extractedItemType.isPhotoRequiredOnFinish());
+  }
+
+  @Test
+  void testEmptyUpdateHasNoEffect() {
+    final String name = "Item type name";
+    final BigDecimal cost = BigDecimal.valueOf(100);
+    final boolean isPhotoConfirm = true;
+    final int maxRentTime = 60;
+    var createItemTypeRequest = new CreateItemTypeRequest(cost, name, maxRentTime, isPhotoConfirm);
+    ItemType itemType = itemTypeService.createItemType(createItemTypeRequest);
+
+    var updateItemTypeRequest = new UpdateItemTypeRequest(null, null, null, null);
+    itemTypeService.updateItemType(itemType.getId(), updateItemTypeRequest);
+
+    ItemType extractedItemType = itemTypeRepository.findById(itemType.getId()).orElseThrow();
+
+    assertEquals(0, cost.compareTo(extractedItemType.getCost()));
+    assertEquals(extractedItemType.getDisplayName(), name);
+    assertEquals(maxRentTime, extractedItemType.getMaxRentTimeMinutes());
+    assertEquals(isPhotoConfirm, extractedItemType.isPhotoRequiredOnFinish());
+  }
+
   @Test
   void testDeleteItemType() {
     final String name = "Item type name";
