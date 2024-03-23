@@ -38,7 +38,6 @@ public class ItemController {
     throw new UnsupportedOperationException();
   }
 
-
   @DeleteMapping("/delete-item/{itemId}")
   @ResponseStatus(HttpStatus.OK)
   public void createItem(@PathVariable("itemId") UUID itemId) {
@@ -46,7 +45,8 @@ public class ItemController {
   }
 
   @ExceptionHandler
-  public ResponseEntity<ClientServerError> entityNotFoundExceptionHandler(EntityNotFoundException e) {
+  public ResponseEntity<ClientServerError> entityNotFoundExceptionHandler(
+      EntityNotFoundException e) {
     return new ResponseEntity<>(new ClientServerError(e.getMessage()), HttpStatus.NOT_FOUND);
   }
 }

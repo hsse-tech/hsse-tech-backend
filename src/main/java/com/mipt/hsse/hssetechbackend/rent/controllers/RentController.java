@@ -71,7 +71,8 @@ public class RentController {
   public void requestOpenItem(@PathVariable("id") long itemId) {}
 
   @ExceptionHandler
-  public ResponseEntity<ClientServerError> entityNotFoundExceptionHandler(EntityNotFoundException e) {
+  public ResponseEntity<ClientServerError> entityNotFoundExceptionHandler(
+      EntityNotFoundException e) {
     return new ResponseEntity<>(new ClientServerError(e.getMessage()), HttpStatus.NOT_FOUND);
   }
 }

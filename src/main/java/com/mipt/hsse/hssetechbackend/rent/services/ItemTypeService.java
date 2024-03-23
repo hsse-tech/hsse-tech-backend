@@ -6,10 +6,9 @@ import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemTypeReq
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemTypeRequest;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import org.springframework.stereotype.Service;
-
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.stereotype.Service;
 
 @Service
 public class ItemTypeService {
@@ -33,12 +32,13 @@ public class ItemTypeService {
 
   @Transactional
   public void updateItemType(UUID itemTypeId, UpdateItemTypeRequest request) {
-    ItemType itemType = itemTypeRepository.findById(itemTypeId).orElseThrow(() -> new EntityNotFoundException(ItemType.class, itemTypeId));
+    ItemType itemType =
+        itemTypeRepository
+            .findById(itemTypeId)
+            .orElseThrow(() -> new EntityNotFoundException(ItemType.class, itemTypeId));
 
-    if (request.newCost() != null)
-      itemType.setCost(request.newCost());
-    if (request.newDisplayName() != null)
-      itemType.setDisplayName(request.newDisplayName());
+    if (request.newCost() != null) itemType.setCost(request.newCost());
+    if (request.newDisplayName() != null) itemType.setDisplayName(request.newDisplayName());
     if (request.isPhotoConfirmationRequired() != null)
       itemType.setPhotoRequiredOnFinish(request.isPhotoConfirmationRequired());
     if (request.newMaxRentTimeMinutes() != null)
@@ -51,7 +51,6 @@ public class ItemTypeService {
   public void deleteItemType(UUID itemTypeId) {
     if (itemTypeRepository.findById(itemTypeId).isPresent())
       itemTypeRepository.deleteById(itemTypeId);
-    else
-      throw new EntityNotFoundException(ItemType.class, itemTypeId);
+    else throw new EntityNotFoundException(ItemType.class, itemTypeId);
   }
 }

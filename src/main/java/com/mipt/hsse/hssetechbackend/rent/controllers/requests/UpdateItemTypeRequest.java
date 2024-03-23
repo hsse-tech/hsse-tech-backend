@@ -14,4 +14,4 @@ public record UpdateItemTypeRequest(
     @JsonProperty("new_display_name") String newDisplayName,
     @PositiveOrZero @JsonProperty("new_cost") BigDecimal newCost,
     @JsonProperty("is_photo_confirmation_required") Boolean isPhotoConfirmationRequired,
-    @Positive @JsonProperty("max_rent_time_minutes") Integer newMaxRentTimeMinutes ) {}
+    @Positive @JsonProperty("max_rent_time_minutes") Integer newMaxRentTimeMinutes) {}

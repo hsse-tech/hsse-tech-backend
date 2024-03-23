@@ -2,11 +2,10 @@ package com.mipt.hsse.hssetechbackend.data.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import java.util.UUID;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-
-import java.util.UUID;
 
 @Getter
 @Setter

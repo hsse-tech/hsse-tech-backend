@@ -6,13 +6,12 @@ import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemTypeReq
 import com.mipt.hsse.hssetechbackend.rent.exceptions.ClientServerError;
 import com.mipt.hsse.hssetechbackend.rent.services.ItemTypeService;
 import jakarta.persistence.EntityNotFoundException;
+import java.util.Optional;
+import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
-import java.util.UUID;
 
 @Controller
 @RequestMapping("/api/renting")
@@ -31,7 +30,8 @@ public class ItemTypeController {
 
   @PatchMapping("/types/{id}")
   @ResponseStatus(HttpStatus.OK)
-  public void updateItemType(@PathVariable("id") UUID itemTypeId, @RequestBody UpdateItemTypeRequest request) {
+  public void updateItemType(
+      @PathVariable("id") UUID itemTypeId, @RequestBody UpdateItemTypeRequest request) {
     itemTypeService.updateItemType(itemTypeId, request);
   }
 
@@ -47,7 +47,8 @@ public class ItemTypeController {
   }
 
   @ExceptionHandler
-  public ResponseEntity<ClientServerError> entityNotFoundExceptionHandler(EntityNotFoundException e) {
+  public ResponseEntity<ClientServerError> entityNotFoundExceptionHandler(
+      EntityNotFoundException e) {
     return new ResponseEntity<>(new ClientServerError(e.getMessage()), HttpStatus.NOT_FOUND);
   }
 }

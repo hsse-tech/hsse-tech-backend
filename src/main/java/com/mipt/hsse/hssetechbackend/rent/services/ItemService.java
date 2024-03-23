@@ -23,22 +23,22 @@ public class ItemService {
 
     return itemRepository.save(item);
   }
-  
+
   @Transactional
   public void updateItem(UUID itemId, UpdateItemRequest request) {
-    Item item = itemRepository.findById(itemId).orElseThrow(() -> new EntityNotFoundException(Item.class, itemId));
+    Item item =
+        itemRepository
+            .findById(itemId)
+            .orElseThrow(() -> new EntityNotFoundException(Item.class, itemId));
 
-    if (request.newDisplayName() != null)
-      item.setDisplayName(request.newDisplayName());
+    if (request.newDisplayName() != null) item.setDisplayName(request.newDisplayName());
 
     itemRepository.save(item);
   }
 
   @Transactional
   public void deleteItem(UUID itemId) {
-    if (itemRepository.findById(itemId).isPresent())
-      itemRepository.deleteById(itemId);
-    else
-      throw new EntityNotFoundException(Item.class, itemId);
+    if (itemRepository.findById(itemId).isPresent()) itemRepository.deleteById(itemId);
+    else throw new EntityNotFoundException(Item.class, itemId);
   }
 }
