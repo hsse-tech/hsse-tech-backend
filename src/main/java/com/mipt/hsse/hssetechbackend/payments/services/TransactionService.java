@@ -28,11 +28,9 @@ public class TransactionService implements TransactionServiceBase {
   @Override
   @Transactional(propagation = Propagation.REQUIRED)
   public Transaction createTransaction(TransactionInfo transactionInfo) {
-    var walletOpt = jpaWalletRepository.findById(transactionInfo.walletId());
+    var wallet = jpaWalletRepository.findById(transactionInfo.walletId())
+            .orElseThrow(() -> new WalletNotFoundException("Wallet not found to assign a new transaction"));
 
-    if (walletOpt.isEmpty()) throw new WalletNotFoundException("Wallet not found to assign a new transaction");
-
-    var wallet = walletOpt.get();
     var transaction = new Transaction(BigDecimal.valueOf(transactionInfo.amount()), transactionInfo.name(), transactionInfo.description().orElse(null));
 
     transaction.setWallet(wallet);
@@ -44,13 +42,9 @@ public class TransactionService implements TransactionServiceBase {
   @Override
   @Transactional(propagation = Propagation.REQUIRED)
   public Transaction setTransactionStatus(UUID id, ClientTransactionStatus status) {
-    var targetTransactionOpt = jpaTransactionRepository.findById(id);
-
-    if (targetTransactionOpt.isEmpty()) {
-      throw new TransactionNotFoundException("Transaction for status update not found");
-    }
-
-    var targetTransaction = targetTransactionOpt.get();
+    var targetTransaction = jpaTransactionRepository.findById(id)
+            .orElseThrow(() ->
+                    new TransactionNotFoundException("Transaction for status update not found"));
 
     switch (status) {
       case SUCCESS -> targetTransaction.setIsSuccess(true);

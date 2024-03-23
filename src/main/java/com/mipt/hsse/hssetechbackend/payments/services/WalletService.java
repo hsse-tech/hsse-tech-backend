@@ -28,14 +28,11 @@ public class WalletService implements WalletServiceBase {
   @Override
   @Transactional(propagation = Propagation.REQUIRED)
   public Wallet createWallet(UUID ownerId) {
-    var owner = userRepository.findById(ownerId);
-
-    if (owner.isEmpty()) {
-      throw new WalletCreationException("Owner not found");
-    }
+    var owner = userRepository.findById(ownerId)
+            .orElseThrow(() -> new WalletCreationException("Owner not found"));
     var wallet = new Wallet();
 
-    wallet.setOwner(owner.get());
+    wallet.setOwner(owner);
 
     walletRepository.save(wallet);
     return wallet;
@@ -44,25 +41,14 @@ public class WalletService implements WalletServiceBase {
   @Override
   @Transactional(propagation = Propagation.REQUIRED)
   public Wallet getWallet(UUID id) {
-    var targetWalletOpt = walletRepository.findById(id);
-
-    if (targetWalletOpt.isEmpty()) {
-      throw new WalletNotFoundException();
-    }
-
-    return targetWalletOpt.get();
+    return walletRepository.findById(id)
+            .orElseThrow(WalletNotFoundException::new);
   }
 
   @Override
   @Transactional(propagation = Propagation.REQUIRED)
   public Wallet changeWalletBalanceOn(UUID walletId, BigDecimal delta) {
-    var targetWalletOpt = walletRepository.findById(walletId);
-
-    if (targetWalletOpt.isEmpty()) {
-      throw new WalletNotFoundException();
-    }
-
-    var targetWallet = targetWalletOpt.get();
+    var targetWallet = getWallet(walletId);
 
     var changedBalance = targetWallet.getBalance().add(delta);
 
