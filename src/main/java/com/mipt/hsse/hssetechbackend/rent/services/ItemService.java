@@ -29,6 +29,8 @@ public class ItemService {
 
   @Transactional
   public Item createItem(CreateItemRequest request) {
-    throw new UnsupportedOperationException();
+    Item item = request.getItem();
+
+    return itemRepository.save(item);
   }
 }

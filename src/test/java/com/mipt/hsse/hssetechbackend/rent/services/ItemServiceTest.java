@@ -3,18 +3,19 @@ package com.mipt.hsse.hssetechbackend.rent.services;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
+import com.mipt.hsse.hssetechbackend.data.entities.Item;
 import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
+import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemTypeRepository;
-import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemTypeRequest;
+import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,59 +25,32 @@ import org.springframework.transaction.annotation.Transactional;
 @ComponentScan(basePackages = {"com.mipt.hsse.hssetechbackend.rent.services"})
 class ItemServiceTest extends DatabaseSuite {
   @Autowired private ItemService itemService;
+
   @Autowired private JpaItemTypeRepository itemTypeRepository;
+  @Autowired private JpaItemRepository itemRepository;
+
+  private final ItemType itemType = new ItemType(BigDecimal.ZERO, "Item type name", 60, false);
+
+  @BeforeEach
+  void save() {
+    itemTypeRepository.save(itemType);
+  }
 
   @AfterEach
   void clear() {
     itemTypeRepository.deleteAll();
+    itemRepository.deleteAll();
   }
 
   @Test
   void testCreateItem() {
-    final String name = "Item type name";
-    final BigDecimal cost = BigDecimal.valueOf(100);
+    final String itemName = "Particular item name";
+    var createItemRequest = new CreateItemRequest(itemName, itemType);
 
-    var createItemTypeRequest = new CreateItemTypeRequest(cost, name, 60, false);
+    Item item = itemService.createItem(createItemRequest);
 
-    ItemType itemType = itemService.createItemType(createItemTypeRequest);
-
-    ItemType extractedItemType = itemTypeRepository.findById(itemType.getId()).orElseThrow();
-
-    assertEquals(0, cost.compareTo(extractedItemType.getCost()));
-    assertEquals(extractedItemType.getDisplayName(), name);
-  }
-
-  @Test
-  void testFailCreateItemWithNotUniqueName() {
-    final String name = "Item type name";
-
-    var request1 = new CreateItemTypeRequest(BigDecimal.ZERO, name, 60, false);
-    var request2 = new CreateItemTypeRequest(BigDecimal.valueOf(100), name, 120, true);
-
-    itemService.createItemType(request1);
-
-    assertThrows(DataIntegrityViolationException.class, () -> itemService.createItemType(request2));
-  }
-
-  @Test
-  void testCreateItemWithUndefinedMaxRentTime() {
-    final String name = "Item type name";
-
-    var createRequest = new CreateItemTypeRequest(BigDecimal.ZERO, name, null, false);
-
-    ItemType itemType = itemService.createItemType(createRequest);
-
-    ItemType extractedItemType = itemTypeRepository.findById(itemType.getId()).orElseThrow();
-
-    assertNull(extractedItemType.getMaxRentTimeMinutes());
-  }
-
-  @Test
-  void testFailCreateItemTypeWithNegativeCost() {
-    final String name = "Item type name";
-
-    var createRequest = new CreateItemTypeRequest(BigDecimal.valueOf(-1), name, null, false);
-
-    assertThrows(TransactionSystemException.class, () -> itemService.createItemType(createRequest));
+    Item extractedItem = itemRepository.findById(item.getId()).orElseThrow();
+    assertEquals(itemName, extractedItem.getDisplayName());
+    assertEquals(itemType.getId(), extractedItem.getType().getId());
   }
 }
