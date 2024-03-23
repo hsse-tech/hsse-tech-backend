@@ -26,7 +26,7 @@ public class ItemController {
     return itemService.createItemType(request);
   }
 
-  @DeleteMapping("/create-item-type/{itemTypeId}")
+  @DeleteMapping("/delete-item-type/{itemTypeId}")
   @ResponseStatus(HttpStatus.OK)
   public void createItemType(@PathVariable("itemTypeId") UUID itemTypeId) {
     itemService.deleteItemType(itemTypeId);
@@ -38,7 +38,7 @@ public class ItemController {
     return itemService.createItem(request);
   }
 
-  @DeleteMapping("/create-item/{itemId}")
+  @DeleteMapping("/delete-item/{itemId}")
   @ResponseStatus(HttpStatus.OK)
   public void createItem(@PathVariable("itemId") UUID itemId) {
     itemService.deleteItem(itemId);
