@@ -10,6 +10,7 @@ import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -36,6 +37,11 @@ public class ItemService {
       itemTypeRepository.deleteById(itemTypeId);
     else
       throw new EntityNotFoundException(ItemType.class, itemTypeId);
+  }
+
+  @Transactional
+  public Optional<ItemType> getItemType(UUID itemTypeId) {
+    return itemTypeRepository.findById(itemTypeId);
   }
 
   @Transactional

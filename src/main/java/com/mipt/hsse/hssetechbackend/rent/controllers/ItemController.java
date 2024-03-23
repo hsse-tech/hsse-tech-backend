@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Controller
@@ -30,6 +31,11 @@ public class ItemController {
   @ResponseStatus(HttpStatus.OK)
   public void createItemType(@PathVariable("itemTypeId") UUID itemTypeId) {
     itemService.deleteItemType(itemTypeId);
+  }
+
+  @GetMapping("/item-type/{itemTypeId}")
+  public Optional<ItemType> getItemType(@PathVariable("itemTypeId") UUID itemTypeId) {
+    return itemService.getItemType(itemTypeId);
   }
 
   @PostMapping("/create-item")
