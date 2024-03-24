@@ -58,6 +58,14 @@ class ItemServiceTest extends DatabaseSuite {
   }
 
   @Test
+  void testFailCreateItemOfAbsentType() {
+    final String itemName = "Particular item name";
+    var createItemRequest = new CreateItemRequest(itemName, UUID.randomUUID());
+
+    assertThrows(EntityNotFoundException.class, () -> itemService.createItem(createItemRequest));
+  }
+
+  @Test
   void testUpdateItem() {
     // Create item
     final String itemName = "Particular item name";
