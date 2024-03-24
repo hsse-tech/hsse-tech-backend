@@ -7,6 +7,7 @@ import com.mipt.hsse.hssetechbackend.rent.controllers.responses.RentInfoResponse
 import com.mipt.hsse.hssetechbackend.rent.exceptions.ClientServerError;
 import com.mipt.hsse.hssetechbackend.rent.services.ItemService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,13 +25,13 @@ public class ItemController {
 
   @PostMapping()
   @ResponseStatus(HttpStatus.CREATED)
-  public Item createItem(@RequestBody CreateItemRequest request) {
+  public Item createItem(@Valid @RequestBody CreateItemRequest request) {
     return itemService.createItem(request);
   }
 
   @PatchMapping("/{id}")
   @ResponseStatus(HttpStatus.OK)
-  public void updateItem(@PathVariable("id") UUID itemId, @RequestBody UpdateItemRequest request) {
+  public void updateItem(@PathVariable("id") UUID itemId, @Valid @RequestBody UpdateItemRequest request) {
     itemService.updateItem(itemId, request);
   }
 

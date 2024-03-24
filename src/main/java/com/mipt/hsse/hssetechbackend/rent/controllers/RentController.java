@@ -5,6 +5,7 @@ import com.mipt.hsse.hssetechbackend.rent.controllers.requests.*;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.ClientServerError;
 import com.mipt.hsse.hssetechbackend.rent.services.RentService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,7 +24,7 @@ public class RentController {
   }
 
   @PostMapping()
-  public Rent rentItem(@RequestBody RentItemRequest request) {
+  public Rent rentItem(@Valid @RequestBody RentItemRequest request) {
     return rentService.rentItem(request);
   }
 
@@ -33,13 +34,13 @@ public class RentController {
   }
 
   @PatchMapping("/edit-time")
-  public void editRentTime(@RequestBody EditRentTimeRequest request) {
+  public void editRentTime(@Valid @RequestBody EditRentTimeRequest request) {
     throw new UnsupportedOperationException();
   }
 
   @PostMapping("/{rent_id}/confirm")
   public void pinPhotoConfirmation(
-      @PathVariable("rent_id") UUID rentId, @RequestBody PinPhotoConfirmationRequest request) {
+      @PathVariable("rent_id") UUID rentId, @Valid @RequestBody PinPhotoConfirmationRequest request) {
     throw new UnsupportedOperationException();
   }
 

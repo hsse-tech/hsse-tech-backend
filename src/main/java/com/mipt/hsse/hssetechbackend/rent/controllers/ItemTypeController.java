@@ -6,6 +6,7 @@ import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemTypeReq
 import com.mipt.hsse.hssetechbackend.rent.exceptions.ClientServerError;
 import com.mipt.hsse.hssetechbackend.rent.services.ItemTypeService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
@@ -24,14 +25,14 @@ public class ItemTypeController {
 
   @PostMapping()
   @ResponseStatus(HttpStatus.CREATED)
-  public ItemType createItemType(@RequestBody CreateItemTypeRequest request) {
+  public ItemType createItemType(@Valid @RequestBody CreateItemTypeRequest request) {
     return itemTypeService.createItemType(request);
   }
 
   @PatchMapping("/{id}")
   @ResponseStatus(HttpStatus.OK)
   public void updateItemType(
-      @PathVariable("id") UUID itemTypeId, @RequestBody UpdateItemTypeRequest request) {
+      @PathVariable("id") UUID itemTypeId, @Valid @RequestBody UpdateItemTypeRequest request) {
     itemTypeService.updateItemType(itemTypeId, request);
   }
 
