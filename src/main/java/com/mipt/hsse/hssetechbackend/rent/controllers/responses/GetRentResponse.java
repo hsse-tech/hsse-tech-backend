@@ -7,6 +7,7 @@ import java.util.UUID;
 
 public record GetRentResponse(UUID id, User renter, Instant startTime, Instant endTime) {
   public static GetRentResponse getFromRent(Rent rent) {
-    return new GetRentResponse(rent.getId(), rent.getRenter(), rent.getStartAt(), rent.getEndedAt());
+    return new GetRentResponse(
+        rent.getId(), rent.getRenter(), rent.getStartAt(), rent.getEndedAt());
   }
 }

@@ -54,7 +54,8 @@ public class RentController {
   }
 
   /**
-    * TODO: This query does not satisfy the brief in Figma, needs consideration, don't use it for the time being
+   * TODO: This query does not satisfy the brief in Figma, needs consideration, don't use it for the
+   * time being
    */
   @GetMapping("/{rent_id}")
   public Rent getRent(@PathVariable("rent_id") UUID rentId) {

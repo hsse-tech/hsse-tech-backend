@@ -6,4 +6,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 public record RentItemRequest(
-    @JsonProperty("user_id") UUID userId, @JsonProperty("item_id") UUID itemId, @JsonProperty("start_time") @NotNull Instant startTime, @JsonProperty("end_time") @NotNull Instant endTime) {}
+    @JsonProperty("user_id") UUID userId,
+    @JsonProperty("item_id") UUID itemId,
+    @JsonProperty("start_time") @NotNull Instant startTime,
+    @JsonProperty("end_time") @NotNull Instant endTime) {}
