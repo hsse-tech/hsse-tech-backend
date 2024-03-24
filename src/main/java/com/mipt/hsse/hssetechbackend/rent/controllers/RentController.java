@@ -68,7 +68,9 @@ public class RentController {
   }
 
   @PostMapping("/items/{id}/open")
-  public void requestOpenItem(@PathVariable("id") long itemId) {}
+  public void requestOpenItem(@PathVariable("id") long itemId) {
+    throw new UnsupportedOperationException();
+  }
 
   @ExceptionHandler
   public ResponseEntity<ClientServerError> entityNotFoundExceptionHandler(

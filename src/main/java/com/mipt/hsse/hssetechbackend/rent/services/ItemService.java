@@ -1,7 +1,9 @@
 package com.mipt.hsse.hssetechbackend.rent.services;
 
 import com.mipt.hsse.hssetechbackend.data.entities.Item;
+import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemRepository;
+import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemTypeRepository;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
@@ -12,14 +14,20 @@ import org.springframework.stereotype.Service;
 @Service
 public class ItemService {
   private final JpaItemRepository itemRepository;
+  private final JpaItemTypeRepository itemTypeRepository;
 
-  public ItemService(JpaItemRepository itemRepository) {
+  public ItemService(JpaItemRepository itemRepository, JpaItemTypeRepository itemTypeRepository) {
     this.itemRepository = itemRepository;
+    this.itemTypeRepository = itemTypeRepository;
   }
 
   @Transactional
   public Item createItem(CreateItemRequest request) {
-    Item item = request.getItem();
+    ItemType itemType =
+        itemTypeRepository
+            .findById(request.itemTypeId())
+            .orElseThrow(() -> new EntityNotFoundException(ItemType.class, request.itemTypeId()));
+    Item item = new Item(request.displayName(), itemType);
 
     return itemRepository.save(item);
   }

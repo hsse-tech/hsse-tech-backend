@@ -20,7 +20,12 @@ public class ItemTypeService {
 
   @Transactional
   public ItemType createItemType(CreateItemTypeRequest request) {
-    ItemType itemType = request.getItemType();
+    ItemType itemType =
+        new ItemType(
+            request.cost(),
+            request.displayName(),
+            request.maxRentTimeMinutes(),
+            request.isPhotoConfirmationRequired());
 
     return itemTypeRepository.save(itemType);
   }
@@ -37,12 +42,18 @@ public class ItemTypeService {
             .findById(itemTypeId)
             .orElseThrow(() -> new EntityNotFoundException(ItemType.class, itemTypeId));
 
-    if (request.newCost() != null) itemType.setCost(request.newCost());
-    if (request.newDisplayName() != null) itemType.setDisplayName(request.newDisplayName());
-    if (request.isPhotoConfirmationRequired() != null)
+    if (request.newCost() != null) {
+      itemType.setCost(request.newCost());
+    }
+    if (request.newDisplayName() != null) {
+      itemType.setDisplayName(request.newDisplayName());
+    }
+    if (request.isPhotoConfirmationRequired() != null) {
       itemType.setPhotoRequiredOnFinish(request.isPhotoConfirmationRequired());
-    if (request.newMaxRentTimeMinutes() != null)
+    }
+    if (request.newMaxRentTimeMinutes() != null) {
       itemType.setMaxRentTimeMinutes(request.newMaxRentTimeMinutes());
+    }
 
     itemTypeRepository.save(itemType);
   }

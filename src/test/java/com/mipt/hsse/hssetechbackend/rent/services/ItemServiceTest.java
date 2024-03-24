@@ -48,7 +48,7 @@ class ItemServiceTest extends DatabaseSuite {
   @Test
   void testCreateItem() {
     final String itemName = "Particular item name";
-    var createItemRequest = new CreateItemRequest(itemName, itemType);
+    var createItemRequest = new CreateItemRequest(itemName, itemType.getId());
 
     Item item = itemService.createItem(createItemRequest);
 
@@ -58,10 +58,10 @@ class ItemServiceTest extends DatabaseSuite {
   }
 
   @Test
-  void updateItem() {
+  void testUpdateItem() {
     // Create item
     final String itemName = "Particular item name";
-    var createItemRequest = new CreateItemRequest(itemName, itemType);
+    var createItemRequest = new CreateItemRequest(itemName, itemType.getId());
     Item item = itemService.createItem(createItemRequest);
 
     // Update item
@@ -75,10 +75,18 @@ class ItemServiceTest extends DatabaseSuite {
   }
 
   @Test
+  void testFailUpdateAbsentItem() {
+    // Update item
+    UpdateItemRequest updateItemRequest = new UpdateItemRequest("newDisplayName");
+    assertThrows(
+        EntityNotFoundException.class, () -> itemService.updateItem(UUID.randomUUID(), updateItemRequest));
+  }
+
+  @Test
   void testEmptyUpdateHasNoEffect() {
     // Create item
     final String itemName = "Particular item name";
-    var createItemRequest = new CreateItemRequest(itemName, itemType);
+    var createItemRequest = new CreateItemRequest(itemName, itemType.getId());
     Item item = itemService.createItem(createItemRequest);
 
     var updateItemRequest = new UpdateItemRequest(null);
@@ -92,7 +100,7 @@ class ItemServiceTest extends DatabaseSuite {
   void testDeleteItem() {
     final String itemName = "Particular item name";
 
-    var createItemRequest = new CreateItemRequest(itemName, itemType);
+    var createItemRequest = new CreateItemRequest(itemName, itemType.getId());
     Item item = itemService.createItem(createItemRequest);
 
     itemService.deleteItem(item.getId());
