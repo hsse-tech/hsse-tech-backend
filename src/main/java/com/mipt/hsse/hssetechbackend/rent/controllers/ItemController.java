@@ -3,6 +3,7 @@ package com.mipt.hsse.hssetechbackend.rent.controllers;
 import com.mipt.hsse.hssetechbackend.data.entities.Item;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
+import com.mipt.hsse.hssetechbackend.rent.controllers.responses.RentInfoResponse;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.ClientServerError;
 import com.mipt.hsse.hssetechbackend.rent.services.ItemService;
 import jakarta.persistence.EntityNotFoundException;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
-@RequestMapping("/api/renting")
+@RequestMapping("/api/renting/item")
 public class ItemController {
   private final ItemService itemService;
 
@@ -21,26 +22,38 @@ public class ItemController {
     this.itemService = itemService;
   }
 
-  @PostMapping("/create-item")
+  @PostMapping()
   @ResponseStatus(HttpStatus.CREATED)
   public Item createItem(@RequestBody CreateItemRequest request) {
     return itemService.createItem(request);
   }
 
-  @PatchMapping("/items/{id}")
+  @PatchMapping("/{id}")
   @ResponseStatus(HttpStatus.OK)
   public void updateItem(@PathVariable("id") UUID itemId, @RequestBody UpdateItemRequest request) {
     itemService.updateItem(itemId, request);
   }
 
-  @GetMapping("/items/{item_id}/qr")
+  @GetMapping("/{id}")
+  public RentInfoResponse getItem(
+      @PathVariable("id") long id,
+      @RequestParam(value = "loadRentInfo", defaultValue = "false") boolean loadRentInfo) {
+    throw new UnsupportedOperationException();
+  }
+
+  @GetMapping("/{item_id}/qr")
   public void getItemBookingQRCode(@PathVariable("item_id") UUID itemId) {
     throw new UnsupportedOperationException();
   }
 
-  @DeleteMapping("/delete-item/{itemId}")
+  @PostMapping("/{item_id}/open")
+  public void provideAccessToItem(@PathVariable("item_id") UUID itemId) {
+    throw new UnsupportedOperationException();
+  }
+
+  @DeleteMapping("/{itemId}")
   @ResponseStatus(HttpStatus.OK)
-  public void createItem(@PathVariable("itemId") UUID itemId) {
+  public void deleteItem(@PathVariable("itemId") UUID itemId) {
     itemService.deleteItem(itemId);
   }
 

@@ -1,5 +1,6 @@
 package com.mipt.hsse.hssetechbackend.data.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -32,13 +33,16 @@ public class ItemType {
   @Column(name = "display_name", nullable = false, length = Integer.MAX_VALUE)
   @NotNull
   @NotEmpty
+  @JsonProperty("display_name")
   private String displayName;
 
   @Column(name = "max_rent_time_minutes")
+  @JsonProperty("max_rent_time_minutes")
   @Positive
   private Integer maxRentTimeMinutes;
 
   @Column(name = "is_photo_required_on_finish")
+  @JsonProperty("is_photo_confirmation_required")
   private boolean isPhotoRequiredOnFinish;
 
   public ItemType(

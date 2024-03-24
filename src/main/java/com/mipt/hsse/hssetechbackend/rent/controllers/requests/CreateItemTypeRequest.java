@@ -1,5 +1,6 @@
 package com.mipt.hsse.hssetechbackend.rent.controllers.requests;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -7,6 +8,6 @@ import java.math.BigDecimal;
 
 public record CreateItemTypeRequest(
     @NotNull @PositiveOrZero BigDecimal cost,
-    @NotNull @NotEmpty String displayName,
-    Integer maxRentTimeMinutes,
-    boolean isPhotoConfirmationRequired) {}
+    @JsonProperty("display_name") @NotNull @NotEmpty String displayName,
+    @JsonProperty("max_rent_time_minutes") Integer maxRentTimeMinutes,
+    @JsonProperty("is_photo_confirmation_required") boolean isPhotoConfirmationRequired) {}

@@ -2,8 +2,6 @@ package com.mipt.hsse.hssetechbackend.rent.controllers;
 
 import com.mipt.hsse.hssetechbackend.data.entities.Rent;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.*;
-import com.mipt.hsse.hssetechbackend.rent.controllers.responses.RentInfoResponse;
-import com.mipt.hsse.hssetechbackend.rent.controllers.responses.ShortRentInfo;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.ClientServerError;
 import com.mipt.hsse.hssetechbackend.rent.services.RentService;
 import jakarta.persistence.EntityNotFoundException;
@@ -15,7 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
-@RequestMapping("/api/renting")
+@RequestMapping("/api/renting/rent")
 public class RentController {
   private final RentService rentService;
 
@@ -24,12 +22,12 @@ public class RentController {
     this.rentService = rentService;
   }
 
-  @PostMapping("/rent-item")
+  @PostMapping()
   public Rent rentItem(@RequestBody RentItemRequest request) {
     return rentService.rentItem(request);
   }
 
-  @DeleteMapping("/unrent-item/{rent_id}")
+  @DeleteMapping("/{rent_id}")
   public void unrentItem(@PathVariable("rent_id") UUID rentId) {
     rentService.unrentItem(rentId);
   }
@@ -39,14 +37,7 @@ public class RentController {
     throw new UnsupportedOperationException();
   }
 
-  @GetMapping("/items/{id}")
-  public RentInfoResponse getRentInfo(
-      @PathVariable("id") long id,
-      @RequestParam(value = "loadRentInfo", defaultValue = "false") boolean loadRentInfo) {
-    throw new UnsupportedOperationException();
-  }
-
-  @PostMapping("/{rent_id}/confirm/photo")
+  @PostMapping("/{rent_id}/confirm")
   public void pinPhotoConfirmation(
       @PathVariable("rent_id") UUID rentId, @RequestBody PinPhotoConfirmationRequest request) {
     throw new UnsupportedOperationException();
@@ -57,19 +48,17 @@ public class RentController {
     throw new UnsupportedOperationException();
   }
 
-  @GetMapping("/api/renting/{rent_id}")
+  @GetMapping("/{rent_id}/confirm")
+  public Object getRentConfirmationPhoto(@PathVariable("rent_id") UUID rentId) {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+    * TODO: This query does not satisfy the brief in Figma, needs consideration, don't use it for the time being
+   */
+  @GetMapping("/{rent_id}")
   public Rent getRent(@PathVariable("rent_id") UUID rentId) {
     return rentService.findById(rentId);
-  }
-
-  @GetMapping("/{rent_id}")
-  public ShortRentInfo getRentInfo(@PathVariable("rent_id") UUID rentId) {
-    throw new UnsupportedOperationException();
-  }
-
-  @PostMapping("/items/{id}/open")
-  public void requestOpenItem(@PathVariable("id") long itemId) {
-    throw new UnsupportedOperationException();
   }
 
   @ExceptionHandler

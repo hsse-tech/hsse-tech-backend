@@ -14,7 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
-@RequestMapping("/api/renting")
+@RequestMapping("/api/renting/item-type")
 public class ItemTypeController {
   private final ItemTypeService itemTypeService;
 
@@ -22,26 +22,26 @@ public class ItemTypeController {
     this.itemTypeService = itemTypeService;
   }
 
-  @PostMapping("/create-item-type")
+  @PostMapping()
   @ResponseStatus(HttpStatus.CREATED)
   public ItemType createItemType(@RequestBody CreateItemTypeRequest request) {
     return itemTypeService.createItemType(request);
   }
 
-  @PatchMapping("/types/{id}")
+  @PatchMapping("/{id}")
   @ResponseStatus(HttpStatus.OK)
   public void updateItemType(
       @PathVariable("id") UUID itemTypeId, @RequestBody UpdateItemTypeRequest request) {
     itemTypeService.updateItemType(itemTypeId, request);
   }
 
-  @DeleteMapping("/delete-item-type/{itemTypeId}")
+  @DeleteMapping("/{itemTypeId}")
   @ResponseStatus(HttpStatus.OK)
   public void createItemType(@PathVariable("itemTypeId") UUID itemTypeId) {
     itemTypeService.deleteItemType(itemTypeId);
   }
 
-  @GetMapping("/item-type/{itemTypeId}")
+  @GetMapping("/{itemTypeId}")
   public Optional<ItemType> getItemType(@PathVariable("itemTypeId") UUID itemTypeId) {
     return itemTypeService.getItemType(itemTypeId);
   }
