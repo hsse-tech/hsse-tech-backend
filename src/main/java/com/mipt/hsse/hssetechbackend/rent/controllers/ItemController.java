@@ -61,6 +61,6 @@ public class ItemController {
   @ExceptionHandler
   public ResponseEntity<ClientServerError> entityNotFoundExceptionHandler(
       EntityNotFoundException e) {
-    return new ResponseEntity<>(new ClientServerError(e.getMessage()), HttpStatus.NOT_FOUND);
+    return new ResponseEntity<>(new ClientServerError(e.getMessage()), HttpStatus.BAD_REQUEST);
   }
 }

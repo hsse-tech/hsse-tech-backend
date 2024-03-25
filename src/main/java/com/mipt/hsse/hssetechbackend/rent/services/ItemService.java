@@ -46,7 +46,7 @@ public class ItemService {
 
   @Transactional
   public void deleteItem(UUID itemId) {
-    if (itemRepository.findById(itemId).isPresent()) itemRepository.deleteById(itemId);
+    if (itemRepository.existsById(itemId)) itemRepository.deleteById(itemId);
     else throw new EntityNotFoundException(Item.class, itemId);
   }
 }
