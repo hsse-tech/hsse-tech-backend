@@ -1,8 +1,7 @@
 package com.mipt.hsse.hssetechbackend.rent.exceptions;
 
 public class RentProcessingException extends RuntimeException {
-  public RentProcessingException() {
-  }
+  public RentProcessingException() {}
 
   public RentProcessingException(String message) {
     super(message);
