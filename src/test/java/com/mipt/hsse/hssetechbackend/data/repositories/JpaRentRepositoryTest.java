@@ -9,6 +9,7 @@ import com.mipt.hsse.hssetechbackend.data.entities.Rent;
 import com.mipt.hsse.hssetechbackend.data.entities.User;
 import java.math.BigDecimal;
 import java.time.Instant;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,8 @@ class JpaRentRepositoryTest extends DatabaseSuite {
   @Autowired private JpaItemRepository itemRepository;
   @Autowired private JpaUserRepository userRepository;
   @Autowired private JpaItemTypeRepository itemTypeRepository;
+  
+  // region Test objects
 
   // Timeline for tests:
   // <--firstRentItem1--><--secondRentItem1--><--thirdRentItem1-->
@@ -51,12 +54,22 @@ class JpaRentRepositoryTest extends DatabaseSuite {
   private final Rent largeRentForItem1 = new Rent(largeRentFrom, largeRentTo, user, item1);
   private final Rent largeRentForItem2 = new Rent(largeRentFrom, largeRentTo, user, item2);
 
+  // endregion
+
   @BeforeEach
   void save() {
     itemTypeRepository.save(itemType);
     itemRepository.save(item1);
     itemRepository.save(item2);
     userRepository.save(user);
+  }
+  
+  @AfterEach
+  void delete() {
+    rentRepository.deleteAll();
+    userRepository.deleteAll();
+    itemRepository.deleteAll();
+    itemTypeRepository.deleteAll();
   }
 
   @Test
@@ -69,6 +82,7 @@ class JpaRentRepositoryTest extends DatabaseSuite {
             secondRentForItem1.getItem(),
             secondRentForItem1.getStartAt(),
             secondRentForItem1.getEndedAt()));
+    System.out.println(rentRepository.count());
   }
 
   @Test
@@ -81,6 +95,7 @@ class JpaRentRepositoryTest extends DatabaseSuite {
             secondRentForItem1.getItem(),
             secondRentForItem1.getStartAt(),
             secondRentForItem1.getEndedAt()));
+    System.out.println(rentRepository.count());
   }
 
   @Test

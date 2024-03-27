@@ -1,4 +1,4 @@
 package com.mipt.hsse.hssetechbackend.rent.controllers.responses;
 
 public record RentInfoResponse(
-    long itemId, long itemTypeId, String displayName, ShortRentInfo rent) {}
+    long itemId, long itemTypeId, String displayName, GetRentResponse rent) {}

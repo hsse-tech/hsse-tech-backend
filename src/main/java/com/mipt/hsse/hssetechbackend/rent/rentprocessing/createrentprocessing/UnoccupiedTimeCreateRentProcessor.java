@@ -22,7 +22,8 @@ public class UnoccupiedTimeCreateRentProcessor implements CreateRentProcessor {
     var item = createRentData.rent().getItem();
     var from = createRentData.rent().getStartAt();
     var to = createRentData.rent().getEndedAt();
-    boolean isDisjointWithOtherRents = rentRepository.isDisjointWithOtherRentsOfSameItem(item, from, to);
+    boolean isDisjointWithOtherRents =
+        rentRepository.isDisjointWithOtherRentsOfSameItem(item, from, to);
 
     if (!isDisjointWithOtherRents)
       throw new RentProcessingException(
