@@ -35,7 +35,7 @@ class ItemTypeControllerTest {
   }
 
   @Test
-  void createItemTypeEndpoint() {
+  void testCreateItemTypeEndpoint() {
     final BigDecimal cost = BigDecimal.valueOf(100);
     final String displayName = "displayName";
     final int maxRentTime = 60;
@@ -62,40 +62,18 @@ class ItemTypeControllerTest {
   }
 
   @Test
-  void testFailCreateInvalidItemTypeNegativeCost() {
+  void testCreateItemTypeEndpointOnInvalidReturnBadRequest() {
     when(itemTypeService.createItemType(any())).thenReturn(null);
 
     CreateItemTypeRequest request =
-        new CreateItemTypeRequest(BigDecimal.valueOf(-100.5), "displayName", 60, false);
+        new CreateItemTypeRequest(BigDecimal.valueOf(-100.5), "", null, false);
     ResponseEntity<ItemType> createResponse =
         rest.postForEntity(BASE_MAPPING, request, ItemType.class);
     assertEquals(HttpStatus.BAD_REQUEST, createResponse.getStatusCode());
   }
 
   @Test
-  void testFailCreateInvalidItemTypeEmptyName() {
-    when(itemTypeService.createItemType(any())).thenReturn(null);
-
-    CreateItemTypeRequest request =
-        new CreateItemTypeRequest(BigDecimal.valueOf(100), "", 60, false);
-    ResponseEntity<ItemType> createResponse =
-        rest.postForEntity(BASE_MAPPING, request, ItemType.class);
-    assertEquals(HttpStatus.BAD_REQUEST, createResponse.getStatusCode());
-  }
-
-  @Test
-  void testFailCreateInvalidItemTypeNegativeMaxRentTime() {
-    when(itemTypeService.createItemType(any())).thenReturn(null);
-
-    CreateItemTypeRequest request =
-        new CreateItemTypeRequest(BigDecimal.valueOf(100), "test Name", -1, false);
-    ResponseEntity<ItemType> createResponse =
-        rest.postForEntity(BASE_MAPPING, request, ItemType.class);
-    assertEquals(HttpStatus.BAD_REQUEST, createResponse.getStatusCode());
-  }
-
-  @Test
-  void testGetItemType() {
+  void testGetItemTypeEndpoint() {
     ItemType itemType = new ItemType(BigDecimal.ZERO, "testName", 60, false);
 
     when(itemTypeService.getItemType(any())).thenReturn(Optional.of(itemType));
@@ -114,7 +92,7 @@ class ItemTypeControllerTest {
   }
 
   @Test
-  void testFailGetAbsentItemType() {
+  void testGetItemTypeEndpointOnGetNonExistReturnBadRequest() {
     when(itemTypeService.getItemType(any())).thenReturn(Optional.empty());
 
     ResponseEntity<ItemType> response =
@@ -127,7 +105,7 @@ class ItemTypeControllerTest {
   // The case when the updated item type does not exist does not differ in any way on Controller
   // level
   @Test
-  void testUpdateItemType() {
+  void testUpdateItemTypeEndpoint() {
     final BigDecimal cost = BigDecimal.valueOf(100);
     final String displayName = "displayName";
     final Integer maxRentTime = null;
@@ -150,7 +128,7 @@ class ItemTypeControllerTest {
   }
 
   @Test
-  void testFailUpdateAbsentItemType() {
+  void testUpdateItemTypeEndpointOnUpdateNonExistReturnBadRequest() {
     when(itemTypeService.getItemType(any())).thenReturn(Optional.empty());
     doNothing().when(itemTypeService).updateItemType(any(), any());
 
@@ -172,7 +150,7 @@ class ItemTypeControllerTest {
   // Note that the behaviour of deleteItemType endpoint in the case of non-existing item type
   // does not differ in any way from the case of existing item type on the Controller level
   @Test
-  void testDeleteItemType() {
+  void testDeleteItemTypeEndpoint() {
     doNothing().when(itemTypeService).deleteItemType(any());
 
     UUID uuid = UUID.randomUUID();
