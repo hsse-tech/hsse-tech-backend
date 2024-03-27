@@ -40,7 +40,8 @@ public class RentController {
 
   @PostMapping("/{rent_id}/confirm")
   public void pinPhotoConfirmation(
-      @PathVariable("rent_id") UUID rentId, @Valid @RequestBody PinPhotoConfirmationRequest request) {
+      @PathVariable("rent_id") UUID rentId,
+      @Valid @RequestBody PinPhotoConfirmationRequest request) {
     throw new UnsupportedOperationException();
   }
 
