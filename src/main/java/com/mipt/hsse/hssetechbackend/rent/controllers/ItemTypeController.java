@@ -23,28 +23,36 @@ public class ItemTypeController {
     this.itemTypeService = itemTypeService;
   }
 
-  @PostMapping()
-  @ResponseStatus(HttpStatus.CREATED)
-  public ItemType createItemType(@Valid @RequestBody CreateItemTypeRequest request) {
-    return itemTypeService.createItemType(request);
+  @PostMapping
+  public ResponseEntity<ItemType> createItemType(
+      @Valid @RequestBody CreateItemTypeRequest request) {
+    ItemType itemType = itemTypeService.createItemType(request);
+    return new ResponseEntity<>(itemType, HttpStatus.CREATED);
   }
 
   @PatchMapping("/{id}")
-  @ResponseStatus(HttpStatus.OK)
-  public void updateItemType(
+  public ResponseEntity<Void> updateItemType(
       @PathVariable("id") UUID itemTypeId, @Valid @RequestBody UpdateItemTypeRequest request) {
-    itemTypeService.updateItemType(itemTypeId, request);
+    if (itemTypeService.getItemType(itemTypeId).isPresent()) {
+      itemTypeService.updateItemType(itemTypeId, request);
+      return ResponseEntity.noContent().build();
+    } else {
+      throw new EntityNotFoundException();
+    }
   }
 
-  @DeleteMapping("/{itemTypeId}")
+  @DeleteMapping("/{id}")
   @ResponseStatus(HttpStatus.OK)
-  public void createItemType(@PathVariable("itemTypeId") UUID itemTypeId) {
+  public void deleteItemType(@PathVariable("id") UUID itemTypeId) {
     itemTypeService.deleteItemType(itemTypeId);
   }
 
-  @GetMapping("/{itemTypeId}")
-  public Optional<ItemType> getItemType(@PathVariable("itemTypeId") UUID itemTypeId) {
-    return itemTypeService.getItemType(itemTypeId);
+  @GetMapping("/{id}")
+  public ResponseEntity<ItemType> getItemType(@PathVariable("id") UUID itemTypeId) {
+    Optional<ItemType> itemType = itemTypeService.getItemType(itemTypeId);
+
+    if (itemType.isPresent()) return new ResponseEntity<>(itemType.get(), HttpStatus.OK);
+    else throw new EntityNotFoundException();
   }
 
   @ExceptionHandler
