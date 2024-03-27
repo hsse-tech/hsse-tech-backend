@@ -49,23 +49,24 @@ CREATE TABLE rent
     "to"     TIMESTAMP NOT NULL,
     item_id  UUID      NOT NULL REFERENCES item (id),
     ended_at TIMESTAMP,
-    user_id  UUID      NOT NULL REFERENCES "user" (id)
+    user_id  UUID    NOT NULL REFERENCES "user" (id) ON DELETE CASCADE
 );
 
 CREATE TABLE wallet
 (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    owner_yandex_id BIGINT NOT NULL REFERENCES human_user_passport (yandex_id) ON DELETE CASCADE
+    owner_yandex_id BIGINT NOT NULL REFERENCES human_user_passport (yandex_id) ON DELETE CASCADE,
+    balance NUMERIC(9, 2) NOT NULL DEFAULT 0
 );
 
 CREATE TABLE transaction
 (
     id           UUID PRIMARY KEY       DEFAULT gen_random_uuid(),
     amount       NUMERIC(9, 2) NOT NULL CHECK (amount BETWEEN 0 AND 1000000.00),
-    is_success   BOOLEAN       NOT NULL,
+    is_success   BOOLEAN       NULL,
     name         TEXT          NOT NULL,
     description  TEXT          NULL,
-    committed_at TIMESTAMP     NOT NULL DEFAULT now(),
+    committed_at TIMESTAMP     NOT NULL,
     wallet_id    UUID          NOT NULL REFERENCES wallet (id) ON DELETE CASCADE
 );
 
