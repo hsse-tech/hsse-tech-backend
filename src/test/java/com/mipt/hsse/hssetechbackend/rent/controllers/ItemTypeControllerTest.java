@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
+import com.mipt.hsse.hssetechbackend.DatabaseSuite;
 import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemTypeRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemTypeRequest;
@@ -16,6 +17,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -23,7 +25,8 @@ import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
-class ItemTypeControllerTest {
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+class ItemTypeControllerTest extends DatabaseSuite {
   @Autowired private TestRestTemplate rest;
   @MockBean private ItemTypeService itemTypeService;
 
