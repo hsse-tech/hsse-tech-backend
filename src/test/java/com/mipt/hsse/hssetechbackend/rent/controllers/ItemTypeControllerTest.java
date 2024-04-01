@@ -130,7 +130,6 @@ class ItemTypeControllerTest extends DatabaseSuite {
 
   @Test
   void testUpdateItemTypeEndpointOnUpdateNonExistReturnBadRequest() {
-    when(itemTypeService.getItemType(any())).thenReturn(Optional.empty());
     doNothing().when(itemTypeService).updateItemType(any(), any());
 
     UpdateItemTypeRequest updateRequest =
