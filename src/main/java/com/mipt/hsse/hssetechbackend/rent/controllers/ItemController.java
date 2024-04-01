@@ -31,7 +31,8 @@ public class ItemController {
 
   @PatchMapping("/{id}")
   @ResponseStatus(HttpStatus.OK)
-  public void updateItem(@PathVariable("id") UUID itemId, @Valid @RequestBody UpdateItemRequest request) {
+  public void updateItem(
+      @PathVariable("id") UUID itemId, @Valid @RequestBody UpdateItemRequest request) {
     itemService.updateItem(itemId, request);
   }
 
