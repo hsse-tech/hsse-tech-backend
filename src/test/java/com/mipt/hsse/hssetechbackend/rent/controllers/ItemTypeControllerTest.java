@@ -88,7 +88,7 @@ class ItemTypeControllerTest extends DatabaseSuite {
             Map.of("itemTypeId", UUID.randomUUID()));
 
     ItemType returnedItemType = response.getBody();
-    assert returnedItemType != null;
+    assertNotNull(returnedItemType);
     assertEquals(itemType.getDisplayName(), returnedItemType.getDisplayName());
     assertEquals(itemType.getCost(), returnedItemType.getCost());
     assertEquals(itemType.getMaxRentTimeMinutes(), returnedItemType.getMaxRentTimeMinutes());
@@ -105,8 +105,6 @@ class ItemTypeControllerTest extends DatabaseSuite {
     assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
   }
 
-  // The case when the updated item type does not exist does not differ in any way on Controller
-  // level
   @Test
   void testUpdateItemTypeEndpoint() {
     final BigDecimal cost = BigDecimal.valueOf(100);
