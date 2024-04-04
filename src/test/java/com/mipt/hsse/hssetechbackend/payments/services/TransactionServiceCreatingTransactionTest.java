@@ -64,7 +64,7 @@ public class TransactionServiceCreatingTransactionTest extends DatabaseSuite {
 
   @Test
   public void testTransactionCreation() {
-    var transactionInfo = new TransactionInfo(50.00, testWallet.getId(), "Гель для душа", Optional.of("О полмолiв мой нiжний гель"));
+    var transactionInfo = new TransactionInfo(50.00, testWallet.getId(), "Гель для душа", Optional.of("О полмолив, мой нежный гель"));
 
     Transaction resultTrans = transactionService.createTransaction(transactionInfo);
 
@@ -74,7 +74,7 @@ public class TransactionServiceCreatingTransactionTest extends DatabaseSuite {
 
   @Test
   public void testTransactionCreationWalletNotFound() {
-    var transactionInfo = new TransactionInfo(50.00, UUID.randomUUID(), "Гель для душа", Optional.of("О полмолiв мой нiжний гель"));
+    var transactionInfo = new TransactionInfo(50.00, UUID.randomUUID(), "Гель для душа", Optional.of("О полмолив, мой нежный гель"));
     assertThrows(WalletNotFoundException.class, () -> transactionService.createTransaction(transactionInfo));
   }
 
