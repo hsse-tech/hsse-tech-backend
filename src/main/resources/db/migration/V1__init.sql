@@ -8,7 +8,7 @@ CREATE TABLE item_type
 (
     id                          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     cost                        NUMERIC(9, 2) NOT NULL CHECK (cost BETWEEN 0 AND 1000000.00),
-    display_name                TEXT          NOT NULL,
+    display_name                TEXT          NOT NULL UNIQUE,
     max_rent_time_minutes       INT           NULL,
     is_photo_required_on_finish BOOLEAN          DEFAULT FALSE
 );

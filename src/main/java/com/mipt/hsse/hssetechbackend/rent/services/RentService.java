@@ -52,8 +52,7 @@ public class RentService {
 
     Rent rent = new Rent(request.startTime(), request.endTime(), renter, item);
 
-    CreateRentProcessData processData =
-        new CreateRentProcessData(rent);
+    CreateRentProcessData processData = new CreateRentProcessData(rent);
 
     try {
       for (var processor : createRentProcessors) {
@@ -78,7 +77,7 @@ public class RentService {
     DeleteRentProcessData processData = new DeleteRentProcessData(rent);
 
     for (var processor : deleteRentProcessors) {
-     processor.processDelete(processData);
+      processor.processDelete(processData);
     }
 
     rentRepository.delete(rent);
