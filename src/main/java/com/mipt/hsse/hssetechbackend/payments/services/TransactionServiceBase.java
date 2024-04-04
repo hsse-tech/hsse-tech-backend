@@ -1,5 +1,6 @@
 package com.mipt.hsse.hssetechbackend.payments.services;
 
+import com.mipt.hsse.hssetechbackend.data.entities.ClientTransactionStatus;
 import com.mipt.hsse.hssetechbackend.data.entities.Transaction;
 import com.mipt.hsse.hssetechbackend.payments.services.dto.TransactionInfo;
 import org.springframework.transaction.annotation.Propagation;

@@ -1,10 +1,7 @@
 package com.mipt.hsse.hssetechbackend.payments.services;
 
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
-import com.mipt.hsse.hssetechbackend.data.entities.HumanUserPassport;
-import com.mipt.hsse.hssetechbackend.data.entities.Transaction;
-import com.mipt.hsse.hssetechbackend.data.entities.User;
-import com.mipt.hsse.hssetechbackend.data.entities.Wallet;
+import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaTransactionRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaUserRepository;
@@ -75,8 +72,7 @@ public class TransactionServiceSetStatusOfTransactionTest extends DatabaseSuite 
 
     assertNotNull(transaction);
     assertEquals(testTransaction.getId(), transaction.getId());
-    assertNotNull(transaction.getIsSuccess());
-    assertTrue(transaction.getIsSuccess());
+    assertEquals(ClientTransactionStatus.SUCCESS, transaction.getStatus());
   }
 
   @Test
@@ -85,8 +81,7 @@ public class TransactionServiceSetStatusOfTransactionTest extends DatabaseSuite 
 
     assertNotNull(transaction);
     assertEquals(testTransaction.getId(), transaction.getId());
-    assertNotNull(transaction.getIsSuccess());
-    assertFalse(transaction.getIsSuccess());
+    assertEquals(ClientTransactionStatus.FAILED, transaction.getStatus());
   }
 
   @Test
@@ -95,7 +90,7 @@ public class TransactionServiceSetStatusOfTransactionTest extends DatabaseSuite 
 
     assertNotNull(transaction);
     assertEquals(testTransaction.getId(), transaction.getId());
-    assertNull(transaction.getIsSuccess());
+    assertEquals(ClientTransactionStatus.IN_PROCESS, testTransaction.getStatus());
   }
 
   @Test

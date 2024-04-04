@@ -1,5 +1,6 @@
 package com.mipt.hsse.hssetechbackend.payments.services;
 
+import com.mipt.hsse.hssetechbackend.data.entities.ClientTransactionStatus;
 import com.mipt.hsse.hssetechbackend.data.entities.Transaction;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaTransactionRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaWalletRepository;
@@ -46,12 +47,7 @@ public class TransactionService implements TransactionServiceBase {
             .orElseThrow(() ->
                     new TransactionNotFoundException("Transaction for status update not found"));
 
-    switch (status) {
-      case SUCCESS -> targetTransaction.setIsSuccess(true);
-      case IN_PROCESS -> targetTransaction.setIsSuccess(null);
-      case FAILED -> targetTransaction.setIsSuccess(false);
-    }
-
+    targetTransaction.setStatus(status);
     jpaTransactionRepository.save(targetTransaction);
 
     return targetTransaction;
