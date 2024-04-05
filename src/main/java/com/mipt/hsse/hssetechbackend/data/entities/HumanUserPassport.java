@@ -7,6 +7,9 @@ import lombok.Setter;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Представляет сущность человек, зашедшего под Yandex ID
+ */
 @Setter
 @Getter
 @Entity

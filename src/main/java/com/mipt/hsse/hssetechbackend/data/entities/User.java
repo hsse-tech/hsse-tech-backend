@@ -9,6 +9,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Представляет сущность пользователя (замок или человек)
+ */
 @Entity
 @Getter
 @Setter
