@@ -5,16 +5,14 @@ import com.mipt.hsse.hssetechbackend.data.entities.Rent;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetItemResponse;
-import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetItemWithRentsResponse;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetRentResponse;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.ClientServerError;
+import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.rent.services.ItemService;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -32,11 +30,11 @@ public class ItemController {
     this.itemService = itemService;
   }
 
-  @PostMapping()
+  @PostMapping
   public ResponseEntity<Item> createItem(@Valid @RequestBody CreateItemRequest request) {
     try {
-    Item createdItem = itemService.createItem(request);
-    return new ResponseEntity<>(createdItem, HttpStatus.CREATED);
+      Item createdItem = itemService.createItem(request);
+      return new ResponseEntity<>(createdItem, HttpStatus.CREATED);
     } catch (EntityNotFoundException e) {
       throw new EntityNotFoundException("Expected item type does not exist");
     }
@@ -53,32 +51,36 @@ public class ItemController {
     }
   }
 
-  @GetMapping("/{id}")
-  public GetItemResponse getItem(
-      @PathVariable("id") UUID itemId,
+  @GetMapping("/{itemId}")
+  public ResponseEntity<GetItemResponse> getItem(
+      @PathVariable("itemId") UUID itemId,
       @RequestParam(value = "loadRentInfo", defaultValue = "false") boolean loadRentInfo) {
     Optional<Item> itemOpt = itemService.getItem(itemId);
     Item item = itemOpt.orElseThrow(EntityNotFoundException::new);
 
     GetItemResponse response;
     if (loadRentInfo) {
-      Set<Rent> rents = itemService.getRentsOfItem(itemId);
-      Set<GetRentResponse> rentsResponses = rents.stream().map(GetRentResponse::getFromRent).collect(Collectors.toSet());
-      response = new GetItemWithRentsResponse(item, rentsResponses);
+      List<Rent> rents = itemService.getFutureRentsOfItem(itemId);
+      List<GetRentResponse> rentsResponses = rents.stream().map(GetRentResponse::getFromRent).toList();
+      response = new GetItemResponse(item, rentsResponses);
     } else {
       response = new GetItemResponse(item);
     }
 
-    return response;
+    return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
   @GetMapping("/{item_id}/qr")
   public void getItemBookingQRCode(@PathVariable("item_id") UUID itemId) {
+//    final int WIDTH = 200;
+//    final int HEIGHT = 200;
+//    BitMatrix qrCode = QrCodeManager.createQR("rickroll", HEIGHT, WIDTH);
+
     throw new UnsupportedOperationException();
   }
 
-  @PostMapping("/{item_id}/open")
-  public void provideAccessToItem(@PathVariable("item_id") UUID itemId) {
+  @PostMapping("/{item_id}/try-open")
+  public void provideAccessToItemIfAllowed(@PathVariable("item_id") UUID itemId) {
     if (!itemService.existsById(itemId)) throw new EntityNotFoundException();
 
     UUID lockId = itemService.getItemLockId(itemId);

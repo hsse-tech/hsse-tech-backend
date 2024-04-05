@@ -8,15 +8,26 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
 import com.mipt.hsse.hssetechbackend.data.entities.Item;
 import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
+import com.mipt.hsse.hssetechbackend.data.entities.Rent;
+import com.mipt.hsse.hssetechbackend.data.entities.User;
+import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemTypeRepository;
+import com.mipt.hsse.hssetechbackend.data.repositories.JpaRentRepository;
+import com.mipt.hsse.hssetechbackend.data.repositories.JpaUserRepository;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
+import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetItemResponse;
+import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetRentResponse;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.rent.services.ItemService;
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,19 +48,27 @@ class ItemControllerTest extends DatabaseSuite {
 
   @MockBean private ItemService itemService;
   @Autowired private JpaItemTypeRepository itemTypeRepository;
+  @Autowired private JpaUserRepository userRepository;
+  @Autowired private JpaItemRepository itemRepository;
+  @Autowired private JpaRentRepository rentRepository;
 
   private static final String BASE_MAPPING = "/api/renting/item";
 
-  private final ItemType itemType = new ItemType(BigDecimal.ZERO, "Item type name", 60, false);
+  private ItemType itemType;
 
   @BeforeEach
-  public void setup() {
+  public void setupRestTemplate() {
     rest.getRestTemplate().setRequestFactory(new HttpComponentsClientHttpRequestFactory());
   }
-
+  
   @BeforeEach
   public void createItemType() {
-    itemTypeRepository.save(itemType);
+    itemType = itemTypeRepository.save(new ItemType(BigDecimal.ZERO, "Item type name", 60, false));
+  }
+
+  @AfterEach
+  public void removeItemType() {
+    itemTypeRepository.deleteAll();
   }
 
   @Test
@@ -75,18 +94,14 @@ class ItemControllerTest extends DatabaseSuite {
   }
 
   @Test
-  void testCreateItemOfAbsentTypeEndpoint() {
-    final String displayName = "Item name";
-
-    when(itemService.createItem(any()))
-        .thenThrow(EntityNotFoundException.class);
+  void testCreateItemEndpointNonExistingItemType() {
+    when(itemService.createItem(any())).thenThrow(EntityNotFoundException.class);
 
     CreateItemRequest request =
-        new CreateItemRequest(displayName, itemType.getId());
+        new CreateItemRequest("any name", UUID.randomUUID());
 
     ResponseEntity<Item> createResponse =
         rest.postForEntity(BASE_MAPPING, request, Item.class);
-    assertEquals(HttpStatus.CREATED, createResponse.getStatusCode());
 
     assertEquals(HttpStatus.BAD_REQUEST, createResponse.getStatusCode());
   }
@@ -98,31 +113,73 @@ class ItemControllerTest extends DatabaseSuite {
     doNothing().when(itemService).deleteItem(any());
 
     UUID uuid = UUID.randomUUID();
-    rest.delete(BASE_MAPPING + "/{itemId}", Map.of("itemTypeId", uuid));
+    rest.delete(BASE_MAPPING + "/{itemId}", Map.of("itemId", uuid));
 
     verify(itemService).deleteItem(uuid);
   }
 
   @Test
   void testGetItemEndpoint() {
-    Item item = new Item("display name", itemType);
+    final String displayName = "displayName";
+    Item item = new Item(displayName, itemType);
 
     when(itemService.getItem(any())).thenReturn(Optional.of(item));
 
-    ResponseEntity<Item> response =
+    ResponseEntity<GetItemResponse> responseEntity =
         rest.getForEntity(
-            BASE_MAPPING + "/{itemId}",
-            Item.class,
+            BASE_MAPPING + "/{itemId}?loadRentInfo=false",
+            GetItemResponse.class,
             Map.of("itemId", UUID.randomUUID()));
 
-    Item returnedItem = response.getBody();
-    assertNotNull(returnedItem);
-    assertEquals(itemType.getDisplayName(), returnedItem.getDisplayName());
-    assertEquals(itemType.getId(), returnedItem.getType().getId());
+    var response = responseEntity.getBody();
+    assertNotNull(response);
+    assertEquals(displayName, response.getDisplayName());
+    assertEquals(itemType.getId(), response.getTypeId());
+    assertNull(response.getRents());
   }
 
   @Test
-  void testGetItemEndpointOnAbsentItemReturnBadRequest() {
+  void getItemWithFutureRents() {
+    final String displayName = "Display name";
+
+    User user = new User("user");
+    user = userRepository.save(user);
+
+    Item item = new Item(displayName, itemType);
+    item = itemRepository.save(item);
+
+    Rent rent = new Rent(
+        Instant.now().plus(5, ChronoUnit.DAYS),
+        Instant.now().plus(6, ChronoUnit.DAYS),
+        user,
+        item);
+    rentRepository.save(rent);
+
+    when(itemService.getItem(any())).thenReturn(Optional.of(item));
+    when(itemService.getFutureRentsOfItem(any())).thenReturn(List.of(rent));
+
+    ResponseEntity<GetItemResponse> responseEntity =
+        rest.getForEntity(
+            BASE_MAPPING + "/{itemId}?loadRentInfo=true",
+            GetItemResponse.class,
+            Map.of("itemId", UUID.randomUUID()));
+
+    var response = responseEntity.getBody();
+    assertNotNull(response);
+    assertEquals(displayName, response.getDisplayName());
+    assertEquals(itemType.getId(), response.getTypeId());
+    assertEquals(1, response.getRents().size());
+
+    GetRentResponse retrievedRent = response.getRents().get(0);
+    assertEquals(rent.getId(), retrievedRent.id());
+
+    rentRepository.deleteAll();
+    userRepository.deleteAll();
+    itemRepository.deleteAll();
+  }
+
+  @Test
+  void testGetItemEndpointAbsentItem() {
     when(itemService.getItem(any())).thenReturn(Optional.empty());
 
     ResponseEntity<Item> response =
@@ -141,6 +198,7 @@ class ItemControllerTest extends DatabaseSuite {
     when(itemService.getItem(any()))
         .thenReturn(
             Optional.of(new Item(displayName, itemType)));
+    when(itemService.existsById(any())).thenReturn(true);
     doNothing().when(itemService).updateItem(any(), any());
 
     UUID uuid = UUID.randomUUID();
@@ -155,7 +213,7 @@ class ItemControllerTest extends DatabaseSuite {
   }
 
   @Test
-  void testUpdateItemTypeEndpointOnUpdateNonExistReturnBadRequest() {
+  void testUpdateItemTypeEndpointonExistingItem() {
     doNothing().when(itemService).updateItem(any(), any());
 
     UpdateItemRequest updateRequest =

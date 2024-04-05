@@ -9,8 +9,8 @@ import com.mipt.hsse.hssetechbackend.data.repositories.JpaRentRepository;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 
@@ -59,8 +59,8 @@ public class ItemService {
     return itemRepository.findById(uuid);
   }
 
-  public Set<Rent> getRentsOfItem(UUID itemId) {
-    return rentRepository.findAllByItem(getItem(itemId).orElseThrow(EntityNotFoundException::new));
+  public List<Rent> getFutureRentsOfItem(UUID itemId) {
+    return rentRepository.findAllFutureRentsOfItem(getItem(itemId).orElseThrow(EntityNotFoundException::new));
   }
 
   public boolean existsById(UUID itemId) {
