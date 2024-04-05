@@ -35,6 +35,9 @@ public class Rent {
   @Column(name = "ended_at")
   private Instant factEndedAt;
 
+  @Column(name = "started_at")
+  private Instant factStartedAt;
+
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @OnDelete(action = OnDeleteAction.CASCADE)
   @JoinColumn(name = "user_id", nullable = false)
