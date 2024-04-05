@@ -60,7 +60,7 @@ class ItemControllerTest extends DatabaseSuite {
   public void setupRestTemplate() {
     rest.getRestTemplate().setRequestFactory(new HttpComponentsClientHttpRequestFactory());
   }
-  
+
   @BeforeEach
   public void createItemType() {
     itemType = itemTypeRepository.save(new ItemType(BigDecimal.ZERO, "Item type name", 60, false));
@@ -75,14 +75,11 @@ class ItemControllerTest extends DatabaseSuite {
   void testCreateItemEndpoint() {
     final String displayName = "Item name";
 
-    when(itemService.createItem(any()))
-        .thenReturn(new Item(displayName, itemType));
+    when(itemService.createItem(any())).thenReturn(new Item(displayName, itemType));
 
-    CreateItemRequest request =
-        new CreateItemRequest(displayName, itemType.getId());
+    CreateItemRequest request = new CreateItemRequest(displayName, itemType.getId());
 
-    ResponseEntity<Item> createResponse =
-        rest.postForEntity(BASE_MAPPING, request, Item.class);
+    ResponseEntity<Item> createResponse = rest.postForEntity(BASE_MAPPING, request, Item.class);
     assertEquals(HttpStatus.CREATED, createResponse.getStatusCode());
 
     verify(itemService).createItem(request);
@@ -97,11 +94,9 @@ class ItemControllerTest extends DatabaseSuite {
   void testCreateItemEndpointNonExistingItemType() {
     when(itemService.createItem(any())).thenThrow(EntityNotFoundException.class);
 
-    CreateItemRequest request =
-        new CreateItemRequest("any name", UUID.randomUUID());
+    CreateItemRequest request = new CreateItemRequest("any name", UUID.randomUUID());
 
-    ResponseEntity<Item> createResponse =
-        rest.postForEntity(BASE_MAPPING, request, Item.class);
+    ResponseEntity<Item> createResponse = rest.postForEntity(BASE_MAPPING, request, Item.class);
 
     assertEquals(HttpStatus.BAD_REQUEST, createResponse.getStatusCode());
   }
@@ -148,11 +143,12 @@ class ItemControllerTest extends DatabaseSuite {
     Item item = new Item(displayName, itemType);
     item = itemRepository.save(item);
 
-    Rent rent = new Rent(
-        Instant.now().plus(5, ChronoUnit.DAYS),
-        Instant.now().plus(6, ChronoUnit.DAYS),
-        user,
-        item);
+    Rent rent =
+        new Rent(
+            Instant.now().plus(5, ChronoUnit.DAYS),
+            Instant.now().plus(6, ChronoUnit.DAYS),
+            user,
+            item);
     rentRepository.save(rent);
 
     when(itemService.getItem(any())).thenReturn(Optional.of(item));
@@ -184,9 +180,7 @@ class ItemControllerTest extends DatabaseSuite {
 
     ResponseEntity<Item> response =
         rest.getForEntity(
-            BASE_MAPPING + "/{itemId}",
-            Item.class,
-            Map.of("itemId", UUID.randomUUID()));
+            BASE_MAPPING + "/{itemId}", Item.class, Map.of("itemId", UUID.randomUUID()));
 
     assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
   }
@@ -195,15 +189,12 @@ class ItemControllerTest extends DatabaseSuite {
   void testUpdateItemEndpoint() {
     final String displayName = "displayName";
 
-    when(itemService.getItem(any()))
-        .thenReturn(
-            Optional.of(new Item(displayName, itemType)));
+    when(itemService.getItem(any())).thenReturn(Optional.of(new Item(displayName, itemType)));
     when(itemService.existsById(any())).thenReturn(true);
     doNothing().when(itemService).updateItem(any(), any());
 
     UUID uuid = UUID.randomUUID();
-    UpdateItemRequest updateRequest =
-        new UpdateItemRequest(displayName);
+    UpdateItemRequest updateRequest = new UpdateItemRequest(displayName);
     HttpEntity<UpdateItemRequest> requestEntity = new HttpEntity<>(updateRequest);
 
     rest.exchange(
@@ -216,20 +207,25 @@ class ItemControllerTest extends DatabaseSuite {
   void testUpdateItemTypeEndpointonExistingItem() {
     doNothing().when(itemService).updateItem(any(), any());
 
-    UpdateItemRequest updateRequest =
-        new UpdateItemRequest("new display name");
+    UpdateItemRequest updateRequest = new UpdateItemRequest("new display name");
     HttpEntity<UpdateItemRequest> requestEntity = new HttpEntity<>(updateRequest);
 
-    ResponseEntity<Void> response = rest.exchange(
-        BASE_MAPPING + "/{id}", HttpMethod.PATCH, requestEntity, void.class, Map.of("id", UUID.randomUUID()));
+    ResponseEntity<Void> response =
+        rest.exchange(
+            BASE_MAPPING + "/{id}",
+            HttpMethod.PATCH,
+            requestEntity,
+            void.class,
+            Map.of("id", UUID.randomUUID()));
 
     assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
   }
-  
+
   @Test
   void testCreateQrCodeForItemBooking() {
-    ResponseEntity<byte[]> response = rest.getForEntity(BASE_MAPPING + "/{item_id}/qr", null,
-        byte[].class, Map.of("item_id", UUID.randomUUID()));
+    ResponseEntity<byte[]> response =
+        rest.getForEntity(
+            BASE_MAPPING + "/{item_id}/qr", byte[].class, Map.of("item_id", UUID.randomUUID()));
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
 
