@@ -18,6 +18,7 @@ import org.hibernate.annotations.OnDeleteAction;
 public class Rent {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
+  @Setter(AccessLevel.NONE)
   @Column(name = "id", nullable = false)
   private UUID id;
 
