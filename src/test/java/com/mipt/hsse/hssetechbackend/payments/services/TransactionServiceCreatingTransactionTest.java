@@ -15,6 +15,8 @@ import com.mipt.hsse.hssetechbackend.payments.services.dto.TransactionInfo;
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
+
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,12 +47,8 @@ public class TransactionServiceCreatingTransactionTest extends DatabaseSuite {
 
   @BeforeEach
   public void setUp() {
-    passportRepository.deleteAll();
-    userRepository.deleteAll();
-    walletRepository.deleteAll();
-
     var testUser = new User("test");
-    var testUserPassport = new HumanUserPassport(123L, "Test", "User", "test@phystech.edu");
+    var testUserPassport = new HumanUserPassport(123L, "Test", "User", "test@phystech.edu", testUser);
     testWallet = new Wallet();
     testWallet.setBalance(BigDecimal.valueOf(100.00));
 
@@ -60,6 +58,13 @@ public class TransactionServiceCreatingTransactionTest extends DatabaseSuite {
     passportRepository.save(testUserPassport);
     userRepository.save(testUser);
     walletRepository.save(testWallet);
+  }
+
+  @AfterEach
+  public void disposeResources() {
+    passportRepository.deleteAll();
+    userRepository.deleteAll();
+    walletRepository.deleteAll();
   }
 
   @Test

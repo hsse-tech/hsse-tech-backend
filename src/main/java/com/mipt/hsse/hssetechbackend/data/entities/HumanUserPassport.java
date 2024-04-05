@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.UUID;
 
 @Setter
@@ -35,11 +36,15 @@ public class HumanUserPassport {
   @Column(name = "email", columnDefinition = "email")
   private String email;
 
-  public HumanUserPassport(Long yandexId, String firstName, String lastName, String email) {
+  @OneToMany(mappedBy = "renter")
+  private List<Rent> rents;
+
+  public HumanUserPassport(Long yandexId, String firstName, String lastName, String email, User user) {
     this.yandexId = yandexId;
     this.firstName = firstName;
     this.lastName = lastName;
     this.email = email;
+    this.user = user;
   }
 
   public HumanUserPassport() {

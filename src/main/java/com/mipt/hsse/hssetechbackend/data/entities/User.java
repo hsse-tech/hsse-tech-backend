@@ -1,15 +1,13 @@
 package com.mipt.hsse.hssetechbackend.data.entities;
 
 import jakarta.persistence.*;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 
 @Entity
 @Getter
@@ -25,9 +23,6 @@ public class User {
 
   @Column(name = "user_type", nullable = false, length = Integer.MAX_VALUE)
   private String userType;
-
-  @OneToMany(mappedBy = "renter")
-  private List<Rent> rents;
 
   @ManyToMany
   @JoinTable(name = "user_role",
