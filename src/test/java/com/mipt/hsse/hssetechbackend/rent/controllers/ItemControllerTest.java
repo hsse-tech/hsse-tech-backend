@@ -225,4 +225,15 @@ class ItemControllerTest extends DatabaseSuite {
 
     assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
   }
+  
+  @Test
+  void testCreateQrCodeForItemBooking() {
+    ResponseEntity<byte[]> response = rest.getForEntity(BASE_MAPPING + "/{item_id}/qr", null,
+        byte[].class, Map.of("item_id", UUID.randomUUID()));
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+
+    byte[] imageBytes = response.getBody();
+    assertNotNull(imageBytes);
+  }
 }
