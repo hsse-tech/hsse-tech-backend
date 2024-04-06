@@ -1,6 +1,6 @@
 package com.mipt.hsse.hssetechbackend.rent.exceptions;
 
-public class EntityNotFoundException extends jakarta.persistence.EntityNotFoundException {
+public class EntityNotFoundException extends RuntimeException {
   public EntityNotFoundException() {
   }
 
