@@ -147,8 +147,6 @@ class ItemTypeControllerTest extends DatabaseSuite {
     assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
   }
 
-  // Note that the behaviour of deleteItemType endpoint in the case of non-existing item type
-  // does not differ in any way from the case of existing item type on the Controller level
   @Test
   void testDeleteItemTypeEndpoint() {
     doNothing().when(itemTypeService).deleteItemType(any());

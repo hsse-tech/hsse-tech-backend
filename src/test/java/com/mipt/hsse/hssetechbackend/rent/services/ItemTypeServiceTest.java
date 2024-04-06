@@ -107,7 +107,6 @@ class ItemTypeServiceTest extends DatabaseSuite {
 
   @Test
   void testFailUpdateAbsentItemType() {
-    // Update item
     UpdateItemTypeRequest updateItemTypeRequest = new UpdateItemTypeRequest(null, null, null, null);
     assertThrows(
         EntityNotFoundException.class, () -> itemTypeService.updateItemType(UUID.randomUUID(), updateItemTypeRequest));
