@@ -45,14 +45,17 @@ public class ItemService {
             .findById(itemId)
             .orElseThrow(() -> new EntityNotFoundException(Item.class, itemId));
 
-    if (request.newDisplayName() != null) item.setDisplayName(request.newDisplayName());
+    if (request.newDisplayName() != null) {
+      item.setDisplayName(request.newDisplayName());
+    }
 
     itemRepository.save(item);
   }
 
   public void deleteItem(UUID itemId) {
-    if (itemRepository.existsById(itemId)) itemRepository.deleteById(itemId);
-    else throw new EntityNotFoundException(Item.class, itemId);
+    if (itemRepository.existsById(itemId)) {
+      itemRepository.deleteById(itemId);
+    }
   }
 
   public Optional<Item> getItem(UUID uuid) {
@@ -60,7 +63,8 @@ public class ItemService {
   }
 
   public List<Rent> getFutureRentsOfItem(UUID itemId) {
-    return rentRepository.findAllFutureRentsOfItem(getItem(itemId).orElseThrow(EntityNotFoundException::new));
+    return rentRepository.findAllFutureRentsOfItem(
+        getItem(itemId).orElseThrow(EntityNotFoundException::new));
   }
 
   public boolean existsById(UUID itemId) {

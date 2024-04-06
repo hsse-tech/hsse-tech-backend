@@ -96,8 +96,6 @@ class ItemControllerTest extends DatabaseSuite {
     assertEquals(HttpStatus.BAD_REQUEST, createResponse.getStatusCode());
   }
 
-  // Note that the behaviour of deleteItem endpoint in the case of non-existing item
-  // does not differ in any way from the case of existing item on the Controller level
   @Test
   void testDeleteItemTypeEndpoint() {
     doNothing().when(itemService).deleteItem(any());

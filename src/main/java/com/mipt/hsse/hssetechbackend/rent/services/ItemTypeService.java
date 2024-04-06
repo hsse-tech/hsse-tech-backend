@@ -58,10 +58,9 @@ public class ItemTypeService {
     itemTypeRepository.save(itemType);
   }
 
-  @Transactional
   public void deleteItemType(UUID itemTypeId) {
-    if (itemTypeRepository.findById(itemTypeId).isPresent())
+    if (itemTypeRepository.existsById(itemTypeId)) {
       itemTypeRepository.deleteById(itemTypeId);
-    else throw new EntityNotFoundException(ItemType.class, itemTypeId);
+    }
   }
 }

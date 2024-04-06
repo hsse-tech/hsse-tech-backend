@@ -144,11 +144,4 @@ class ItemTypeServiceTest extends DatabaseSuite {
     
     assertTrue(itemTypeRepository.findById(itemType.getId()).isEmpty());
   }
-
-  @Test
-  void testFailDeleteAbsentItemType() {
-    final UUID id = UUID.randomUUID();
-    
-    assertThrows(EntityNotFoundException.class, () -> itemTypeService.deleteItemType(id));
-  }
 }
