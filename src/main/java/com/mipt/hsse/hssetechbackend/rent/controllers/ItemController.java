@@ -1,8 +1,6 @@
 package com.mipt.hsse.hssetechbackend.rent.controllers;
 
 import com.google.zxing.WriterException;
-import com.google.zxing.client.j2se.MatrixToImageWriter;
-import com.google.zxing.common.BitMatrix;
 import com.mipt.hsse.hssetechbackend.data.entities.Item;
 import com.mipt.hsse.hssetechbackend.data.entities.Rent;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
@@ -14,13 +12,10 @@ import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.rent.qrcodegeneration.QrCodeManager;
 import com.mipt.hsse.hssetechbackend.rent.services.ItemService;
 import jakarta.validation.Valid;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import javax.imageio.ImageIO;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -83,30 +78,18 @@ public class ItemController {
 
   @GetMapping(value = "/{item_id}/qr")
   public ResponseEntity<byte[]> getItemBookingQRCode(@PathVariable("item_id") UUID itemId) {
-    final int WIDTH = 200;
-    final int HEIGHT = 200;
-
-    BitMatrix qrCodeMatrix;
-    // TODO: When we have domain, it should be put in here
+    byte[] qrCodeBytes;
     try {
-      qrCodeMatrix = QrCodeManager.createQR("https://{DOMAIN}/rent/" + itemId, HEIGHT, WIDTH);
-    } catch (WriterException e) {
+      // TODO: When we have domain, it should be put in here
+      qrCodeBytes = QrCodeManager.createQRByteArray("https://{DOMAIN}/rent/" + itemId);
+    } catch (IOException | WriterException e) {
       throw new RuntimeException(e);
     }
-    BufferedImage image = MatrixToImageWriter.toBufferedImage(qrCodeMatrix);
-
-    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-    try {
-      ImageIO.write(image, "png", byteArrayOutputStream);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-    byte[] imageInBytes = byteArrayOutputStream.toByteArray();
 
     return ResponseEntity.status(HttpStatus.OK)
         .header(HttpHeaders.CONTENT_DISPOSITION, "filename=\"image.png\"")
         .contentType(MediaType.IMAGE_PNG)
-        .body(imageInBytes);
+        .body(qrCodeBytes);
   }
 
   @PostMapping("/{item_id}/try-open")

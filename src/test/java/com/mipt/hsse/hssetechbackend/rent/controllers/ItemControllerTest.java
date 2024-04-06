@@ -121,6 +121,7 @@ class ItemControllerTest extends DatabaseSuite {
             GetItemResponse.class,
             Map.of("itemId", UUID.randomUUID()));
 
+    assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
     var response = responseEntity.getBody();
     assertNotNull(response);
     assertEquals(displayName, response.getDisplayName());
@@ -194,9 +195,10 @@ class ItemControllerTest extends DatabaseSuite {
     UpdateItemRequest updateRequest = new UpdateItemRequest(displayName);
     HttpEntity<UpdateItemRequest> requestEntity = new HttpEntity<>(updateRequest);
 
-    rest.exchange(
+    ResponseEntity<Void> responseEntity = rest.exchange(
         BASE_MAPPING + "/{id}", HttpMethod.PATCH, requestEntity, void.class, Map.of("id", uuid));
 
+    assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
     verify(itemService).updateItem(uuid, updateRequest);
   }
 
