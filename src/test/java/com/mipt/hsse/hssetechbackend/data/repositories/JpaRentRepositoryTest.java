@@ -3,10 +3,8 @@ package com.mipt.hsse.hssetechbackend.data.repositories;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
-import com.mipt.hsse.hssetechbackend.data.entities.Item;
-import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
-import com.mipt.hsse.hssetechbackend.data.entities.Rent;
-import com.mipt.hsse.hssetechbackend.data.entities.User;
+import com.mipt.hsse.hssetechbackend.data.entities.*;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 import org.junit.jupiter.api.AfterEach;
@@ -26,7 +24,8 @@ class JpaRentRepositoryTest extends DatabaseSuite {
   @Autowired private JpaItemRepository itemRepository;
   @Autowired private JpaUserRepository userRepository;
   @Autowired private JpaItemTypeRepository itemTypeRepository;
-  
+  @Autowired private JpaHumanUserPassportRepository humanRepository;
+
   // region Test objects
 
   // Timeline for tests:
@@ -44,15 +43,16 @@ class JpaRentRepositoryTest extends DatabaseSuite {
   Instant largeRentTo = Instant.ofEpochSecond(150);
 
   private final User user = new User("user");
+  private final HumanUserPassport humanUser = new HumanUserPassport(123L, "Test", "User", "test@phystech.edu", user);
   private final ItemType itemType = new ItemType(BigDecimal.ZERO, "name", 200, false);
   private final Item item1 = new Item("item1", itemType);
   private final Item item2 = new Item("item2", itemType);
 
-  private final Rent firstRentForItem1 = new Rent(firstFrom, firstTo, user, item1);
-  private final Rent secondRentForItem1 = new Rent(secondFrom, secondTo, user, item1);
-  private final Rent thirdRentForItem1 = new Rent(thirdFrom, thirdTo, user, item1);
-  private final Rent largeRentForItem1 = new Rent(largeRentFrom, largeRentTo, user, item1);
-  private final Rent largeRentForItem2 = new Rent(largeRentFrom, largeRentTo, user, item2);
+  private final Rent firstRentForItem1 = new Rent(firstFrom, firstTo, humanUser, item1);
+  private final Rent secondRentForItem1 = new Rent(secondFrom, secondTo, humanUser, item1);
+  private final Rent thirdRentForItem1 = new Rent(thirdFrom, thirdTo, humanUser, item1);
+  private final Rent largeRentForItem1 = new Rent(largeRentFrom, largeRentTo, humanUser, item1);
+  private final Rent largeRentForItem2 = new Rent(largeRentFrom, largeRentTo, humanUser, item2);
 
   // endregion
 
@@ -61,6 +61,7 @@ class JpaRentRepositoryTest extends DatabaseSuite {
     itemTypeRepository.save(itemType);
     itemRepository.save(item1);
     itemRepository.save(item2);
+    humanRepository.save(humanUser);
     userRepository.save(user);
   }
   
@@ -70,6 +71,7 @@ class JpaRentRepositoryTest extends DatabaseSuite {
     userRepository.deleteAll();
     itemRepository.deleteAll();
     itemTypeRepository.deleteAll();
+    humanRepository.deleteAll();
   }
 
   @Test

@@ -1,9 +1,9 @@
 package com.mipt.hsse.hssetechbackend.rent.services;
 
 import com.mipt.hsse.hssetechbackend.data.entities.*;
+import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaRentRepository;
-import com.mipt.hsse.hssetechbackend.data.repositories.JpaUserRepository;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.RentItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.RentProcessingException;
@@ -20,14 +20,14 @@ import org.springframework.web.client.RestClientException;
 @Service
 public class RentService {
   private final JpaRentRepository rentRepository;
-  private final JpaUserRepository userRepository;
+  private final JpaHumanUserPassportRepository userRepository;
   private final JpaItemRepository itemRepository;
   private final List<CreateRentProcessor> createRentProcessors;
   private final List<DeleteRentProcessor> deleteRentProcessors;
 
   public RentService(
       JpaRentRepository rentRepository,
-      JpaUserRepository userRepository,
+      JpaHumanUserPassportRepository userRepository,
       JpaItemRepository itemRepository,
       List<CreateRentProcessor> createRentProcessors,
       List<DeleteRentProcessor> deleteRentProcessors) {
@@ -45,7 +45,7 @@ public class RentService {
             .findById(request.itemId())
             .orElseThrow(() -> new EntityNotFoundException(Item.class, request.itemId()));
 
-    User renter =
+    HumanUserPassport renter =
         userRepository
             .findById(request.userId())
             .orElseThrow(() -> new EntityNotFoundException(User.class, request.userId()));

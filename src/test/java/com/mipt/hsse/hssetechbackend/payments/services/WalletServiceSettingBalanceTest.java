@@ -9,6 +9,7 @@ import com.mipt.hsse.hssetechbackend.data.repositories.JpaUserRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaWalletRepository;
 import com.mipt.hsse.hssetechbackend.payments.exceptions.WalletNotFoundException;
 import com.mipt.hsse.hssetechbackend.payments.exceptions.WalletUpdatingException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,12 +45,8 @@ public class WalletServiceSettingBalanceTest extends DatabaseSuite {
 
   @BeforeEach
   public void setUp() {
-    passportRepository.deleteAll();
-    userRepository.deleteAll();
-    walletRepository.deleteAll();
-
     var testUser = new User("test");
-    var testUserPassport = new HumanUserPassport(123L, "Test", "User", "test@phystech.edu");
+    var testUserPassport = new HumanUserPassport(123L, "Test", "User", "test@phystech.edu", testUser);
     testWallet = new Wallet();
 
     testWallet.setOwner(testUserPassport);
@@ -58,6 +55,13 @@ public class WalletServiceSettingBalanceTest extends DatabaseSuite {
     passportRepository.save(testUserPassport);
     userRepository.save(testUser);
     walletRepository.save(testWallet);
+  }
+
+  @AfterEach
+  public void disposeResources() {
+    passportRepository.deleteAll();
+    userRepository.deleteAll();
+    walletRepository.deleteAll();
   }
 
   @Test
