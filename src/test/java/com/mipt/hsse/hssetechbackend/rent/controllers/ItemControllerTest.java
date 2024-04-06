@@ -6,14 +6,8 @@ import static org.mockito.Mockito.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
-import com.mipt.hsse.hssetechbackend.data.entities.Item;
-import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
-import com.mipt.hsse.hssetechbackend.data.entities.Rent;
-import com.mipt.hsse.hssetechbackend.data.entities.User;
-import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemRepository;
-import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemTypeRepository;
-import com.mipt.hsse.hssetechbackend.data.repositories.JpaRentRepository;
-import com.mipt.hsse.hssetechbackend.data.repositories.JpaUserRepository;
+import com.mipt.hsse.hssetechbackend.data.entities.*;
+import com.mipt.hsse.hssetechbackend.data.repositories.*;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetItemResponse;
@@ -49,6 +43,7 @@ class ItemControllerTest extends DatabaseSuite {
   @MockBean private ItemService itemService;
   @Autowired private JpaItemTypeRepository itemTypeRepository;
   @Autowired private JpaUserRepository userRepository;
+  @Autowired private JpaHumanUserPassportRepository jpaHumanUserPassportRepository;
   @Autowired private JpaItemRepository itemRepository;
   @Autowired private JpaRentRepository rentRepository;
 
@@ -138,7 +133,9 @@ class ItemControllerTest extends DatabaseSuite {
     final String displayName = "Display name";
 
     User user = new User("user");
-    user = userRepository.save(user);
+
+    HumanUserPassport humanUserPassport = new HumanUserPassport(123L, "testName", "testLastName", "test@gmail.com", user);
+    humanUserPassport = jpaHumanUserPassportRepository.save(humanUserPassport);
 
     Item item = new Item(displayName, itemType);
     item = itemRepository.save(item);
@@ -147,7 +144,7 @@ class ItemControllerTest extends DatabaseSuite {
         new Rent(
             Instant.now().plus(5, ChronoUnit.DAYS),
             Instant.now().plus(6, ChronoUnit.DAYS),
-            user,
+            humanUserPassport,
             item);
     rentRepository.save(rent);
 

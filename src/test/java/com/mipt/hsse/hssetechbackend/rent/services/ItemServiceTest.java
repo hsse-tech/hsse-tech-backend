@@ -3,14 +3,8 @@ package com.mipt.hsse.hssetechbackend.rent.services;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
-import com.mipt.hsse.hssetechbackend.data.entities.Item;
-import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
-import com.mipt.hsse.hssetechbackend.data.entities.Rent;
-import com.mipt.hsse.hssetechbackend.data.entities.User;
-import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemRepository;
-import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemTypeRepository;
-import com.mipt.hsse.hssetechbackend.data.repositories.JpaRentRepository;
-import com.mipt.hsse.hssetechbackend.data.repositories.JpaUserRepository;
+import com.mipt.hsse.hssetechbackend.data.entities.*;
+import com.mipt.hsse.hssetechbackend.data.repositories.*;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
@@ -39,6 +33,7 @@ class ItemServiceTest extends DatabaseSuite {
   @Autowired private JpaItemTypeRepository itemTypeRepository;
   @Autowired private JpaItemRepository itemRepository;
   @Autowired private JpaUserRepository userRepository;
+  @Autowired private JpaHumanUserPassportRepository humanUserPassportRepository;
   @Autowired private JpaRentRepository rentRepository;
 
   private final ItemType itemType = new ItemType(BigDecimal.ZERO, "Item type name", 60, false);
@@ -71,7 +66,9 @@ class ItemServiceTest extends DatabaseSuite {
     final String displayName = "Display name";
 
     User user = new User("user");
-    user = userRepository.save(user);
+
+    HumanUserPassport humanUserPassport = new HumanUserPassport(123L, "firstName", "lastName", "test@gmail.com", user);
+    humanUserPassport = humanUserPassportRepository.save(humanUserPassport);
 
     Item item = new Item(displayName, itemType);
     item = itemRepository.save(item);
@@ -82,28 +79,28 @@ class ItemServiceTest extends DatabaseSuite {
     Rent rentBeforeNow = new Rent(
         Instant.now().minus(5, ChronoUnit.DAYS),
         Instant.now().minus(4, ChronoUnit.DAYS),
-        user,
+        humanUserPassport,
         item);
     rentRepository.save(rentBeforeNow);
 
     Rent rentBeginningNow = new Rent(
         Instant.now(),
         Instant.now().plus(1, ChronoUnit.DAYS),
-        user,
+        humanUserPassport,
         item);
     rentRepository.save(rentBeginningNow);
 
     Rent rentAfterNow = new Rent(
         Instant.now().plus(5, ChronoUnit.DAYS),
         Instant.now().plus(6, ChronoUnit.DAYS),
-        user,
+        humanUserPassport,
         item);
     rentRepository.save(rentAfterNow);
 
     Rent rentOfAnotherItem = new Rent(
         Instant.now().plus(7, ChronoUnit.DAYS),
         Instant.now().plus(8, ChronoUnit.DAYS),
-        user,
+        humanUserPassport,
         needlessItem);
     rentRepository.save(rentOfAnotherItem);
 
