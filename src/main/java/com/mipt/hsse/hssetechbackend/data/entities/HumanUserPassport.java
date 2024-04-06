@@ -1,21 +1,22 @@
 package com.mipt.hsse.hssetechbackend.data.entities;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.UUID;
 
-@Getter
+/**
+ * Представляет сущность человек, зашедшего под Yandex ID
+ */
 @Setter
+@Getter
 @Entity
 @Table(name = "human_user_passport")
 public class HumanUserPassport {
   @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
   @Column(name = "original_id", nullable = false)
-  @Setter(AccessLevel.NONE)
   private UUID id;
 
   @MapsId
@@ -37,4 +38,19 @@ public class HumanUserPassport {
 
   @Column(name = "email", columnDefinition = "email")
   private String email;
+
+  @OneToMany(mappedBy = "renter")
+  private List<Rent> rents;
+
+  public HumanUserPassport(Long yandexId, String firstName, String lastName, String email, User user) {
+    this.yandexId = yandexId;
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.email = email;
+    this.user = user;
+  }
+
+  public HumanUserPassport() {
+
+  }
 }

@@ -4,6 +4,9 @@ CREATE DOMAIN email AS citext
     CHECK ( value ~
             '^[a-zA-Z0-9.!#$%&''*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$' );
 
+CREATE TYPE transaction_status AS ENUM ('IN_PROCESS', 'SUCCESS', 'FAILED');
+CREATE CAST (varchar AS transaction_status) WITH INOUT AS IMPLICIT;
+
 CREATE TABLE item_type
 (
     id                          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -29,7 +32,7 @@ CREATE TABLE "user"
 CREATE TABLE human_user_passport
 (
     yandex_id   BIGINT  NOT NULL UNIQUE,
-    original_id UUID PRIMARY KEY REFERENCES "user" (id),
+    original_id UUID PRIMARY KEY REFERENCES "user" (id) ON DELETE CASCADE,
     first_name  TEXT    NOT NULL,
     last_name   TEXT    NOT NULL,
     email       email   NOT NULL,
@@ -48,24 +51,26 @@ CREATE TABLE rent
     "from"   TIMESTAMP NOT NULL,
     "to"     TIMESTAMP NOT NULL,
     item_id  UUID      NOT NULL REFERENCES item (id),
+    started_at TIMESTAMP,
     ended_at TIMESTAMP,
-    user_id  UUID      NOT NULL REFERENCES "user" (id)
+    user_id  UUID    NOT NULL REFERENCES human_user_passport(original_id) ON DELETE CASCADE
 );
 
 CREATE TABLE wallet
 (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    owner_yandex_id BIGINT NOT NULL REFERENCES human_user_passport (yandex_id) ON DELETE CASCADE
+    owner_yandex_id BIGINT NOT NULL REFERENCES human_user_passport (yandex_id) ON DELETE CASCADE,
+    balance NUMERIC(9, 2) NOT NULL DEFAULT 0
 );
 
 CREATE TABLE transaction
 (
     id           UUID PRIMARY KEY       DEFAULT gen_random_uuid(),
     amount       NUMERIC(9, 2) NOT NULL CHECK (amount BETWEEN 0 AND 1000000.00),
-    is_success   BOOLEAN       NOT NULL,
+    status   transaction_status       NOT NULL DEFAULT 'IN_PROCESS',
     name         TEXT          NOT NULL,
     description  TEXT          NULL,
-    committed_at TIMESTAMP     NOT NULL DEFAULT now(),
+    created_at TIMESTAMP     NOT NULL DEFAULT now(),
     wallet_id    UUID          NOT NULL REFERENCES wallet (id) ON DELETE CASCADE
 );
 
