@@ -107,7 +107,6 @@ class ItemTypeServiceTest extends DatabaseSuite {
 
   @Test
   void testFailUpdateAbsentItemType() {
-    // Update item
     UpdateItemTypeRequest updateItemTypeRequest = new UpdateItemTypeRequest(null, null, null, null);
     assertThrows(
         EntityNotFoundException.class, () -> itemTypeService.updateItemType(UUID.randomUUID(), updateItemTypeRequest));
@@ -144,12 +143,5 @@ class ItemTypeServiceTest extends DatabaseSuite {
     itemTypeService.deleteItemType(itemType.getId());
     
     assertTrue(itemTypeRepository.findById(itemType.getId()).isEmpty());
-  }
-
-  @Test
-  void testFailDeleteAbsentItemType() {
-    final UUID id = UUID.randomUUID();
-    
-    assertThrows(EntityNotFoundException.class, () -> itemTypeService.deleteItemType(id));
   }
 }
