@@ -47,31 +47,31 @@ CREATE TABLE lock_passport
 
 CREATE TABLE rent
 (
-    id       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    "from"   TIMESTAMP NOT NULL,
-    "to"     TIMESTAMP NOT NULL,
-    item_id  UUID      NOT NULL REFERENCES item (id),
+    id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    "from"     TIMESTAMP NOT NULL,
+    "to"       TIMESTAMP NOT NULL,
+    item_id    UUID      NOT NULL REFERENCES item (id),
     started_at TIMESTAMP,
-    ended_at TIMESTAMP,
-    user_id  UUID    NOT NULL REFERENCES human_user_passport(original_id) ON DELETE CASCADE
+    ended_at   TIMESTAMP,
+    user_id    UUID      NOT NULL REFERENCES human_user_passport (original_id) ON DELETE CASCADE
 );
 
 CREATE TABLE wallet
 (
-    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    owner_yandex_id BIGINT NOT NULL REFERENCES human_user_passport (yandex_id) ON DELETE CASCADE,
-    balance NUMERIC(9, 2) NOT NULL DEFAULT 0
+    id              UUID PRIMARY KEY       DEFAULT gen_random_uuid(),
+    owner_yandex_id BIGINT        NOT NULL REFERENCES human_user_passport (yandex_id) ON DELETE CASCADE,
+    balance         NUMERIC(9, 2) NOT NULL DEFAULT 0
 );
 
 CREATE TABLE transaction
 (
-    id           UUID PRIMARY KEY       DEFAULT gen_random_uuid(),
-    amount       NUMERIC(9, 2) NOT NULL CHECK (amount BETWEEN 0 AND 1000000.00),
-    status   transaction_status       NOT NULL DEFAULT 'IN_PROCESS',
-    name         TEXT          NOT NULL,
-    description  TEXT          NULL,
-    created_at TIMESTAMP     NOT NULL DEFAULT now(),
-    wallet_id    UUID          NOT NULL REFERENCES wallet (id) ON DELETE CASCADE
+    id          UUID PRIMARY KEY            DEFAULT gen_random_uuid(),
+    amount      NUMERIC(9, 2)      NOT NULL CHECK (amount BETWEEN 0 AND 1000000.00),
+    status      transaction_status NOT NULL DEFAULT 'IN_PROCESS',
+    name        TEXT               NOT NULL,
+    description TEXT               NULL,
+    created_at  TIMESTAMP          NOT NULL DEFAULT now(),
+    wallet_id   UUID               NOT NULL REFERENCES wallet (id) ON DELETE CASCADE
 );
 
 CREATE TABLE role
@@ -85,10 +85,4 @@ CREATE TABLE user_role
     user_id UUID REFERENCES "user" (id),
     role_id SERIAL REFERENCES role (id),
     CONSTRAINT pk PRIMARY KEY (user_id, role_id)
-);
-
-CREATE TABLE rent_finish_photo_confirmation
-(
-    id       UUID PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
-    photo_id BIGINT           NOT NULL
 );

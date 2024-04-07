@@ -1,5 +1,6 @@
 package com.mipt.hsse.hssetechbackend.rent.rentprocessing.createrentprocessing;
 
+import com.mipt.hsse.hssetechbackend.auxiliary.VerificationResult;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.RentProcessingException;
 
 /**
@@ -11,5 +12,5 @@ import com.mipt.hsse.hssetechbackend.rent.exceptions.RentProcessingException;
  */
 @FunctionalInterface
 public interface CreateRentProcessor {
-  void processCreate(CreateRentProcessData createRentData) throws RentProcessingException;
+  VerificationResult processCreate(CreateRentProcessData createRentData) throws RentProcessingException;
 }

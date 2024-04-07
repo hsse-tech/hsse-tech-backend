@@ -11,7 +11,7 @@ import com.mipt.hsse.hssetechbackend.data.repositories.*;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetItemResponse;
-import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetRentResponse;
+import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetShortRentResponse;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.rent.services.ItemService;
 import java.math.BigDecimal;
@@ -98,8 +98,6 @@ class ItemControllerTest extends DatabaseSuite {
 
   @Test
   void testDeleteItemTypeEndpoint() {
-    doNothing().when(itemService).deleteItem(any());
-
     UUID uuid = UUID.randomUUID();
     rest.delete(BASE_MAPPING + "/{itemId}", Map.of("itemId", uuid));
 
@@ -162,7 +160,7 @@ class ItemControllerTest extends DatabaseSuite {
     assertEquals(itemType.getId(), response.getTypeId());
     assertEquals(1, response.getRents().size());
 
-    GetRentResponse retrievedRent = response.getRents().get(0);
+    GetShortRentResponse retrievedRent = response.getRents().get(0);
     assertEquals(rent.getId(), retrievedRent.id());
 
     rentRepository.deleteAll();
