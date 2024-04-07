@@ -8,7 +8,6 @@ import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaRentRepository;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateRentRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.PinPhotoConfirmationRequest;
-import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateRentRequest;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.RentProcessingException;
 import com.mipt.hsse.hssetechbackend.rent.rentprocessing.createrentprocessing.CreateRentProcessData;
@@ -108,24 +107,6 @@ public class RentService {
     return rentRepository
         .findById(rentId)
         .orElseThrow(() -> new EntityNotFoundException(Rent.class, rentId));
-  }
-
-  public void updateRent(UUID rentId, UpdateRentRequest updateRequest) {
-    Optional<Rent> rentOpt = rentRepository.findById(rentId);
-    Rent rent = rentOpt.orElseThrow(EntityNotFoundException::new);
-
-    verifyRentStartEnd(updateRequest.newStartTime(), updateRequest.newEndTime(), rent)
-        .throwIfInvalid();
-
-    boolean isTimeUnoccupied =
-        rentRepository.isDisjointWithOtherRentsOfSameItem(
-            rent.getItem(), updateRequest.newStartTime(), updateRequest.newEndTime());
-    if (!isTimeUnoccupied) throw new RentProcessingException("Time is occupied already");
-
-    rent.setPlannedStart(updateRequest.newStartTime());
-    rent.setPlannedEnd(updateRequest.newEndTime());
-
-    rentRepository.save(rent);
   }
 
   public void startRent(UUID rentId) {

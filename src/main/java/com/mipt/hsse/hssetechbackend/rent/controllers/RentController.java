@@ -36,12 +36,6 @@ public class RentController {
     rentService.deleteRent(rentId);
   }
 
-  @PatchMapping("/{rent_id}")
-  public void editRentTime(
-      @PathVariable("rent_id") UUID rentId, @Valid @RequestBody UpdateRentRequest updateRequest) {
-      rentService.updateRent(rentId, updateRequest);
-  }
-
   @PostMapping("/{rent_id}/confirm")
   public void pinPhotoConfirmation(
       @PathVariable("rent_id") UUID rentId,
