@@ -1,15 +1,29 @@
 package com.mipt.hsse.hssetechbackend.rent.controllers;
 
+import com.google.zxing.WriterException;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
 import com.mipt.hsse.hssetechbackend.data.entities.Item;
+import com.mipt.hsse.hssetechbackend.data.entities.Rent;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
-import com.mipt.hsse.hssetechbackend.rent.controllers.responses.RentInfoResponse;
+import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetItemResponse;
+import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetRentResponse;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.ClientServerError;
+import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
+import com.mipt.hsse.hssetechbackend.rent.qrcodegeneration.QrCodeManager;
 import com.mipt.hsse.hssetechbackend.rent.services.ItemService;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import javax.imageio.ImageIO;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -19,42 +33,98 @@ import org.springframework.web.bind.annotation.*;
 public class ItemController {
   private final ItemService itemService;
 
+  // TODO: Lock service is not implemented yet
+  // private final LockService lockService;
+
   public ItemController(ItemService itemService) {
     this.itemService = itemService;
   }
 
-  @PostMapping()
-  @ResponseStatus(HttpStatus.CREATED)
-  public Item createItem(@Valid @RequestBody CreateItemRequest request) {
-    return itemService.createItem(request);
+  @PostMapping
+  public ResponseEntity<Item> createItem(@Valid @RequestBody CreateItemRequest request) {
+    try {
+      Item createdItem = itemService.createItem(request);
+      return new ResponseEntity<>(createdItem, HttpStatus.CREATED);
+    } catch (EntityNotFoundException e) {
+      throw new EntityNotFoundException("Expected item type does not exist");
+    }
   }
 
   @PatchMapping("/{id}")
-  @ResponseStatus(HttpStatus.OK)
-  public void updateItem(
+  public ResponseEntity<Void> updateItem(
       @PathVariable("id") UUID itemId, @Valid @RequestBody UpdateItemRequest request) {
-    itemService.updateItem(itemId, request);
+    if (itemService.existsById(itemId)) {
+      itemService.updateItem(itemId, request);
+      return ResponseEntity.noContent().build();
+    } else {
+      throw new EntityNotFoundException();
+    }
   }
 
-  @GetMapping("/{id}")
-  public RentInfoResponse getItem(
-      @PathVariable("id") long id,
+  @GetMapping("/{itemId}")
+  public ResponseEntity<GetItemResponse> getItem(
+      @PathVariable("itemId") UUID itemId,
       @RequestParam(value = "loadRentInfo", defaultValue = "false") boolean loadRentInfo) {
-    throw new UnsupportedOperationException();
+    Optional<Item> itemOpt = itemService.getItem(itemId);
+    Item item = itemOpt.orElseThrow(EntityNotFoundException::new);
+
+    GetItemResponse response;
+    if (loadRentInfo) {
+      List<Rent> rents = itemService.getFutureRentsOfItem(itemId);
+      List<GetRentResponse> rentsResponses =
+          rents.stream().map(GetRentResponse::getFromRent).toList();
+      response = new GetItemResponse(item, rentsResponses);
+    } else {
+      response = new GetItemResponse(item);
+    }
+
+    return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
-  @GetMapping("/{item_id}/qr")
-  public void getItemBookingQRCode(@PathVariable("item_id") UUID itemId) {
-    throw new UnsupportedOperationException();
+  @GetMapping(value = "/{item_id}/qr")
+  public ResponseEntity<byte[]> getItemBookingQRCode(@PathVariable("item_id") UUID itemId) {
+    final int WIDTH = 200;
+    final int HEIGHT = 200;
+
+    BitMatrix qrCodeMatrix;
+    try {
+      // TODO: When we have domain, it should be put in here
+      qrCodeMatrix = QrCodeManager.createQR("https://{DOMAIN}/rent/" + itemId, HEIGHT, WIDTH);
+    } catch (WriterException e) {
+      throw new RuntimeException(e);
+    }
+    BufferedImage image = MatrixToImageWriter.toBufferedImage(qrCodeMatrix);
+
+    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+    try {
+      ImageIO.write(image, "png", byteArrayOutputStream);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+    byte[] imageInBytes = byteArrayOutputStream.toByteArray();
+
+    return ResponseEntity.status(HttpStatus.OK)
+        .header(HttpHeaders.CONTENT_DISPOSITION, "filename=\"image.png\"")
+        .contentType(MediaType.IMAGE_PNG)
+        .body(imageInBytes);
   }
 
-  @PostMapping("/{item_id}/open")
-  public void provideAccessToItem(@PathVariable("item_id") UUID itemId) {
-    throw new UnsupportedOperationException();
+  @PostMapping("/{item_id}/try-open")
+  public void provideAccessToItemIfAllowed(@PathVariable("item_id") UUID itemId) {
+    if (!itemService.existsById(itemId)) throw new EntityNotFoundException();
+
+    UUID lockId = itemService.getItemLockId(itemId);
+
+    // TODO: Lock service is not implemented yet
+    throw new UnsupportedOperationException("Lock service is not implemented yet");
+    //    if (!lockService.existsById(lockId))
+    //      throw new EntityNotFoundException("The lock that is assigned to this item does not
+    // exist");
+    //
+    //    lockService.requireOpenById(lockId);
   }
 
   @DeleteMapping("/{itemId}")
-  @ResponseStatus(HttpStatus.OK)
   public void deleteItem(@PathVariable("itemId") UUID itemId) {
     itemService.deleteItem(itemId);
   }

@@ -3,14 +3,15 @@ package com.mipt.hsse.hssetechbackend.rent.services;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
-import com.mipt.hsse.hssetechbackend.data.entities.Item;
-import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
-import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemRepository;
-import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemTypeRepository;
+import com.mipt.hsse.hssetechbackend.data.entities.*;
+import com.mipt.hsse.hssetechbackend.data.repositories.*;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +32,9 @@ class ItemServiceTest extends DatabaseSuite {
 
   @Autowired private JpaItemTypeRepository itemTypeRepository;
   @Autowired private JpaItemRepository itemRepository;
+  @Autowired private JpaUserRepository userRepository;
+  @Autowired private JpaHumanUserPassportRepository humanUserPassportRepository;
+  @Autowired private JpaRentRepository rentRepository;
 
   private final ItemType itemType = new ItemType(BigDecimal.ZERO, "Item type name", 60, false);
 
@@ -57,6 +61,60 @@ class ItemServiceTest extends DatabaseSuite {
     assertEquals(itemType.getId(), extractedItem.getType().getId());
   }
 
+  @Test
+  void getFutureRents() {
+    final String displayName = "Display name";
+
+    User user = new User("user");
+
+    HumanUserPassport humanUserPassport = new HumanUserPassport(123L, "firstName", "lastName", "test@gmail.com", user);
+    humanUserPassport = humanUserPassportRepository.save(humanUserPassport);
+
+    Item item = new Item(displayName, itemType);
+    item = itemRepository.save(item);
+
+    Item needlessItem = new Item("Dummy item", itemType);
+    needlessItem = itemRepository.save(needlessItem);
+
+    Rent rentBeforeNow = new Rent(
+        Instant.now().minus(5, ChronoUnit.DAYS),
+        Instant.now().minus(4, ChronoUnit.DAYS),
+        humanUserPassport,
+        item);
+    rentRepository.save(rentBeforeNow);
+
+    Rent rentBeginningNow = new Rent(
+        Instant.now(),
+        Instant.now().plus(1, ChronoUnit.DAYS),
+        humanUserPassport,
+        item);
+    rentRepository.save(rentBeginningNow);
+
+    Rent rentAfterNow = new Rent(
+        Instant.now().plus(5, ChronoUnit.DAYS),
+        Instant.now().plus(6, ChronoUnit.DAYS),
+        humanUserPassport,
+        item);
+    rentRepository.save(rentAfterNow);
+
+    Rent rentOfAnotherItem = new Rent(
+        Instant.now().plus(7, ChronoUnit.DAYS),
+        Instant.now().plus(8, ChronoUnit.DAYS),
+        humanUserPassport,
+        needlessItem);
+    rentRepository.save(rentOfAnotherItem);
+
+    List<Rent> futureRentsOfItem = itemService.getFutureRentsOfItem(item.getId());
+    assertEquals(1, futureRentsOfItem.size());
+
+    Rent retrievedRent = futureRentsOfItem.get(0);
+    assertEquals(rentAfterNow.getId(), retrievedRent.getId());
+
+    rentRepository.deleteAll();
+    userRepository.deleteAll();
+    itemRepository.deleteAll();
+  }
+  
   @Test
   void testFailCreateItemOfAbsentType() {
     final String itemName = "Particular item name";
@@ -114,12 +172,5 @@ class ItemServiceTest extends DatabaseSuite {
     itemService.deleteItem(item.getId());
 
     assertTrue(itemRepository.findById(item.getId()).isEmpty());
-  }
-
-  @Test
-  void testFailDeleteAbsentItem() {
-    final UUID id = UUID.randomUUID();
-
-    assertThrows(EntityNotFoundException.class, () -> itemService.deleteItem(id));
   }
 }

@@ -1,5 +1,6 @@
 package com.mipt.hsse.hssetechbackend.rent.services;
 
+import com.mipt.hsse.hssetechbackend.auxiliary.VerificationResult;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemRepository;
@@ -15,7 +16,6 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientException;
 
 @Service
 public class RentService {
@@ -54,12 +54,11 @@ public class RentService {
 
     CreateRentProcessData processData = new CreateRentProcessData(rent);
 
-    try {
-      for (var processor : createRentProcessors) {
-        processor.processCreate(processData);
+    for (var processor : createRentProcessors) {
+      VerificationResult verificationResult = processor.processCreate(processData);
+      if (!verificationResult.isValid()) {
+        throw new RentProcessingException(verificationResult.getErrorMessage());
       }
-    } catch (RentProcessingException e) {
-      throw new RestClientException("Failed to create a new rent: processing stage failed");
     }
 
     rentRepository.save(rent);
@@ -77,7 +76,10 @@ public class RentService {
     DeleteRentProcessData processData = new DeleteRentProcessData(rent);
 
     for (var processor : deleteRentProcessors) {
-      processor.processDelete(processData);
+      VerificationResult verificationResult = processor.processDelete(processData);
+      if (!verificationResult.isValid()) {
+        throw new RentProcessingException(verificationResult.getErrorMessage());
+      }
     }
 
     rentRepository.delete(rent);

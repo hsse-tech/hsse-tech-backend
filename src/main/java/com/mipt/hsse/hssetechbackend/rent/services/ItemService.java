@@ -2,12 +2,15 @@ package com.mipt.hsse.hssetechbackend.rent.services;
 
 import com.mipt.hsse.hssetechbackend.data.entities.Item;
 import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
+import com.mipt.hsse.hssetechbackend.data.entities.Rent;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemTypeRepository;
+import com.mipt.hsse.hssetechbackend.data.repositories.JpaRentRepository;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
-import jakarta.transaction.Transactional;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 
@@ -15,13 +18,17 @@ import org.springframework.stereotype.Service;
 public class ItemService {
   private final JpaItemRepository itemRepository;
   private final JpaItemTypeRepository itemTypeRepository;
+  private final JpaRentRepository rentRepository;
 
-  public ItemService(JpaItemRepository itemRepository, JpaItemTypeRepository itemTypeRepository) {
+  public ItemService(
+      JpaItemRepository itemRepository,
+      JpaItemTypeRepository itemTypeRepository,
+      JpaRentRepository rentRepository) {
     this.itemRepository = itemRepository;
     this.itemTypeRepository = itemTypeRepository;
+    this.rentRepository = rentRepository;
   }
 
-  @Transactional
   public Item createItem(CreateItemRequest request) {
     ItemType itemType =
         itemTypeRepository
@@ -32,21 +39,39 @@ public class ItemService {
     return itemRepository.save(item);
   }
 
-  @Transactional
   public void updateItem(UUID itemId, UpdateItemRequest request) {
     Item item =
         itemRepository
             .findById(itemId)
             .orElseThrow(() -> new EntityNotFoundException(Item.class, itemId));
 
-    if (request.newDisplayName() != null) item.setDisplayName(request.newDisplayName());
+    if (request.newDisplayName() != null) {
+      item.setDisplayName(request.newDisplayName());
+    }
 
     itemRepository.save(item);
   }
 
-  @Transactional
   public void deleteItem(UUID itemId) {
-    if (itemRepository.existsById(itemId)) itemRepository.deleteById(itemId);
-    else throw new EntityNotFoundException(Item.class, itemId);
+    if (itemRepository.existsById(itemId)) {
+      itemRepository.deleteById(itemId);
+    }
+  }
+
+  public Optional<Item> getItem(UUID uuid) {
+    return itemRepository.findById(uuid);
+  }
+
+  public List<Rent> getFutureRentsOfItem(UUID itemId) {
+    return rentRepository.findAllFutureRentsOfItem(
+        getItem(itemId).orElseThrow(EntityNotFoundException::new));
+  }
+
+  public boolean existsById(UUID itemId) {
+    return itemRepository.existsById(itemId);
+  }
+
+  public UUID getItemLockId(UUID itemId) {
+    throw new UnsupportedOperationException();
   }
 }
