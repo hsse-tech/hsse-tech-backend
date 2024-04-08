@@ -40,7 +40,7 @@ public class WalletService implements WalletServiceBase {
   }
 
   @Override
-  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  @Transactional(propagation = Propagation.REQUIRED)
   public Wallet getWallet(UUID id) {
     return walletRepository.findById(id)
             .orElseThrow(WalletNotFoundException::new);
