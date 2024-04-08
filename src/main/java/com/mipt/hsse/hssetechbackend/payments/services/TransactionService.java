@@ -6,6 +6,7 @@ import com.mipt.hsse.hssetechbackend.data.repositories.JpaTransactionRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaWalletRepository;
 import com.mipt.hsse.hssetechbackend.payments.exceptions.TransactionNotFoundException;
 import com.mipt.hsse.hssetechbackend.payments.exceptions.WalletNotFoundException;
+import com.mipt.hsse.hssetechbackend.payments.exceptions.WalletUpdatingException;
 import com.mipt.hsse.hssetechbackend.payments.services.dto.TransactionInfo;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -31,10 +32,17 @@ public class TransactionService implements TransactionServiceBase {
     var wallet = jpaWalletRepository.findById(transactionInfo.walletId())
             .orElseThrow(() -> new WalletNotFoundException("Wallet not found to assign a new transaction"));
 
+    if (wallet.getBalance().compareTo(transactionInfo.amount()) < 0) {
+      throw new WalletUpdatingException("Not enough money");
+    }
+
     var transaction = new Transaction(transactionInfo.amount(), transactionInfo.name(), transactionInfo.description().orElse(null));
 
     transaction.setWallet(wallet);
+    wallet.setBalance(wallet.getBalance().subtract(transactionInfo.amount()));
+
     jpaTransactionRepository.save(transaction);
+    jpaWalletRepository.save(wallet);
 
     return transaction;
   }
