@@ -33,13 +33,14 @@ public class WalletService implements WalletServiceBase {
     var wallet = new Wallet();
 
     wallet.setOwner(owner);
+    wallet.setBalance(BigDecimal.ZERO);
 
     walletRepository.save(wallet);
     return wallet;
   }
 
   @Override
-  @Transactional(propagation = Propagation.REQUIRED)
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
   public Wallet getWallet(UUID id) {
     return walletRepository.findById(id)
             .orElseThrow(WalletNotFoundException::new);

@@ -7,7 +7,7 @@ import com.mipt.hsse.hssetechbackend.data.entities.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import org.junit.jupiter.api.AfterEach;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,20 +58,17 @@ class JpaRentRepositoryTest extends DatabaseSuite {
 
   @BeforeEach
   void save() {
-    itemTypeRepository.save(itemType);
-    itemRepository.save(item1);
-    itemRepository.save(item2);
-    humanRepository.save(humanUser);
-    userRepository.save(user);
-  }
-  
-  @AfterEach
-  void delete() {
     rentRepository.deleteAll();
     userRepository.deleteAll();
     itemRepository.deleteAll();
     itemTypeRepository.deleteAll();
     humanRepository.deleteAll();
+
+    itemTypeRepository.save(itemType);
+    itemRepository.save(item1);
+    itemRepository.save(item2);
+    humanRepository.save(humanUser);
+    userRepository.save(user);
   }
 
   @Test
