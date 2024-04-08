@@ -25,13 +25,13 @@ public class UnoccupiedTimeCreateRentProcessor implements CreateRentProcessor {
     boolean isDisjointWithOtherRents =
         rentRepository.isDisjointWithOtherRentsOfSameItem(item, from, to);
 
-    if (!isDisjointWithOtherRents)
+    if (!isDisjointWithOtherRents) {
       return VerificationResult.buildInvalid(
           "Unoccupied time check failed:\nTime from "
               + from
               + " to "
               + to
               + " is occupied already");
-    else return VerificationResult.buildValid();
+    } else return VerificationResult.buildValid();
   }
 }
