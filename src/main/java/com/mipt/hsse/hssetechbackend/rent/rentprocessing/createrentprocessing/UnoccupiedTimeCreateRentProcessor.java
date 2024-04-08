@@ -1,7 +1,7 @@
 package com.mipt.hsse.hssetechbackend.rent.rentprocessing.createrentprocessing;
 
+import com.mipt.hsse.hssetechbackend.auxiliary.VerificationResult;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaRentRepository;
-import com.mipt.hsse.hssetechbackend.rent.exceptions.RentProcessingException;
 import org.springframework.stereotype.Component;
 
 /**
@@ -18,19 +18,20 @@ public class UnoccupiedTimeCreateRentProcessor implements CreateRentProcessor {
 
   /** Verify that each existing rent either starts before or finishes after the given rent */
   @Override
-  public void processCreate(CreateRentProcessData createRentData) {
+  public VerificationResult processCreate(CreateRentProcessData createRentData) {
     var item = createRentData.rent().getItem();
     var from = createRentData.rent().getStartAt();
     var to = createRentData.rent().getEndedAt();
     boolean isDisjointWithOtherRents =
         rentRepository.isDisjointWithOtherRentsOfSameItem(item, from, to);
 
-    if (!isDisjointWithOtherRents)
-      throw new RentProcessingException(
+    if (!isDisjointWithOtherRents) {
+      return VerificationResult.buildInvalid(
           "Unoccupied time check failed:\nTime from "
               + from
               + " to "
               + to
               + " is occupied already");
+    } else return VerificationResult.buildValid();
   }
 }
