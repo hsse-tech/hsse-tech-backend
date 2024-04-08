@@ -66,7 +66,7 @@ CREATE TABLE wallet
 CREATE TABLE transaction
 (
     id           UUID PRIMARY KEY       DEFAULT gen_random_uuid(),
-    amount       NUMERIC(9, 2) NOT NULL CHECK (amount BETWEEN 0 AND 1000000.00),
+    amount       NUMERIC(9, 2) NOT NULL CHECK (amount BETWEEN -1000000.00 AND 1000000.00),
     status   transaction_status       NOT NULL DEFAULT 'IN_PROCESS',
     name         TEXT          NOT NULL,
     description  TEXT          NULL,
