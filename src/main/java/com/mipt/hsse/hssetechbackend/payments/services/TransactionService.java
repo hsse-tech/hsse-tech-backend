@@ -27,7 +27,7 @@ public class TransactionService implements TransactionServiceBase {
   }
 
   @Override
-  @Transactional(propagation = Propagation.REQUIRED)
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
   public Transaction createTransaction(TransactionInfo transactionInfo) {
     var wallet = jpaWalletRepository.findById(transactionInfo.walletId())
             .orElseThrow(() -> new WalletNotFoundException("Wallet not found to assign a new transaction"));

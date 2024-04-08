@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static com.mipt.hsse.hssetechbackend.BigDecimalHelper.*;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -47,7 +48,6 @@ public class CreatingRentTests extends DatabaseSuite {
 
   private HumanUserPassport testRenter;
   private Item testItem;
-  private Wallet testWallet;
 
   @BeforeEach
   public void setUp() {
@@ -61,7 +61,7 @@ public class CreatingRentTests extends DatabaseSuite {
     testRenter = new HumanUserPassport(123L, "Ivan", "Ivanov", "phystech@phystech.edu", new User("user"));
     var testItemType = new ItemType(BigDecimal.valueOf(100), "Молоток", null, false);
     testItem = new Item("Молоток с оранжевой рукоятью", testItemType);
-    testWallet = new Wallet();
+    Wallet testWallet = new Wallet();
 
     testWallet.setOwner(testRenter);
     testWallet.setBalance(BigDecimal.valueOf(150));
