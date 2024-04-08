@@ -4,11 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import com.mipt.hsse.hssetechbackend.DatabaseSuite;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.*;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.PinPhotoConfirmationRequest;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.VerificationFailedException;
+import com.mipt.hsse.hssetechbackend.rent.rentprocessing.createrentprocessing.UnoccupiedTimeCreateRentProcessor;
 import com.mipt.hsse.hssetechbackend.rent.services.RentService;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -21,19 +23,27 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
-//@DataJpaTest
-//@Import({
-//    RentService.class,
-//    ConfirmationPhotoRepositoryOnDrive.class,
-//    UnoccupiedTimeCreateRentProcessor.class
-//})
-//@Transactional(propagation = Propagation.NOT_SUPPORTED)
-//@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@SpringBootTest
-class ConfirmRentFinishTest {
+@DataJpaTest
+@Import({
+    RentService.class,
+    ConfirmationPhotoRepositoryOnDrive.class,
+    UnoccupiedTimeCreateRentProcessor.class
+})
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+class ConfirmRentFinishTest extends DatabaseSuite {
+  @Autowired private JpaItemRepository itemRepository;
+  @Autowired private JpaItemTypeRepository itemTypeRepository;
+  @Autowired private JpaUserRepository userRepository;
+  @Autowired private JpaHumanUserPassportRepository humanUserPassportRepository;
+
   @MockBean private JpaRentRepository rentRepository;
   @MockBean private ConfirmationPhotoRepository photoRepository;
 
@@ -47,10 +57,18 @@ class ConfirmRentFinishTest {
 
   @BeforeEach
   void save() {
+    humanUserPassportRepository.save(userPassport);
+    userRepository.save(user);
+    itemTypeRepository.save(itemType);
+    itemRepository.save(item);
   }
 
   @AfterEach
   void clear() {
+    itemTypeRepository.deleteAll();
+    itemRepository.deleteAll();
+    userRepository.deleteAll();
+    humanUserPassportRepository.deleteAll();
   }
 
   @Test
@@ -108,6 +126,8 @@ class ConfirmRentFinishTest {
   void testFailConfirmRentThatDoesNotRequireConfirm() {
     ItemType itemTypeWithoutConfirm = new ItemType(BigDecimal.ZERO, "someName", 60, false);
     Item itemWithoutConfirm = new Item("someItemName", itemTypeWithoutConfirm);
+    itemTypeRepository.save(itemTypeWithoutConfirm);
+    itemRepository.save(itemWithoutConfirm);
 
     Rent rent = new Rent(Instant.now(), Instant.now().plus(1, ChronoUnit.HOURS), userPassport, itemWithoutConfirm);
     rent.setFactStart(Instant.now());
