@@ -3,7 +3,6 @@ package com.mipt.hsse.hssetechbackend.rent.services.rentservice;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
-import com.mipt.hsse.hssetechbackend.DatabaseSuite;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.*;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
@@ -33,7 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 })
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class DeleteRentTest extends DatabaseSuite {
+class DeleteRentTest {
   @Autowired private JpaItemRepository itemRepository;
   @Autowired private JpaItemTypeRepository itemTypeRepository;
   @Autowired private JpaUserRepository userRepository;

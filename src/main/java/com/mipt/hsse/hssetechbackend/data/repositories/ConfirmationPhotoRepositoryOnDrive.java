@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 public class ConfirmationPhotoRepositoryOnDrive implements ConfirmationPhotoRepository {
   private static final int UUID_LENGTH = 32;
   private static final int PATH_PART_LENGTH = 8;
-  private static final String BASE_PATH = System.getenv("PHOTO_CONFIRM") + "/";
+  private static final String BASE_PATH = System.getenv("PHOTO_CONFIRMATION_PATH") + "/";
 
   @Override
   public boolean existsPhotoForRent(UUID rentId) {
@@ -30,6 +30,10 @@ public class ConfirmationPhotoRepositoryOnDrive implements ConfirmationPhotoRepo
   public void save(UUID rentId, byte[] photoBytes) throws IOException, NoSuchAlgorithmException {
     Path path = getFilePathByRentId(rentId);
     Files.createDirectories(path.getParent());
+
+    if (Files.exists(path)) {
+      throw new UnsupportedOperationException();
+    }
 
     Files.write(path, photoBytes);
   }

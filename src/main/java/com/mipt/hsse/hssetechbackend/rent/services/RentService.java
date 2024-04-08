@@ -152,10 +152,9 @@ public class RentService {
 
     try {
       photoRepository.save(rentId, request.photoBytes());
-    } catch (IOException | NoSuchAlgorithmException e) {
+    } catch (IOException | NoSuchAlgorithmException | UnsupportedOperationException e) {
       throw new ServerErrorException("Unexpected IO error while saving photo", e);
     }
-
   }
 
   private VerificationResult verifyRentStartEnd(Instant start, Instant end, Rent rent) {

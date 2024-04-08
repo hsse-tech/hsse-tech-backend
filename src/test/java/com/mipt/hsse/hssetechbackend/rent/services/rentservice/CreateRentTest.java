@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import com.mipt.hsse.hssetechbackend.DatabaseSuite;
 import com.mipt.hsse.hssetechbackend.data.entities.HumanUserPassport;
 import com.mipt.hsse.hssetechbackend.data.entities.Item;
 import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
@@ -37,7 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 })
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class CreateRentTest extends DatabaseSuite {
+class CreateRentTest {
   @Autowired private JpaItemRepository itemRepository;
   @Autowired private JpaItemTypeRepository itemTypeRepository;
   @Autowired private JpaUserRepository userRepository;
