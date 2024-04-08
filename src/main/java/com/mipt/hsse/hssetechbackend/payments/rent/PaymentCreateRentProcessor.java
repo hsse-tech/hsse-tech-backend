@@ -1,9 +1,9 @@
 package com.mipt.hsse.hssetechbackend.payments.rent;
 
+import com.mipt.hsse.hssetechbackend.auxiliary.VerificationResult;
 import com.mipt.hsse.hssetechbackend.data.entities.ClientTransactionStatus;
 import com.mipt.hsse.hssetechbackend.payments.services.TransactionServiceBase;
 import com.mipt.hsse.hssetechbackend.payments.services.dto.TransactionInfo;
-import com.mipt.hsse.hssetechbackend.rent.exceptions.RentProcessingException;
 import com.mipt.hsse.hssetechbackend.rent.rentprocessing.createrentprocessing.CreateRentProcessData;
 import com.mipt.hsse.hssetechbackend.rent.rentprocessing.createrentprocessing.CreateRentProcessor;
 import org.springframework.stereotype.Service;
@@ -24,7 +24,7 @@ public class PaymentCreateRentProcessor implements CreateRentProcessor {
 
   @Override
   @Transactional(propagation = Propagation.REQUIRED)
-  public void processCreate(CreateRentProcessData createRentData) throws RentProcessingException {
+  public VerificationResult processCreate(CreateRentProcessData createRentData) {
     var rent = createRentData.rent();
     var targetItem = rent.getItem();
     var targetItemType = targetItem.getType();
@@ -39,5 +39,7 @@ public class PaymentCreateRentProcessor implements CreateRentProcessor {
 
     var trans = transactionService.createTransaction(new TransactionInfo(cost, wallet.getId(), transName, Optional.empty()));
     transactionService.setTransactionStatus(trans.getId(), ClientTransactionStatus.SUCCESS);
+
+    return VerificationResult.buildValid();
   }
 }

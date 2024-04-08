@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.Instant;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -64,7 +64,7 @@ public class CreatingRentTests extends DatabaseSuite {
     testWallet = new Wallet();
 
     testWallet.setOwner(testRenter);
-    testWallet.setBalance(BigDecimal.valueOf(1000));
+    testWallet.setBalance(BigDecimal.valueOf(150));
 
     humanUserPassportRepository.save(testRenter);
     walletRepository.save(testWallet);
@@ -78,14 +78,27 @@ public class CreatingRentTests extends DatabaseSuite {
   public void testCreateShouldPass() {
     var processData = new CreateRentProcessData(new Rent(Instant.now(), Instant.now().plusSeconds(90 * 60), testRenter, testItem));
 
-    paymentRentProc.processCreate(processData);
+    var result = paymentRentProc.processCreate(processData);
 
     assertEquals(1, transactionRepository.count());
 
     var transaction = transactionRepository.findAll().get(0);
 
+    assertTrue(result.isValid());
+    assertEquals(BigDecimal.ZERO, walletRepository.findAll().get(0).getBalance());
     assertEquals(0, transaction.getAmount().compareTo(BigDecimal.valueOf(150.00)));
     assertEquals("Аренда \"Молоток с оранжевой рукоятью\"", transaction.getName());
     assertEquals(ClientTransactionStatus.SUCCESS, transaction.getStatus());
+  }
+
+  @Test
+  public void testCreateShouldFailBecauseNotEnoughBalance() {
+    var processData = new CreateRentProcessData(new Rent(Instant.now(), Instant.now().plusSeconds(120 * 60), testRenter, testItem));
+
+    var result = paymentRentProc.processCreate(processData);
+
+    assertEquals(0, transactionRepository.count());
+    assertEquals(0, walletRepository.findAll().get(0).getBalance().compareTo(BigDecimal.valueOf(150)));
+    assertFalse(result.isValid());
   }
 }
