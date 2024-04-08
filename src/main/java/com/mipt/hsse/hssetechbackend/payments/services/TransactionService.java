@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
 @Service
@@ -32,7 +31,7 @@ public class TransactionService implements TransactionServiceBase {
     var wallet = jpaWalletRepository.findById(transactionInfo.walletId())
             .orElseThrow(() -> new WalletNotFoundException("Wallet not found to assign a new transaction"));
 
-    var transaction = new Transaction(BigDecimal.valueOf(transactionInfo.amount()), transactionInfo.name(), transactionInfo.description().orElse(null));
+    var transaction = new Transaction(transactionInfo.amount(), transactionInfo.name(), transactionInfo.description().orElse(null));
 
     transaction.setWallet(wallet);
     jpaTransactionRepository.save(transaction);
