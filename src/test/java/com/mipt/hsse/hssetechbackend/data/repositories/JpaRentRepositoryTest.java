@@ -82,8 +82,8 @@ class JpaRentRepositoryTest extends DatabaseSuite {
     assertTrue(
         rentRepository.isDisjointWithOtherRentsOfSameItem(
             secondRentForItem1.getItem(),
-            secondRentForItem1.getStartAt(),
-            secondRentForItem1.getEndedAt()));
+            secondRentForItem1.getPlannedStart(),
+            secondRentForItem1.getPlannedEnd()));
     System.out.println(rentRepository.count());
   }
 
@@ -95,8 +95,8 @@ class JpaRentRepositoryTest extends DatabaseSuite {
     assertFalse(
         rentRepository.isDisjointWithOtherRentsOfSameItem(
             secondRentForItem1.getItem(),
-            secondRentForItem1.getStartAt(),
-            secondRentForItem1.getEndedAt()));
+            secondRentForItem1.getPlannedStart(),
+            secondRentForItem1.getPlannedEnd()));
     System.out.println(rentRepository.count());
   }
 
@@ -110,8 +110,8 @@ class JpaRentRepositoryTest extends DatabaseSuite {
     assertTrue(
         rentRepository.isDisjointWithOtherRentsOfSameItem(
             secondRentForItem1.getItem(),
-            secondRentForItem1.getStartAt(),
-            secondRentForItem1.getEndedAt()));
+            secondRentForItem1.getPlannedStart(),
+            secondRentForItem1.getPlannedEnd()));
   }
 
   @Test
@@ -121,7 +121,7 @@ class JpaRentRepositoryTest extends DatabaseSuite {
     assertFalse(
         rentRepository.isDisjointWithOtherRentsOfSameItem(
             largeRentForItem1.getItem(),
-            largeRentForItem1.getStartAt(),
-            largeRentForItem1.getEndedAt()));
+            largeRentForItem1.getPlannedStart(),
+            largeRentForItem1.getPlannedEnd()));
   }
 }

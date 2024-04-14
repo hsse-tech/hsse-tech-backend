@@ -25,17 +25,17 @@ public class GetItemResponse {
   private final String displayName;
 
   @JsonProperty("rent_info")
-  private final List<GetRentResponse> rents;
+  private final List<GetShortRentResponse> rents;
 
   @JsonCreator
-  public GetItemResponse(UUID itemId, UUID typeId, String displayName, List<GetRentResponse> rents) {
+  public GetItemResponse(UUID itemId, UUID typeId, String displayName, List<GetShortRentResponse> rents) {
     this.itemId = itemId;
     this.typeId = typeId;
     this.displayName = displayName;
     this.rents = rents;
   }
 
-  public GetItemResponse(Item item, List<GetRentResponse> rents) {
+  public GetItemResponse(Item item, List<GetShortRentResponse> rents) {
     itemId = item.getId();
     typeId = item.getType().getId();
     displayName = item.getDisplayName();

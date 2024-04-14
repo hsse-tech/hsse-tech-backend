@@ -8,7 +8,7 @@ import com.mipt.hsse.hssetechbackend.data.entities.Rent;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetItemResponse;
-import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetRentResponse;
+import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetShortRentResponse;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.ClientServerError;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.rent.qrcodegeneration.QrCodeManager;
@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import javax.imageio.ImageIO;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -71,8 +72,8 @@ public class ItemController {
     GetItemResponse response;
     if (loadRentInfo) {
       List<Rent> rents = itemService.getFutureRentsOfItem(itemId);
-      List<GetRentResponse> rentsResponses =
-          rents.stream().map(GetRentResponse::getFromRent).toList();
+      List<GetShortRentResponse> rentsResponses =
+          rents.stream().map(GetShortRentResponse::getFromRent).toList();
       response = new GetItemResponse(item, rentsResponses);
     } else {
       response = new GetItemResponse(item);
@@ -82,10 +83,9 @@ public class ItemController {
   }
 
   @GetMapping(value = "/{item_id}/qr")
-  public ResponseEntity<byte[]> getItemBookingQRCode(@PathVariable("item_id") UUID itemId) {
-    final int WIDTH = 200;
-    final int HEIGHT = 200;
-
+  public ResponseEntity<byte[]> getItemBookingQRCode(@PathVariable("item_id") UUID itemId,
+                                                     @Value("${item-qrcode-width}") int WIDTH,
+                                                     @Value("${item-qrcode-height}") int HEIGHT) {
     BitMatrix qrCodeMatrix;
     try {
       // TODO: When we have domain, it should be put in here
