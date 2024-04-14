@@ -6,12 +6,12 @@ import com.mipt.hsse.hssetechbackend.data.repositories.JpaTransactionRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaWalletRepository;
 import com.mipt.hsse.hssetechbackend.payments.exceptions.TransactionNotFoundException;
 import com.mipt.hsse.hssetechbackend.payments.exceptions.WalletNotFoundException;
+import com.mipt.hsse.hssetechbackend.payments.exceptions.WalletUpdatingException;
 import com.mipt.hsse.hssetechbackend.payments.services.dto.TransactionInfo;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
 @Service
@@ -27,15 +27,22 @@ public class TransactionService implements TransactionServiceBase {
   }
 
   @Override
-  @Transactional(propagation = Propagation.REQUIRED)
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
   public Transaction createTransaction(TransactionInfo transactionInfo) {
     var wallet = jpaWalletRepository.findById(transactionInfo.walletId())
             .orElseThrow(() -> new WalletNotFoundException("Wallet not found to assign a new transaction"));
 
-    var transaction = new Transaction(BigDecimal.valueOf(transactionInfo.amount()), transactionInfo.name(), transactionInfo.description().orElse(null));
+    if (wallet.getBalance().compareTo(transactionInfo.amount()) < 0) {
+      throw new WalletUpdatingException("Not enough money");
+    }
+
+    var transaction = new Transaction(transactionInfo.amount(), transactionInfo.name(), transactionInfo.description().orElse(null));
 
     transaction.setWallet(wallet);
+    wallet.setBalance(wallet.getBalance().subtract(transactionInfo.amount()));
+
     jpaTransactionRepository.save(transaction);
+    jpaWalletRepository.save(wallet);
 
     return transaction;
   }

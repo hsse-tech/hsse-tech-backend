@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,13 +52,15 @@ class ItemControllerTest extends DatabaseSuite {
 
   @BeforeEach
   public void setupRestTemplate() {
+    rentRepository.deleteAll();
+    itemTypeRepository.deleteAll();
+    jpaHumanUserPassportRepository.deleteAll();
     rest.getRestTemplate().setRequestFactory(new HttpComponentsClientHttpRequestFactory());
   }
 
   @BeforeEach
   public void createItemType() {
     itemTypeRepository.deleteAll();
-
 
     itemType = itemTypeRepository.save(new ItemType(BigDecimal.ZERO, "Item type name", 60, false));
   }

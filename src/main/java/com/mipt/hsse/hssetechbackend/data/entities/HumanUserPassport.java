@@ -42,6 +42,9 @@ public class HumanUserPassport {
   @OneToMany(mappedBy = "renter")
   private List<Rent> rents;
 
+  @OneToOne(mappedBy = "owner")
+  private Wallet wallet;
+
   public HumanUserPassport(Long yandexId, String firstName, String lastName, String email, User user) {
     this.yandexId = yandexId;
     this.firstName = firstName;
