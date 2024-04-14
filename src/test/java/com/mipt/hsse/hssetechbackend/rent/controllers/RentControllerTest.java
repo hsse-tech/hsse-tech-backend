@@ -21,6 +21,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,6 +75,15 @@ class RentControllerTest extends DatabaseSuite {
             new HumanUserPassport(123L, "Name", "Surname", "email@gmail.com", user));
   }
 
+  @AfterEach
+  public void clear() {
+    rentRepository.deleteAll();
+    itemRepository.deleteAll();
+    itemTypeRepository.deleteAll();
+    jpaHumanUserPassportRepository.deleteAll();
+    userRepository.deleteAll();
+  }
+
   @Test
   void testCreateRentEndpoint() {
     Instant start = Instant.now().plus(1, ChronoUnit.HOURS);
@@ -88,7 +98,7 @@ class RentControllerTest extends DatabaseSuite {
 
     verify(rentService).createRent(createRentRequest);
 
-    Rent responseRent = createResponse.getBody().getRent();
+    Rent responseRent = Objects.requireNonNull(createResponse.getBody()).getRent();
     assertNotNull(responseRent);
     assertEquals(item.getId(), responseRent.getItem().getId());
     assertEquals(userPassport.getId(), responseRent.getRenter().getId());
