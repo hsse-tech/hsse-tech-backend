@@ -1,6 +1,5 @@
 package com.mipt.hsse.hssetechbackend.rent.rentprocessing.createrentprocessing;
 
-
 import com.mipt.hsse.hssetechbackend.auxiliary.VerificationResult;
 
 /**

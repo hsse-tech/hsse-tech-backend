@@ -23,35 +23,40 @@ public class Rent {
   private UUID id;
 
   @Column(name = "\"from\"", nullable = false)
-  private Instant startAt;
+  private Instant plannedStart;
 
   @Column(name = "\"to\"", nullable = false)
-  private Instant endedAt;
+  private Instant plannedEnd;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "item_id", nullable = false)
   private Item item;
 
   @Column(name = "ended_at")
-  private Instant factEndedAt;
+  private Instant factEnd;
 
   @Column(name = "started_at")
-  private Instant factStartedAt;
+  private Instant factStart;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @OnDelete(action = OnDeleteAction.CASCADE)
   @JoinColumn(name = "user_id", nullable = false)
   private HumanUserPassport renter;
 
-  public Rent(Instant startAt, Instant endedAt, HumanUserPassport renter, Item item) {
-    this.startAt = startAt;
-    this.endedAt = endedAt;
+  public Rent(Instant plannedStart, Instant plannedEnd, HumanUserPassport renter, Item item) {
+    this.plannedStart = plannedStart;
+    this.plannedEnd = plannedEnd;
     this.item = item;
     this.renter = renter;
   }
 
-  public Rent(Instant startAt, Instant endedAt, HumanUserPassport renter, Item item, Instant factEndedAt) {
-    this(startAt, endedAt, renter, item);
-    this.factEndedAt = factEndedAt;
+  public Rent(
+      Instant plannedStart,
+      Instant plannedEnd,
+      HumanUserPassport renter,
+      Item item,
+      Instant factEnd) {
+    this(plannedStart, plannedEnd, renter, item);
+    this.factEnd = factEnd;
   }
 }

@@ -20,8 +20,8 @@ public class UnoccupiedTimeCreateRentProcessor implements CreateRentProcessor {
   @Override
   public VerificationResult processCreate(CreateRentProcessData createRentData) {
     var item = createRentData.rent().getItem();
-    var from = createRentData.rent().getStartAt();
-    var to = createRentData.rent().getEndedAt();
+    var from = createRentData.rent().getPlannedStart();
+    var to = createRentData.rent().getPlannedEnd();
     boolean isDisjointWithOtherRents =
         rentRepository.isDisjointWithOtherRentsOfSameItem(item, from, to);
 
