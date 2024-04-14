@@ -58,12 +58,10 @@ class ItemControllerTest extends DatabaseSuite {
 
   @BeforeEach
   public void createItemType() {
-    itemType = itemTypeRepository.save(new ItemType(BigDecimal.ZERO, "Item type name", 60, false));
-  }
-
-  @AfterEach
-  public void removeItemType() {
     itemTypeRepository.deleteAll();
+
+
+    itemType = itemTypeRepository.save(new ItemType(BigDecimal.ZERO, "Item type name", 60, false));
   }
 
   @Test
