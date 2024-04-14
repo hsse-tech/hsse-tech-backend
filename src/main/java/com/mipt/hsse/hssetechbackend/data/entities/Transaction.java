@@ -33,7 +33,7 @@ public class Transaction {
   @Column(name = "description", length = Integer.MAX_VALUE)
   private String description;
 
-  @Column(name = "created_at", nullable = false)
+  @Column(name = "created_at", nullable = false, updatable = false)
   private Instant createdAt;
 
   @NotNull

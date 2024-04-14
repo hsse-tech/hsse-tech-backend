@@ -12,7 +12,6 @@ import com.mipt.hsse.hssetechbackend.data.repositories.JpaWalletRepository;
 import com.mipt.hsse.hssetechbackend.payments.exceptions.WalletCreationException;
 import java.util.UUID;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,19 +42,16 @@ class WalletServiceWalletCreationTest extends DatabaseSuite {
 
   @BeforeEach
   public void setUp() {
+    passportRepository.deleteAll();
+    userRepository.deleteAll();
+    walletRepository.deleteAll();
+
     testUser = new User("test");
     HumanUserPassport testUserPassport = new HumanUserPassport(123L, "Test", "User", "test@phystech.edu", testUser);
     testUserPassport.setUser(testUser);
 
     passportRepository.save(testUserPassport);
     userRepository.save(testUser);
-  }
-
-  @AfterEach
-  public void disposeResources() {
-    passportRepository.deleteAll();
-    userRepository.deleteAll();
-    walletRepository.deleteAll();
   }
 
   @Test

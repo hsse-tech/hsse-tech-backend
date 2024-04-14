@@ -33,6 +33,7 @@ public class WalletService implements WalletServiceBase {
     var wallet = new Wallet();
 
     wallet.setOwner(owner);
+    wallet.setBalance(BigDecimal.ZERO);
 
     walletRepository.save(wallet);
     return wallet;
