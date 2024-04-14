@@ -4,7 +4,7 @@ import com.mipt.hsse.hssetechbackend.DatabaseSuite;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.*;
 import com.mipt.hsse.hssetechbackend.payments.services.TransactionService;
-import com.mipt.hsse.hssetechbackend.rent.rentprocessing.createrentprocessing.CreateRentProcessData;
+import com.mipt.hsse.hssetechbackend.rent.rentprocessing.deleterentprocessing.DeleteRentProcessData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,14 +17,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.Instant;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static com.mipt.hsse.hssetechbackend.BigDecimalHelper.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-@Import({PaymentCreateRentProcessor.class, TransactionService.class})
-public class CreatingRentTests extends DatabaseSuite {
+@Import({PaymentDeleteRentProcessor.class, TransactionService.class})
+public class PaymentDeletingRentTests extends DatabaseSuite {
   @Autowired
   private JpaUserRepository userRepository;
 
@@ -44,7 +44,7 @@ public class CreatingRentTests extends DatabaseSuite {
   private JpaTransactionRepository transactionRepository;
 
   @Autowired
-  private PaymentCreateRentProcessor paymentRentProc;
+  private PaymentDeleteRentProcessor paymentRentProc;
 
   private HumanUserPassport testRenter;
   private Item testItem;
@@ -75,30 +75,19 @@ public class CreatingRentTests extends DatabaseSuite {
   }
 
   @Test
-  public void testCreateShouldPass() {
-    var processData = new CreateRentProcessData(new Rent(Instant.now(), Instant.now().plusSeconds(90 * 60), testRenter, testItem));
+  public void testDeleteShouldPass() {
+    var processData = new DeleteRentProcessData(
+            new Rent(Instant.now(), Instant.now().plusSeconds(90 * 60), testRenter, testItem));
 
-    var result = paymentRentProc.processCreate(processData);
+    var result = paymentRentProc.processDelete(processData);
 
     assertEquals(1, transactionRepository.count());
 
     var transaction = transactionRepository.findAll().get(0);
 
     assertTrue(result.isValid());
-    assertEquals(BigDecimal.ZERO, walletRepository.findAll().get(0).getBalance());
-    assertEquals(0, transaction.getAmount().compareTo(BigDecimal.valueOf(150.00)));
-    assertEquals("Аренда \"Молоток с оранжевой рукоятью\"", transaction.getName());
+    assertEquals(300, walletRepository.findAll().get(0).getBalance());
+    assertEquals("Возврат средств за аренду вещи \"Молоток с оранжевой рукоятью\"", transaction.getName());
     assertEquals(ClientTransactionStatus.SUCCESS, transaction.getStatus());
-  }
-
-  @Test
-  public void testCreateShouldFailBecauseNotEnoughBalance() {
-    var processData = new CreateRentProcessData(new Rent(Instant.now(), Instant.now().plusSeconds(120 * 60), testRenter, testItem));
-
-    var result = paymentRentProc.processCreate(processData);
-
-    assertEquals(0, transactionRepository.count());
-    assertEquals(0, walletRepository.findAll().get(0).getBalance().compareTo(BigDecimal.valueOf(150)));
-    assertFalse(result.isValid());
   }
 }

@@ -4,7 +4,7 @@ import com.mipt.hsse.hssetechbackend.DatabaseSuite;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.*;
 import com.mipt.hsse.hssetechbackend.payments.services.TransactionService;
-import com.mipt.hsse.hssetechbackend.rent.rentprocessing.deleterentprocessing.DeleteRentProcessData;
+import com.mipt.hsse.hssetechbackend.rent.rentprocessing.createrentprocessing.CreateRentProcessData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,15 +16,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.UUID;
 
-import static com.mipt.hsse.hssetechbackend.BigDecimalHelper.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static com.mipt.hsse.hssetechbackend.BigDecimalHelper.*;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-@Import({PaymentDeleteRentProcessor.class, TransactionService.class})
-public class DeletingRentTests extends DatabaseSuite {
+@Import({PaymentCreateRentProcessor.class, TransactionService.class})
+public class PaymentCreatingRentTests extends DatabaseSuite {
   @Autowired
   private JpaUserRepository userRepository;
 
@@ -44,7 +45,7 @@ public class DeletingRentTests extends DatabaseSuite {
   private JpaTransactionRepository transactionRepository;
 
   @Autowired
-  private PaymentDeleteRentProcessor paymentRentProc;
+  private PaymentCreateRentProcessor paymentRentProc;
 
   private HumanUserPassport testRenter;
   private Item testItem;
@@ -75,19 +76,45 @@ public class DeletingRentTests extends DatabaseSuite {
   }
 
   @Test
-  public void testDeleteShouldPass() {
-    var processData = new DeleteRentProcessData(
-            new Rent(Instant.now(), Instant.now().plusSeconds(90 * 60), testRenter, testItem));
+  public void testCreateShouldPass() {
+    var processData = new CreateRentProcessData(new Rent(Instant.now(), Instant.now().plusSeconds(90 * 60), testRenter, testItem));
 
-    var result = paymentRentProc.processDelete(processData);
+    var result = paymentRentProc.processCreate(processData);
 
     assertEquals(1, transactionRepository.count());
 
     var transaction = transactionRepository.findAll().get(0);
 
     assertTrue(result.isValid());
-    assertEquals(300, walletRepository.findAll().get(0).getBalance());
-    assertEquals("Возврат средств за аренду вещи \"Молоток с оранжевой рукоятью\"", transaction.getName());
+    assertEquals(BigDecimal.ZERO, walletRepository.findAll().get(0).getBalance());
+    assertEquals(0, transaction.getAmount().compareTo(BigDecimal.valueOf(150.00)));
+    assertEquals("Оплата аренды", transaction.getName());
+    assertEquals("Аренда \"Молоток с оранжевой рукоятью\"", transaction.getDescription());
     assertEquals(ClientTransactionStatus.SUCCESS, transaction.getStatus());
+  }
+
+  @Test
+  public void testCreateShouldFailBecauseNotEnoughBalance() {
+    var processData = new CreateRentProcessData(new Rent(Instant.now(), Instant.now().plusSeconds(120 * 60), testRenter, testItem));
+
+    var result = paymentRentProc.processCreate(processData);
+
+    assertEquals(0, transactionRepository.count());
+    assertEquals(0, walletRepository.findAll().get(0).getBalance().compareTo(BigDecimal.valueOf(150)));
+    assertFalse(result.isValid());
+  }
+
+  @Test
+  public void testCreateShouldFailBecauseWalletNotFound() {
+    var processData = new CreateRentProcessData(new Rent(Instant.now(), Instant.now().plusSeconds(120 * 60), testRenter, testItem));
+    var fakeWallet = new Wallet();
+    fakeWallet.setId(UUID.randomUUID());
+
+    testRenter.setWallet(fakeWallet);
+    var result = paymentRentProc.processCreate(processData);
+
+    assertEquals(0, transactionRepository.count());
+    assertEquals(0, walletRepository.findAll().get(0).getBalance().compareTo(BigDecimal.valueOf(150)));
+    assertFalse(result.isValid());
   }
 }

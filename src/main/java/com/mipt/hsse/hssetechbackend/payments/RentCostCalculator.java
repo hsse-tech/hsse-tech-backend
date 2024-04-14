@@ -11,7 +11,7 @@ public class RentCostCalculator {
   public static BigDecimal calculate(Item item, Instant from, Instant to) {
     var targetItemType = item.getType();
     var costByHour = targetItemType.getCost();
-    var rentTimeHour = (to.getEpochSecond() - from.getEpochSecond()) / HOUR_SECONDS;
+    float rentTimeHour = (to.getEpochSecond() - from.getEpochSecond()) / HOUR_SECONDS;
     return costByHour.multiply(BigDecimal.valueOf(rentTimeHour));
   }
 }
