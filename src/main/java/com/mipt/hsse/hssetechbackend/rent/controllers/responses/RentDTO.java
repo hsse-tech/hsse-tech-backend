@@ -8,8 +8,8 @@ import java.util.UUID;
 
 public record RentDTO(
     @JsonProperty("id") UUID rentId,
-    GetItemResponse item,
-    GetHumanUserResponse renter,
+    @JsonProperty("item") GetItemResponse item,
+    @JsonProperty("renter") GetHumanUserResponse renter,
     @JsonProperty("start") Instant plannedStart,
     @JsonProperty("end") Instant plannedEnd,
     @JsonProperty("fact_start") Instant factStart,

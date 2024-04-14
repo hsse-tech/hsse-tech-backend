@@ -8,8 +8,10 @@ import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaRentRepository;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateRentRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.PinPhotoConfirmationRequest;
+import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateRentRequest;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.RentProcessingException;
+import com.mipt.hsse.hssetechbackend.rent.exceptions.VerificationFailedException;
 import com.mipt.hsse.hssetechbackend.rent.rentprocessing.createrentprocessing.CreateRentProcessData;
 import com.mipt.hsse.hssetechbackend.rent.rentprocessing.createrentprocessing.CreateRentProcessor;
 import com.mipt.hsse.hssetechbackend.rent.rentprocessing.deleterentprocessing.DeleteRentProcessData;
@@ -36,7 +38,7 @@ public class RentService {
   private final List<DeleteRentProcessor> deleteRentProcessors;
   private final ConfirmationPhotoRepository photoRepository;
   private final long MIN_RENT_DURATION_MINUTES;
-  
+
   public RentService(
       JpaRentRepository rentRepository,
       JpaHumanUserPassportRepository userRepository,
@@ -44,7 +46,7 @@ public class RentService {
       List<CreateRentProcessor> createRentProcessors,
       List<DeleteRentProcessor> deleteRentProcessors,
       ConfirmationPhotoRepository photoRepository,
-      @Value("${max-rent-duration-minutes}") long minRentDurationMinutes) {
+      @Value("${min-rent-duration-minutes}") long minRentDurationMinutes) {
     this.rentRepository = rentRepository;
     this.userRepository = userRepository;
     this.itemRepository = itemRepository;
@@ -157,6 +159,40 @@ public class RentService {
     }
   }
 
+  @Transactional
+  public void updateRent(UUID rentId, UpdateRentRequest request) {
+    Rent rent = rentRepository.findById(rentId).orElseThrow(EntityNotFoundException::new);
+
+    if (rent.getPlannedStart().isBefore(Instant.now())) {
+      throw new VerificationFailedException(
+          "This rent cannot be updated now because it has already started");
+    }
+    if (request.newEndTime().isBefore(Instant.now())) {
+      throw new VerificationFailedException("New end time cannot be after current time");
+    }
+
+    // Check that the new time bounds of rent will not intersect with any other rents
+    // Note that they may intersect with this rent itself
+    List<Rent> getIntersectingRents =
+        rentRepository.getIntersectingRentsOfItem(
+            rent.getItem(), request.newStartTime(), request.newEndTime());
+    if (getIntersectingRents.size() > 1
+        || getIntersectingRents.size() == 1
+            && getIntersectingRents.get(0).getId() != rent.getId()) {
+      throw new VerificationFailedException(
+          "The new time bounds intersect with already existing rent(-s) of the same item");
+    }
+
+    // Verify time bounds
+    verifyRentStartEnd(request.newStartTime(), request.newEndTime(), rent).throwIfInvalid();
+
+    rent.setPlannedStart(request.newStartTime());
+    rent.setPlannedEnd(request.newEndTime());
+
+    rentRepository.save(rent);
+  }
+
+  // region Time-related rent verification
   private VerificationResult verifyRentStartEnd(Instant start, Instant end, Rent rent) {
     Duration rentDuration = Duration.between(start, end);
     long rentDurationMinutes = rentDuration.toMinutes();
@@ -232,4 +268,5 @@ public class RentService {
     if (!error.equals(NO_ERROR)) return VerificationResult.buildInvalid(error);
     else return VerificationResult.buildValid();
   }
+  // endregion
 }
