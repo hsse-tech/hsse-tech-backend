@@ -25,7 +25,7 @@ public class PaymentDeleteRentProcessor implements DeleteRentProcessor {
     var rent = deleteRentData.rent();
     var targetItem = rent.getItem();
     var rentCost = RentCostCalculator.calculate(
-            targetItem, deleteRentData.rent().getStartAt(), deleteRentData.rent().getEndedAt())
+            targetItem, deleteRentData.rent().getPlannedStart(), deleteRentData.rent().getPlannedEnd())
             .negate();
     var renter = rent.getRenter();
     var wallet = renter.getWallet();

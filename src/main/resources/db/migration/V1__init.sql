@@ -10,7 +10,7 @@ CREATE CAST (varchar AS transaction_status) WITH INOUT AS IMPLICIT;
 CREATE TABLE item_type
 (
     id                          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    cost                        NUMERIC(9, 2) NOT NULL CHECK (cost BETWEEN 0 AND 1000000.00),
+    cost                        NUMERIC(9, 2) NOT NULL CHECK (cost BETWEEN -1000000.00 AND 1000000.00),
     display_name                TEXT          NOT NULL UNIQUE,
     max_rent_time_minutes       INT           NULL,
     is_photo_required_on_finish BOOLEAN          DEFAULT FALSE
@@ -50,7 +50,7 @@ CREATE TABLE rent
     id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     "from"     TIMESTAMP NOT NULL,
     "to"       TIMESTAMP NOT NULL,
-    item_id    UUID      NOT NULL REFERENCES item (id),
+    item_id    UUID      NOT NULL REFERENCES item (id) ON DELETE CASCADE,
     started_at TIMESTAMP,
     ended_at   TIMESTAMP,
     user_id    UUID      NOT NULL REFERENCES human_user_passport (original_id) ON DELETE CASCADE
@@ -66,7 +66,7 @@ CREATE TABLE wallet
 CREATE TABLE transaction
 (
     id          UUID PRIMARY KEY            DEFAULT gen_random_uuid(),
-    amount      NUMERIC(9, 2)      NOT NULL CHECK (amount BETWEEN 0 AND 1000000.00),
+    amount      NUMERIC(9, 2)      NOT NULL CHECK (amount BETWEEN -1000000.00 AND 1000000.00),
     status      transaction_status NOT NULL DEFAULT 'IN_PROCESS',
     name        TEXT               NOT NULL,
     description TEXT               NULL,

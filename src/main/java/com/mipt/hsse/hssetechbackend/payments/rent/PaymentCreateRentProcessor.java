@@ -30,7 +30,7 @@ public class PaymentCreateRentProcessor implements CreateRentProcessor {
     var rent = createRentData.rent();
     var targetItem = rent.getItem();
     var rentCost = RentCostCalculator.calculate(
-            targetItem, createRentData.rent().getStartAt(), createRentData.rent().getEndedAt());
+            targetItem, createRentData.rent().getPlannedStart(), createRentData.rent().getPlannedEnd());
     var renter = rent.getRenter();
     var wallet = renter.getWallet();
 
