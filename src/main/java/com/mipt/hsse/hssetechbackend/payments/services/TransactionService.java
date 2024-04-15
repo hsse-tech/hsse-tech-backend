@@ -19,11 +19,14 @@ public class TransactionService implements TransactionServiceBase {
 
   private final JpaWalletRepository jpaWalletRepository;
   private final JpaTransactionRepository jpaTransactionRepository;
+  private final WalletService walletService;
 
   public TransactionService(JpaWalletRepository jpaWalletRepository,
-                            JpaTransactionRepository jpaTransactionRepository) {
+                            JpaTransactionRepository jpaTransactionRepository,
+                            WalletService walletService) {
     this.jpaWalletRepository = jpaWalletRepository;
     this.jpaTransactionRepository = jpaTransactionRepository;
+    this.walletService = walletService;
   }
 
   @Override
@@ -39,10 +42,8 @@ public class TransactionService implements TransactionServiceBase {
     var transaction = new Transaction(transactionInfo.amount(), transactionInfo.name(), transactionInfo.description().orElse(null));
 
     transaction.setWallet(wallet);
-    wallet.setBalance(wallet.getBalance().subtract(transactionInfo.amount()));
 
     jpaTransactionRepository.save(transaction);
-    jpaWalletRepository.save(wallet);
 
     return transaction;
   }
@@ -58,5 +59,21 @@ public class TransactionService implements TransactionServiceBase {
     jpaTransactionRepository.save(targetTransaction);
 
     return targetTransaction;
+  }
+
+  @Override
+  @Transactional(propagation = Propagation.REQUIRED)
+  public void commitTransaction(UUID id) {
+    var target = jpaTransactionRepository.findById(id).orElseThrow(WalletNotFoundException::new);
+    var targetWallet = target.getWallet();
+    walletService.changeWalletBalanceOn(targetWallet.getId(), target.getAmount().negate());
+    target.setStatus(ClientTransactionStatus.SUCCESS);
+
+    jpaTransactionRepository.save(target);
+  }
+
+  @Override
+  public void failTransaction(UUID id) {
+
   }
 }

@@ -11,12 +11,12 @@ import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepos
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaUserRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaWalletRepository;
 import com.mipt.hsse.hssetechbackend.payments.exceptions.WalletNotFoundException;
-import com.mipt.hsse.hssetechbackend.payments.exceptions.WalletUpdatingException;
 import com.mipt.hsse.hssetechbackend.payments.services.dto.TransactionInfo;
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,10 +49,6 @@ public class TransactionServiceCreatingTransactionTest extends DatabaseSuite {
 
   @BeforeEach
   public void setUp() {
-    passportRepository.deleteAll();
-    userRepository.deleteAll();
-    walletRepository.deleteAll();
-
     var testUser = new User("test");
     var testUserPassport = new HumanUserPassport(123L, "Test", "User", "test@phystech.edu", testUser);
     testWallet = new Wallet();
@@ -66,6 +62,13 @@ public class TransactionServiceCreatingTransactionTest extends DatabaseSuite {
     walletRepository.save(testWallet);
   }
 
+  @AfterEach
+  public void clear() {
+    passportRepository.deleteAll();
+    userRepository.deleteAll();
+    walletRepository.deleteAll();
+  }
+
   @Test
   public void testTransactionCreation() {
     var transactionInfo = new TransactionInfo(BigDecimal.valueOf(50.00), testWallet.getId(), "Гель для душа", Optional.of("О полмолив, мой нежный гель"));
@@ -73,7 +76,7 @@ public class TransactionServiceCreatingTransactionTest extends DatabaseSuite {
     Transaction resultTrans = transactionService.createTransaction(transactionInfo);
 
     assertNotNull(resultTrans);
-    assertEquals(50, walletRepository.findAll().get(0).getBalance());
+    assertEquals(100, walletRepository.findAll().get(0).getBalance());
     assertEquals(testWallet.getId(), resultTrans.getWallet().getId());
   }
 
@@ -88,13 +91,6 @@ public class TransactionServiceCreatingTransactionTest extends DatabaseSuite {
   public void testTransactionCreationDescriptionEmpty() {
     var transactionInfo = new TransactionInfo(BigDecimal.valueOf(50.00), testWallet.getId(), "Гель для душа", Optional.empty());
     assertDoesNotThrow(() -> transactionService.createTransaction(transactionInfo));
-    assertEquals(50, walletRepository.findAll().get(0).getBalance());
-  }
-
-  @Test
-  public void testTransactionNotEnoughMoney() {
-    var transactionInfo = new TransactionInfo(BigDecimal.valueOf(150.00), testWallet.getId(), "Гель для душа", Optional.of("О полмолив, мой нежный гель"));
-
-    assertThrows(WalletUpdatingException.class, () -> transactionService.createTransaction(transactionInfo));
+    assertEquals(100, walletRepository.findAll().get(0).getBalance());
   }
 }
