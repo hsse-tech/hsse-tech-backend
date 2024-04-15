@@ -19,6 +19,8 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.UUID;
+
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,15 +58,18 @@ class ConfirmRentFinishTest extends DatabaseSuite {
 
   @BeforeEach
   void save() {
-    itemTypeRepository.deleteAll();
-    itemRepository.deleteAll();
-    userRepository.deleteAll();
-    humanUserPassportRepository.deleteAll();
-
     humanUserPassportRepository.save(userPassport);
     userRepository.save(user);
     itemTypeRepository.save(itemType);
     itemRepository.save(item);
+  }
+
+  @AfterEach
+  public void clear() {
+    itemTypeRepository.deleteAll();
+    itemRepository.deleteAll();
+    userRepository.deleteAll();
+    humanUserPassportRepository.deleteAll();
   }
 
   @Test
