@@ -31,7 +31,7 @@ import static com.mipt.hsse.hssetechbackend.BigDecimalHelper.*;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-@Import({TransactionService.class})
+@Import({TransactionService.class, WalletService.class})
 public class TransactionServiceCreatingTransactionTest extends DatabaseSuite {
   @Autowired
   private JpaUserRepository userRepository;

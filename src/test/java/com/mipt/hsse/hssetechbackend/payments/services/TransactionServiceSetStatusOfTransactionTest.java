@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @DataJpaTest
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import({TransactionService.class})
+@Import({TransactionService.class, WalletService.class})
 public class TransactionServiceSetStatusOfTransactionTest extends DatabaseSuite {
   @Autowired
   private JpaUserRepository userRepository;

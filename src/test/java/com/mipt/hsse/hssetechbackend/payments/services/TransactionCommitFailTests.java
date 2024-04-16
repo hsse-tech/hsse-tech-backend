@@ -68,7 +68,7 @@ public class TransactionCommitFailTests extends DatabaseSuite {
   }
 
   @Test
-  public void testCommitTransaction() {
+  public void testCommitTransaction() throws TransactionManipulationException {
     var testTransaction = new Transaction(BigDecimal.valueOf(50), "Test", null);
     testTransaction.setWallet(testWallet);
     transactionRepository.save(testTransaction);
@@ -84,7 +84,8 @@ public class TransactionCommitFailTests extends DatabaseSuite {
     testTransaction.setWallet(testWallet);
     transactionRepository.save(testTransaction);
 
-    assertThrows(WalletUpdatingException.class, () -> transactionService.commitTransaction(testTransaction.getId()));
+    assertThrows(WalletUpdatingException.class,
+            () -> transactionService.commitTransaction(testTransaction.getId()));
     assertEquals(ClientTransactionStatus.IN_PROCESS, transactionRepository.findAll().get(0).getStatus());
   }
 
@@ -95,6 +96,51 @@ public class TransactionCommitFailTests extends DatabaseSuite {
     testTransaction.setStatus(ClientTransactionStatus.SUCCESS);
     transactionRepository.save(testTransaction);
 
-    assertThrows(TransactionManipulationException.class, () -> transactionService.commitTransaction(testTransaction.getId()));
+    assertThrows(TransactionManipulationException.class,
+            () -> transactionService.commitTransaction(testTransaction.getId()));
+  }
+
+  @Test
+  public void testCommitAlreadyFailed() {
+    var testTransaction = new Transaction(BigDecimal.valueOf(300), "Test", null);
+    testTransaction.setWallet(testWallet);
+    testTransaction.setStatus(ClientTransactionStatus.FAILED);
+    transactionRepository.save(testTransaction);
+
+    assertThrows(TransactionManipulationException.class,
+            () -> transactionService.commitTransaction(testTransaction.getId()));
+  }
+
+  @Test
+  public void testFailTransaction() throws TransactionManipulationException {
+    var testTransaction = new Transaction(BigDecimal.valueOf(300), "Test", null);
+    testTransaction.setWallet(testWallet);
+    testTransaction.setStatus(ClientTransactionStatus.IN_PROCESS);
+    transactionRepository.save(testTransaction);
+
+    transactionService.failTransaction(testTransaction.getId());
+    assertEquals(ClientTransactionStatus.FAILED, transactionRepository.findAll().get(0).getStatus());
+  }
+
+  @Test
+  public void testFailWhenAlreadySuccess() {
+    var testTransaction = new Transaction(BigDecimal.valueOf(300), "Test", null);
+    testTransaction.setWallet(testWallet);
+    testTransaction.setStatus(ClientTransactionStatus.SUCCESS);
+    transactionRepository.save(testTransaction);
+
+    assertThrows(TransactionManipulationException.class,
+            () -> transactionService.failTransaction(testTransaction.getId()));
+  }
+
+  @Test
+  public void testFailWhenAlreadyFailed() {
+    var testTransaction = new Transaction(BigDecimal.valueOf(300), "Test", null);
+    testTransaction.setWallet(testWallet);
+    testTransaction.setStatus(ClientTransactionStatus.FAILED);
+    transactionRepository.save(testTransaction);
+
+    assertThrows(TransactionManipulationException.class,
+            () -> transactionService.failTransaction(testTransaction.getId()));
   }
 }
