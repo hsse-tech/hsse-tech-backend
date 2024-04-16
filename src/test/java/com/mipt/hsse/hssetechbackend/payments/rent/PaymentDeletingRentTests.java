@@ -4,6 +4,7 @@ import com.mipt.hsse.hssetechbackend.DatabaseSuite;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.*;
 import com.mipt.hsse.hssetechbackend.payments.services.TransactionService;
+import com.mipt.hsse.hssetechbackend.payments.services.WalletService;
 import com.mipt.hsse.hssetechbackend.rent.rentprocessing.deleterentprocessing.DeleteRentProcessData;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-@Import({PaymentDeleteRentProcessor.class, TransactionService.class})
+@Import({PaymentDeleteRentProcessor.class, TransactionService.class, WalletService.class})
 public class PaymentDeletingRentTests extends DatabaseSuite {
   @Autowired
   private JpaUserRepository userRepository;
