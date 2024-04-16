@@ -53,20 +53,18 @@ class ItemControllerTest extends DatabaseSuite {
   private ItemType itemType;
 
   @BeforeEach
-  public void setupRestTemplate() {
+  void setupRestTemplate() {
     rest.getRestTemplate().setRequestFactory(new HttpComponentsClientHttpRequestFactory());
   }
 
   @BeforeEach
-  public void createItemType() {
+  void createItemType() {
     itemType = itemTypeRepository.save(new ItemType(BigDecimal.ZERO, "Item type name", 60, false));
   }
 
   @AfterEach
-  public void clear() {
-    rentRepository.deleteAll();
+  void clear() {
     itemTypeRepository.deleteAll();
-    jpaHumanUserPassportRepository.deleteAll();
   }
 
   @Test
