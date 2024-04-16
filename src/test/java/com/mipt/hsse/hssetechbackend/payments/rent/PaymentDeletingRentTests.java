@@ -5,6 +5,7 @@ import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.*;
 import com.mipt.hsse.hssetechbackend.payments.services.TransactionService;
 import com.mipt.hsse.hssetechbackend.rent.rentprocessing.deleterentprocessing.DeleteRentProcessData;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,13 +52,6 @@ public class PaymentDeletingRentTests extends DatabaseSuite {
 
   @BeforeEach
   public void setUp() {
-    userRepository.deleteAll();
-    humanUserPassportRepository.deleteAll();
-    itemRepository.deleteAll();
-    itemTypeRepository.deleteAll();
-    walletRepository.deleteAll();
-    transactionRepository.deleteAll();
-
     testRenter = new HumanUserPassport(123L, "Ivan", "Ivanov", "phystech@phystech.edu", new User("user"));
     var testItemType = new ItemType(BigDecimal.valueOf(100), "Молоток", null, false);
     testItem = new Item("Молоток с оранжевой рукоятью", testItemType);
@@ -74,6 +68,16 @@ public class PaymentDeletingRentTests extends DatabaseSuite {
     testRenter.setWallet(testWallet);
   }
 
+  @AfterEach
+  public void clear() {
+    userRepository.deleteAll();
+    humanUserPassportRepository.deleteAll();
+    itemRepository.deleteAll();
+    itemTypeRepository.deleteAll();
+    walletRepository.deleteAll();
+    transactionRepository.deleteAll();
+  }
+  
   @Test
   public void testDeleteShouldPass() {
     var processData = new DeleteRentProcessData(

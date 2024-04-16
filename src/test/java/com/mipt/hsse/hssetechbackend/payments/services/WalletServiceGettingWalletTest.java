@@ -14,6 +14,7 @@ import com.mipt.hsse.hssetechbackend.payments.exceptions.WalletNotFoundException
 import java.math.BigDecimal;
 import java.util.UUID;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,10 +45,6 @@ public class WalletServiceGettingWalletTest extends DatabaseSuite {
 
   @BeforeEach
   public void setUp() {
-    passportRepository.deleteAll();
-    userRepository.deleteAll();
-    walletRepository.deleteAll();
-
     var testUser = new User("test");
     var testUserPassport = new HumanUserPassport(123L, "Test", "User", "test@phystech.edu", testUser);
     testWallet = new Wallet();
@@ -59,6 +56,13 @@ public class WalletServiceGettingWalletTest extends DatabaseSuite {
     passportRepository.save(testUserPassport);
     userRepository.save(testUser);
     walletRepository.save(testWallet);
+  }
+
+  @AfterEach
+  public void clear() {
+    passportRepository.deleteAll();
+    userRepository.deleteAll();
+    walletRepository.deleteAll();
   }
 
   @Test

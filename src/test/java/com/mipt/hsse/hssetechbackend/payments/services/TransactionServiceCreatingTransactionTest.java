@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,10 +50,6 @@ public class TransactionServiceCreatingTransactionTest extends DatabaseSuite {
 
   @BeforeEach
   public void setUp() {
-    passportRepository.deleteAll();
-    userRepository.deleteAll();
-    walletRepository.deleteAll();
-
     var testUser = new User("test");
     var testUserPassport = new HumanUserPassport(123L, "Test", "User", "test@phystech.edu", testUser);
     testWallet = new Wallet();
@@ -66,6 +63,13 @@ public class TransactionServiceCreatingTransactionTest extends DatabaseSuite {
     walletRepository.save(testWallet);
   }
 
+  @AfterEach
+  public void clear() {
+    passportRepository.deleteAll();
+    userRepository.deleteAll();
+    walletRepository.deleteAll();
+  }
+  
   @Test
   public void testTransactionCreation() {
     var transactionInfo = new TransactionInfo(BigDecimal.valueOf(50.00), testWallet.getId(), "Гель для душа", Optional.of("О полмолив, мой нежный гель"));
