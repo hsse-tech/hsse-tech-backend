@@ -1,8 +1,8 @@
 package com.mipt.hsse.hssetechbackend.payments.rent;
 
 import com.mipt.hsse.hssetechbackend.auxiliary.VerificationResult;
-import com.mipt.hsse.hssetechbackend.data.entities.ClientTransactionStatus;
 import com.mipt.hsse.hssetechbackend.payments.RentCostCalculator;
+import com.mipt.hsse.hssetechbackend.payments.exceptions.TransactionManipulationException;
 import com.mipt.hsse.hssetechbackend.payments.services.TransactionService;
 import com.mipt.hsse.hssetechbackend.payments.services.dto.TransactionInfo;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.RentProcessingException;
@@ -34,7 +34,12 @@ public class PaymentDeleteRentProcessor implements DeleteRentProcessor {
 
     var transInfo = new TransactionInfo(rentCost, wallet.getId(), transName, Optional.empty());
     var targetTrans = transactionService.createTransaction(transInfo);
-    transactionService.setTransactionStatus(targetTrans.getId(), ClientTransactionStatus.SUCCESS);
+
+    try {
+      transactionService.commitTransaction(targetTrans.getId());
+    } catch (TransactionManipulationException e) {
+      return VerificationResult.buildInvalid("Failed to commit transaction");
+    }
 
     return VerificationResult.buildValid();
   }

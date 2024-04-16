@@ -51,18 +51,6 @@ public class TransactionService implements TransactionServiceBase {
 
   @Override
   @Transactional(propagation = Propagation.REQUIRED)
-  public Transaction setTransactionStatus(UUID id, ClientTransactionStatus status) {
-    var targetTransaction = jpaTransactionRepository.findById(id)
-            .orElseThrow(TransactionNotFoundException::new);
-
-    targetTransaction.setStatus(status);
-    jpaTransactionRepository.save(targetTransaction);
-
-    return targetTransaction;
-  }
-
-  @Override
-  @Transactional(propagation = Propagation.REQUIRED)
   public void commitTransaction(UUID id) throws TransactionManipulationException {
     var target = jpaTransactionRepository.findById(id)
             .orElseThrow(TransactionNotFoundException::new);
