@@ -41,9 +41,10 @@ public class TransactionCommitFailTests extends DatabaseSuite {
   @Autowired
   private TransactionService transactionService;
 
-  private Wallet testWallet;
   @Autowired
   private JpaTransactionRepository transactionRepository;
+
+  private Wallet testWallet;
 
   @BeforeEach
   public void setUp() {

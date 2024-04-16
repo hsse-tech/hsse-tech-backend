@@ -31,7 +31,7 @@ public class TopUpBalanceProvider {
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public TopUpSession topUpBalance(UUID walletId, BigDecimal amount) {
     var transaction = transactionService.createTransaction(
-            new TransactionInfo(amount, walletId, TOP_UP_TRANSACTION_NAME, Optional.empty()));
+            new TransactionInfo(amount.negate(), walletId, TOP_UP_TRANSACTION_NAME, Optional.empty()));
 
     var topUpSessionInfo = acquiringSessionInitializer.initialize(
             new SessionParams(convertToKopeck(amount), transaction.getId().toString()));

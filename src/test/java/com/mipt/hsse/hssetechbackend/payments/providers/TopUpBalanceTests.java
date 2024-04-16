@@ -95,7 +95,7 @@ public class TopUpBalanceTests extends DatabaseSuite {
     var targetTransaction = transactionRepository.findAll().get(0);
     var targetWallet = walletRepository.findAll().get(0);
 
-    assertEquals(100, targetTransaction.getAmount());
+    assertEquals(-100, targetTransaction.getAmount());
     assertEquals(ClientTransactionStatus.IN_PROCESS, targetTransaction.getStatus());
     assertEquals(100, targetWallet.getBalance());
 
@@ -119,7 +119,7 @@ public class TopUpBalanceTests extends DatabaseSuite {
     var targetTransaction = transactionRepository.findAll().get(0);
     var targetWallet = walletRepository.findAll().get(0);
 
-    assertEquals(100, targetTransaction.getAmount());
+    assertEquals(-100, targetTransaction.getAmount());
     assertEquals(ClientTransactionStatus.FAILED, targetTransaction.getStatus());
     assertEquals(100, targetWallet.getBalance());
 
