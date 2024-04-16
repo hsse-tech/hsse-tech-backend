@@ -8,7 +8,7 @@ import jakarta.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
 
 public record CreateItemTypeRequest(
-    @PositiveOrZero @NotNull BigDecimal cost,
+    @JsonProperty("cost") @PositiveOrZero @NotNull BigDecimal cost,
     @JsonProperty("display_name") @NotNull @NotEmpty String displayName,
-    @Positive @JsonProperty("max_rent_time_minutes") Integer maxRentTimeMinutes,
+    @JsonProperty("max_rent_time_minutes") @Positive  Integer maxRentTimeMinutes,
     @JsonProperty("is_photo_confirmation_required") boolean isPhotoConfirmationRequired) {}

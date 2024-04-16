@@ -11,12 +11,11 @@ import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.VerificationFailedException;
 import com.mipt.hsse.hssetechbackend.rent.rentprocessing.createrentprocessing.UnoccupiedTimeCreateRentProcessor;
 import com.mipt.hsse.hssetechbackend.rent.services.RentService;
+import com.mipt.hsse.hssetechbackend.testsauxiliary.EqualsManager;
 import java.math.BigDecimal;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,12 +52,6 @@ class UpdateRentTest extends DatabaseSuite {
 
   @BeforeEach
   void save() {
-    rentRepository.deleteAll();
-    itemTypeRepository.deleteAll();
-    itemRepository.deleteAll();
-    userRepository.deleteAll();
-    humanUserPassportRepository.deleteAll();
-
     humanUserPassportRepository.save(userPassport);
     userRepository.save(user);
     itemTypeRepository.save(itemType);
@@ -89,8 +82,8 @@ class UpdateRentTest extends DatabaseSuite {
     rentService.updateRent(rentId, new UpdateRentRequest(newStartTime, newEndTime));
 
     Rent retrievedRent = rentService.findById(rentId);
-    assertTrue(equalsInstantsWithDelta(retrievedRent.getPlannedStart(), newStartTime));
-    assertTrue(equalsInstantsWithDelta(retrievedRent.getPlannedEnd(), newEndTime));
+    assertTrue(EqualsManager.equalsInstantsWithDelta(retrievedRent.getPlannedStart(), newStartTime));
+    assertTrue(EqualsManager.equalsInstantsWithDelta(retrievedRent.getPlannedEnd(), newEndTime));
   }
 
   @Test
@@ -161,9 +154,4 @@ class UpdateRentTest extends DatabaseSuite {
         VerificationFailedException.class, () -> rentService.updateRent(rentId, updateRentRequest));
   }
 
-  // Compare Instants with delta due to Instant.now() inaccuracies
-  // Two instants are considered equal if the difference is less than 1 millisecond
-  private boolean equalsInstantsWithDelta(Instant a, Instant b) {
-    return Duration.between(a, b).toMillis() == 0;
-  }
 }

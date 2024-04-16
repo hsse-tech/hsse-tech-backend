@@ -12,6 +12,6 @@ import java.math.BigDecimal;
  */
 public record UpdateItemTypeRequest(
     @JsonProperty("new_display_name") String newDisplayName,
-    @PositiveOrZero @JsonProperty("new_cost") BigDecimal newCost,
+    @JsonProperty("new_cost") @PositiveOrZero BigDecimal newCost,
     @JsonProperty("is_photo_confirmation_required") Boolean isPhotoConfirmationRequired,
-    @Positive @JsonProperty("max_rent_time_minutes") Integer newMaxRentTimeMinutes) {}
+    @JsonProperty("max_rent_time_minutes") @Positive Integer newMaxRentTimeMinutes) {}

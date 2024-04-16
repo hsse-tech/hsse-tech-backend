@@ -59,13 +59,6 @@ class RentControllerTest extends DatabaseSuite {
 
   @BeforeEach
   public void createTestObjects() {
-    rentRepository.deleteAll();
-    itemRepository.deleteAll();
-    itemTypeRepository.deleteAll();
-    jpaHumanUserPassportRepository.deleteAll();
-    userRepository.deleteAll();
-
-
     ItemType itemType = itemTypeRepository.save(new ItemType(BigDecimal.ZERO, "Item type name", 120, false));
     item = itemRepository.save(new Item("Item name", itemType));
 

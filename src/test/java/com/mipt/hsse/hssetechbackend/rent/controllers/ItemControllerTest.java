@@ -52,16 +52,18 @@ class ItemControllerTest extends DatabaseSuite {
   private ItemType itemType;
 
   @BeforeEach
-  public void setupRestTemplate() {
+  void setupRestTemplate() {
     rest.getRestTemplate().setRequestFactory(new HttpComponentsClientHttpRequestFactory());
   }
 
   @BeforeEach
-  public void createItemType() {
-    itemTypeRepository.deleteAll();
-
-
+  void createItemType() {
     itemType = itemTypeRepository.save(new ItemType(BigDecimal.ZERO, "Item type name", 60, false));
+  }
+
+  @AfterEach
+  void clear() {
+    itemTypeRepository.deleteAll();
   }
 
   @Test
