@@ -14,7 +14,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.UUID;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,18 +50,15 @@ class DeleteRentTest extends DatabaseSuite {
 
   @BeforeEach
   void save() {
-    humanUserPassportRepository.save(userPassport);
-    userRepository.save(user);
-    itemTypeRepository.save(itemType);
-    itemRepository.save(item);
-  }
-
-  @AfterEach
-  void clear() {
     itemTypeRepository.deleteAll();
     itemRepository.deleteAll();
     userRepository.deleteAll();
     humanUserPassportRepository.deleteAll();
+
+    humanUserPassportRepository.save(userPassport);
+    userRepository.save(user);
+    itemTypeRepository.save(itemType);
+    itemRepository.save(item);
   }
 
   @Test

@@ -10,7 +10,7 @@ import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemTypeReq
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import java.math.BigDecimal;
 import java.util.UUID;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -29,7 +29,7 @@ class ItemTypeServiceTest extends DatabaseSuite {
   @Autowired private ItemTypeService itemTypeService;
   @Autowired private JpaItemTypeRepository itemTypeRepository;
 
-  @AfterEach
+  @BeforeEach
   void clear() {
     itemTypeRepository.deleteAll();
   }
