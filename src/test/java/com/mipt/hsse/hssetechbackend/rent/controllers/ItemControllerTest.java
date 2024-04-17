@@ -225,4 +225,32 @@ class ItemControllerTest {
     assertNotNull(imageBytes);
     assertArrayEquals(initBytes, imageBytes.bytes());
   }
+
+  @Test
+  void testProvideAccessToItemEndpoint() throws Exception {
+    UUID itemId = UUID.randomUUID();
+
+    when(itemService.existsById(itemId)).thenReturn(true);
+
+    mockMvc
+        .perform(post(BASE_MAPPING + "/{item_id}/try-open", itemId.toString()))
+        .andDo(print())
+        .andExpect(status().isOk());
+
+    verify(itemService).provideAccessToItem(itemId);
+  }
+
+  @Test
+  void testProvideAccessToItemIfDenied() throws Exception {
+    UUID itemId = UUID.randomUUID();
+
+    when(itemService.existsById(itemId)).thenReturn(false);
+
+    mockMvc
+        .perform(post(BASE_MAPPING + "/{item_id}/try-open", itemId.toString()))
+        .andDo(print())
+        .andExpect(status().isBadRequest());
+
+    verify(itemService, never()).provideAccessToItem(itemId);
+  }
 }
