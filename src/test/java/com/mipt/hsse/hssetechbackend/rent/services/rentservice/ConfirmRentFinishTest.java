@@ -20,7 +20,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,27 +33,24 @@ import org.springframework.transaction.annotation.Transactional;
 
 @DataJpaTest
 @Import({
-    RentService.class,
-    ConfirmationPhotoRepositoryOnDrive.class,
-    UnoccupiedTimeCreateRentProcessor.class
+  RentService.class,
+  ConfirmationPhotoRepositoryOnDrive.class,
+  UnoccupiedTimeCreateRentProcessor.class
 })
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class ConfirmRentFinishTest extends DatabaseSuite {
-  @Autowired private JpaItemRepository itemRepository;
-  @Autowired private JpaItemTypeRepository itemTypeRepository;
-  @Autowired private JpaUserRepository userRepository;
-  @Autowired private JpaHumanUserPassportRepository humanUserPassportRepository;
-
-  @MockBean private JpaRentRepository rentRepository;
-  @MockBean private ConfirmationPhotoRepository photoRepository;
-
   private final User user = new User("test");
   private final HumanUserPassport userPassport =
       new HumanUserPassport(123L, "Test", "User", "test@phystech.edu", user);
   private final ItemType itemType = new ItemType(BigDecimal.ZERO, "TestItemType", 60, true);
   private final Item item = new Item("TestItem", itemType);
-
+  @Autowired private JpaItemRepository itemRepository;
+  @Autowired private JpaItemTypeRepository itemTypeRepository;
+  @Autowired private JpaUserRepository userRepository;
+  @Autowired private JpaHumanUserPassportRepository humanUserPassportRepository;
+  @MockBean private JpaRentRepository rentRepository;
+  @MockBean private ConfirmationPhotoRepository photoRepository;
   @Autowired private RentService rentService;
 
   @BeforeEach
@@ -75,7 +71,8 @@ class ConfirmRentFinishTest extends DatabaseSuite {
 
   @Test
   void testConfirmRent() throws IOException, NoSuchAlgorithmException {
-    Rent rent = new Rent(Instant.now(), Instant.now().plus(1, ChronoUnit.HOURS), userPassport, item);
+    Rent rent =
+        new Rent(Instant.now(), Instant.now().plus(1, ChronoUnit.HOURS), userPassport, item);
     rent.setFactStart(Instant.now());
 
     when(rentRepository.findById(any())).thenReturn(Optional.of(rent));
@@ -100,19 +97,22 @@ class ConfirmRentFinishTest extends DatabaseSuite {
 
   @Test
   void testFailConfirmNotStartedRent() {
-    Rent rent = new Rent(Instant.now(), Instant.now().plus(1, ChronoUnit.HOURS), userPassport, item);
+    Rent rent =
+        new Rent(Instant.now(), Instant.now().plus(1, ChronoUnit.HOURS), userPassport, item);
 
     when(rentRepository.findById(any())).thenReturn(Optional.of(rent));
 
     UUID uuid = UUID.randomUUID();
     BytesArray bytesArray = new BytesArray(new byte[] {0, 1, 2, 3});
     PinPhotoConfirmationRequest request = new PinPhotoConfirmationRequest(bytesArray);
-    assertThrows(VerificationFailedException.class, () -> rentService.confirmRentFinish(uuid, request));
+    assertThrows(
+        VerificationFailedException.class, () -> rentService.confirmRentFinish(uuid, request));
   }
 
   @Test
   void testFailedConfirmAlreadyEndedRent() {
-    Rent rent = new Rent(Instant.now(), Instant.now().plus(1, ChronoUnit.HOURS), userPassport, item);
+    Rent rent =
+        new Rent(Instant.now(), Instant.now().plus(1, ChronoUnit.HOURS), userPassport, item);
     rent.setFactStart(Instant.now());
     rent.setFactEnd(Instant.now().plus(20, ChronoUnit.MINUTES));
 
@@ -121,7 +121,8 @@ class ConfirmRentFinishTest extends DatabaseSuite {
     UUID uuid = UUID.randomUUID();
     BytesArray bytesArray = new BytesArray(new byte[] {0, 1, 2, 3});
     PinPhotoConfirmationRequest request = new PinPhotoConfirmationRequest(bytesArray);
-    assertThrows(VerificationFailedException.class, () -> rentService.confirmRentFinish(uuid, request));
+    assertThrows(
+        VerificationFailedException.class, () -> rentService.confirmRentFinish(uuid, request));
   }
 
   @Test
@@ -131,7 +132,12 @@ class ConfirmRentFinishTest extends DatabaseSuite {
     itemTypeRepository.save(itemTypeWithoutConfirm);
     itemRepository.save(itemWithoutConfirm);
 
-    Rent rent = new Rent(Instant.now(), Instant.now().plus(1, ChronoUnit.HOURS), userPassport, itemWithoutConfirm);
+    Rent rent =
+        new Rent(
+            Instant.now(),
+            Instant.now().plus(1, ChronoUnit.HOURS),
+            userPassport,
+            itemWithoutConfirm);
     rent.setFactStart(Instant.now());
 
     when(rentRepository.findById(any())).thenReturn(Optional.of(rent));
@@ -139,12 +145,14 @@ class ConfirmRentFinishTest extends DatabaseSuite {
     UUID uuid = UUID.randomUUID();
     BytesArray bytesArray = new BytesArray(new byte[] {0, 1, 2, 3});
     PinPhotoConfirmationRequest request = new PinPhotoConfirmationRequest(bytesArray);
-    assertThrows(VerificationFailedException.class, () -> rentService.confirmRentFinish(uuid, request));
+    assertThrows(
+        VerificationFailedException.class, () -> rentService.confirmRentFinish(uuid, request));
   }
 
   @Test
   void testFailConfirmSecondTime() {
-    Rent rent = new Rent(Instant.now(), Instant.now().plus(1, ChronoUnit.HOURS), userPassport, item);
+    Rent rent =
+        new Rent(Instant.now(), Instant.now().plus(1, ChronoUnit.HOURS), userPassport, item);
     rent.setFactStart(Instant.now());
 
     when(rentRepository.findById(any())).thenReturn(Optional.of(rent));
@@ -153,6 +161,8 @@ class ConfirmRentFinishTest extends DatabaseSuite {
     BytesArray bytesArray = new BytesArray(new byte[] {0, 1, 2, 3});
     PinPhotoConfirmationRequest request = new PinPhotoConfirmationRequest(bytesArray);
 
-    assertThrows(VerificationFailedException.class, () -> rentService.confirmRentFinish(UUID.randomUUID(), request));
+    assertThrows(
+        VerificationFailedException.class,
+        () -> rentService.confirmRentFinish(UUID.randomUUID(), request));
   }
 }

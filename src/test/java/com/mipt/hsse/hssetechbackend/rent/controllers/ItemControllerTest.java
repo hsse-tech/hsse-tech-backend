@@ -9,7 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.mipt.hsse.hssetechbackend.DatabaseSuite;
 import com.mipt.hsse.hssetechbackend.auxiliary.serializablebytesarray.BytesArray;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
@@ -36,14 +35,11 @@ import org.springframework.test.web.servlet.MvcResult;
 @WebMvcTest(ItemController.class)
 @Import(ObjectMapper.class)
 class ItemControllerTest {
+  private static final String BASE_MAPPING = "/api/renting/item";
+  private final ItemType itemType = new ItemType(BigDecimal.ZERO, "Item type name", 60, false);
   @Autowired MockMvc mockMvc;
   @Autowired ObjectMapper objectMapper;
-
   @MockBean private ItemService itemService;
-
-  private static final String BASE_MAPPING = "/api/renting/item";
-
-  private final ItemType itemType = new ItemType(BigDecimal.ZERO, "Item type name", 60, false);
 
   @BeforeEach
   void setupObjectMapper() {

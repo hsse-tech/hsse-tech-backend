@@ -10,7 +10,6 @@ import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemTypeReq
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import java.math.BigDecimal;
 import java.util.UUID;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +58,8 @@ class ItemTypeServiceTest extends DatabaseSuite {
 
     itemTypeService.createItemType(request1);
 
-    assertThrows(DataIntegrityViolationException.class, () -> itemTypeService.createItemType(request2));
+    assertThrows(
+        DataIntegrityViolationException.class, () -> itemTypeService.createItemType(request2));
   }
 
   @Test
@@ -81,7 +81,8 @@ class ItemTypeServiceTest extends DatabaseSuite {
 
     var createRequest = new CreateItemTypeRequest(BigDecimal.valueOf(-1), name, null, false);
 
-    assertThrows(TransactionSystemException.class, () -> itemTypeService.createItemType(createRequest));
+    assertThrows(
+        TransactionSystemException.class, () -> itemTypeService.createItemType(createRequest));
   }
 
   @Test
@@ -95,7 +96,8 @@ class ItemTypeServiceTest extends DatabaseSuite {
     final BigDecimal newCost = BigDecimal.valueOf(200);
     final Boolean newPhotoConfirm = true;
     final Integer newMaxRentTime = 120;
-    var updateItemTypeRequest = new UpdateItemTypeRequest(newName, newCost, newPhotoConfirm, newMaxRentTime);
+    var updateItemTypeRequest =
+        new UpdateItemTypeRequest(newName, newCost, newPhotoConfirm, newMaxRentTime);
     itemTypeService.updateItemType(itemType.getId(), updateItemTypeRequest);
 
     ItemType extractedItemType = itemTypeRepository.findById(itemType.getId()).orElseThrow();
@@ -110,9 +112,10 @@ class ItemTypeServiceTest extends DatabaseSuite {
   void testFailUpdateAbsentItemType() {
     UpdateItemTypeRequest updateItemTypeRequest = new UpdateItemTypeRequest(null, null, null, null);
     assertThrows(
-        EntityNotFoundException.class, () -> itemTypeService.updateItemType(UUID.randomUUID(), updateItemTypeRequest));
+        EntityNotFoundException.class,
+        () -> itemTypeService.updateItemType(UUID.randomUUID(), updateItemTypeRequest));
   }
-  
+
   @Test
   void testEmptyUpdateHasNoEffect() {
     final String name = "Item type name";
@@ -142,7 +145,7 @@ class ItemTypeServiceTest extends DatabaseSuite {
     ItemType itemType = itemTypeService.createItemType(createItemTypeRequest);
 
     itemTypeService.deleteItemType(itemType.getId());
-    
+
     assertTrue(itemTypeRepository.findById(itemType.getId()).isEmpty());
   }
 }

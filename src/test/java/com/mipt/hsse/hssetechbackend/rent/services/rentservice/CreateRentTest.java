@@ -18,7 +18,6 @@ import com.mipt.hsse.hssetechbackend.rent.services.RentService;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,19 +38,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class CreateRentTest extends DatabaseSuite {
-  @Autowired private JpaItemRepository itemRepository;
-  @Autowired private JpaItemTypeRepository itemTypeRepository;
-  @Autowired private JpaUserRepository userRepository;
-  @Autowired private JpaHumanUserPassportRepository humanUserPassportRepository;
-
-  @MockBean private JpaRentRepository rentRepository;
-
   private final User user = new User("test");
   private final HumanUserPassport userPassport =
       new HumanUserPassport(123L, "Test", "User", "test@phystech.edu", user);
   private final ItemType itemType = new ItemType(BigDecimal.ZERO, "TestItemType", 60, false);
   private final Item item = new Item("TestItem", itemType);
-
+  @Autowired private JpaItemRepository itemRepository;
+  @Autowired private JpaItemTypeRepository itemTypeRepository;
+  @Autowired private JpaUserRepository userRepository;
+  @Autowired private JpaHumanUserPassportRepository humanUserPassportRepository;
+  @MockBean private JpaRentRepository rentRepository;
   @Autowired private RentService rentService;
 
   @BeforeEach

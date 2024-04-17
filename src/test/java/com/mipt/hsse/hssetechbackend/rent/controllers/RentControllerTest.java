@@ -9,7 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.mipt.hsse.hssetechbackend.DatabaseSuite;
 import com.mipt.hsse.hssetechbackend.auxiliary.serializablebytesarray.BytesArray;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.*;
@@ -37,18 +36,15 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest(RentController.class)
 @Import(ObjectMapper.class)
 class RentControllerTest {
-  @Autowired MockMvc mockMvc;
-  @Autowired ObjectMapper objectMapper;
-
-  @MockBean private RentService rentService;
-
   private static final String BASE_MAPPING = "/api/renting/rent";
-
   private final ItemType itemType = new ItemType(BigDecimal.ZERO, "Item type name", 120, false);
   private final Item item = new Item("Item name", itemType);
   private final User user = new User("human");
   private final HumanUserPassport userPassport =
       new HumanUserPassport(123L, "Name", "Surname", "email@gmail.com", user);
+  @Autowired MockMvc mockMvc;
+  @Autowired ObjectMapper objectMapper;
+  @MockBean private RentService rentService;
 
   @BeforeEach
   void setupObjectMapper() {
@@ -93,7 +89,6 @@ class RentControllerTest {
 
     mockMvc
         .perform(post(BASE_MAPPING).content(requestStr).contentType(MediaType.APPLICATION_JSON))
-
         .andExpect(status().isBadRequest());
   }
 
@@ -102,7 +97,14 @@ class RentControllerTest {
     Rent rent = new Rent(Instant.now(), Instant.now(), userPassport, item);
     when(rentService.findById(any())).thenReturn(rent);
 
-    var mvcResult= mockMvc.perform(get(BASE_MAPPING + "/{rent_id}", UUID.randomUUID())).andDo(print()).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+    var mvcResult =
+        mockMvc
+            .perform(get(BASE_MAPPING + "/{rent_id}", UUID.randomUUID()))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
     RentDTO retrievedRentDTO = objectMapper.readValue(mvcResult, RentDTO.class);
 
     assertEquals(rent.getFactStart(), retrievedRentDTO.factStart());
@@ -140,15 +142,15 @@ class RentControllerTest {
     doThrow(VerificationFailedException.class).when(rentService).updateRent(any(), any());
 
     UUID uuid = UUID.randomUUID();
-    UpdateRentRequest updateRequest =
-        new UpdateRentRequest(
-            Instant.now(), Instant.now());
+    UpdateRentRequest updateRequest = new UpdateRentRequest(Instant.now(), Instant.now());
     String requestStr = objectMapper.writeValueAsString(updateRequest);
 
-    mockMvc.perform(
-        patch(BASE_MAPPING + "/{id}", uuid)
-            .content(requestStr)
-            .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
+    mockMvc
+        .perform(
+            patch(BASE_MAPPING + "/{id}", uuid)
+                .content(requestStr)
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
