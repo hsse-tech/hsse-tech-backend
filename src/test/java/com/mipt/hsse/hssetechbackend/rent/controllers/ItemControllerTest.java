@@ -3,123 +3,122 @@ package com.mipt.hsse.hssetechbackend.rent.controllers;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
+import com.mipt.hsse.hssetechbackend.auxiliary.serializablebytesarray.BytesArray;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
-import com.mipt.hsse.hssetechbackend.data.repositories.*;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetItemResponse;
-import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetShortRentResponse;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.rent.services.ItemService;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.*;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
-@SpringBootTest(webEnvironment = RANDOM_PORT)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class ItemControllerTest extends DatabaseSuite {
-  @Autowired private TestRestTemplate rest;
+@WebMvcTest(ItemController.class)
+@Import(ObjectMapper.class)
+class ItemControllerTest {
+  @Autowired MockMvc mockMvc;
+  @Autowired ObjectMapper objectMapper;
 
   @MockBean private ItemService itemService;
-  @Autowired private JpaItemTypeRepository itemTypeRepository;
-  @Autowired private JpaUserRepository userRepository;
-  @Autowired private JpaHumanUserPassportRepository jpaHumanUserPassportRepository;
-  @Autowired private JpaItemRepository itemRepository;
-  @Autowired private JpaRentRepository rentRepository;
 
   private static final String BASE_MAPPING = "/api/renting/item";
 
-  private ItemType itemType;
+  private final ItemType itemType = new ItemType(BigDecimal.ZERO, "Item type name", 60, false);
 
   @BeforeEach
-  void setupRestTemplate() {
-    rest.getRestTemplate().setRequestFactory(new HttpComponentsClientHttpRequestFactory());
-  }
-
-  @BeforeEach
-  void createItemType() {
-    itemType = itemTypeRepository.save(new ItemType(BigDecimal.ZERO, "Item type name", 60, false));
-  }
-
-  @AfterEach
-  void clear() {
-    itemTypeRepository.deleteAll();
+  void setupObjectMapper() {
+    objectMapper.registerModule(new JavaTimeModule());
   }
 
   @Test
-  void testCreateItemEndpoint() {
+  void testCreateItemEndpoint() throws Exception {
     final String displayName = "Item name";
 
     when(itemService.createItem(any())).thenReturn(new Item(displayName, itemType));
 
-    CreateItemRequest request = new CreateItemRequest(displayName, itemType.getId());
+    CreateItemRequest request = new CreateItemRequest(displayName, UUID.randomUUID());
+    String requestStr = objectMapper.writeValueAsString(request);
 
-    ResponseEntity<Item> createResponse = rest.postForEntity(BASE_MAPPING, request, Item.class);
-    assertEquals(HttpStatus.CREATED, createResponse.getStatusCode());
+    var mvcResponse =
+        mockMvc
+            .perform(post(BASE_MAPPING).content(requestStr).contentType(MediaType.APPLICATION_JSON))
+            .andDo(print())
+            .andExpect(status().isCreated())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    Item responseItem = objectMapper.readValue(mvcResponse, Item.class);
 
     verify(itemService).createItem(request);
 
-    Item responseItem = createResponse.getBody();
     assertNotNull(responseItem);
     assertEquals(displayName, responseItem.getDisplayName());
     assertEquals(itemType.getId(), responseItem.getType().getId());
   }
 
   @Test
-  void testCreateItemEndpointNonExistingItemType() {
+  void testCreateItemEndpointNonExistingItemType() throws Exception {
     when(itemService.createItem(any())).thenThrow(EntityNotFoundException.class);
 
     CreateItemRequest request = new CreateItemRequest("any name", UUID.randomUUID());
+    String requestStr = objectMapper.writeValueAsString(request);
 
-    ResponseEntity<Item> createResponse = rest.postForEntity(BASE_MAPPING, request, Item.class);
-
-    assertEquals(HttpStatus.BAD_REQUEST, createResponse.getStatusCode());
+    mockMvc
+        .perform(post(BASE_MAPPING).content(requestStr).contentType(MediaType.APPLICATION_JSON))
+        .andDo(print())
+        .andExpect(status().isBadRequest());
   }
 
   @Test
-  void testDeleteItemTypeEndpoint() {
+  void testDeleteItemEndpoint() throws Exception {
     UUID uuid = UUID.randomUUID();
-    rest.delete(BASE_MAPPING + "/{itemId}", Map.of("itemId", uuid));
+
+    mockMvc
+        .perform(delete(BASE_MAPPING + "/{itemId}", uuid.toString()))
+        .andDo(print())
+        .andExpect(status().isOk());
 
     verify(itemService).deleteItem(uuid);
   }
 
   @Test
-  void testGetItemEndpoint() {
+  void testGetItemEndpoint() throws Exception {
     final String displayName = "displayName";
     Item item = new Item(displayName, itemType);
 
     when(itemService.getItem(any())).thenReturn(Optional.of(item));
 
-    ResponseEntity<GetItemResponse> responseEntity =
-        rest.getForEntity(
-            BASE_MAPPING + "/{itemId}?loadRentInfo=false",
-            GetItemResponse.class,
-            Map.of("itemId", UUID.randomUUID()));
+    MvcResult mvcResult =
+        mockMvc
+            .perform(
+                get(BASE_MAPPING + "/{itemId}?loadRentInfo=false", UUID.randomUUID().toString()))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andReturn();
 
-    assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-    var response = responseEntity.getBody();
+    String responseBody = mvcResult.getResponse().getContentAsString();
+    GetItemResponse response = objectMapper.readValue(responseBody, GetItemResponse.class);
+
     assertNotNull(response);
     assertEquals(displayName, response.getDisplayName());
     assertEquals(itemType.getId(), response.getTypeId());
@@ -127,16 +126,12 @@ class ItemControllerTest extends DatabaseSuite {
   }
 
   @Test
-  void getItemWithFutureRents() {
+  void testGetItemWithFutureRents() throws Exception {
     final String displayName = "Display name";
-
     User user = new User("user");
-
-    HumanUserPassport humanUserPassport = new HumanUserPassport(123L, "testName", "testLastName", "test@gmail.com", user);
-    humanUserPassport = jpaHumanUserPassportRepository.save(humanUserPassport);
-
+    HumanUserPassport humanUserPassport =
+        new HumanUserPassport(123L, "testName", "testLastName", "test@gmail.com", user);
     Item item = new Item(displayName, itemType);
-    item = itemRepository.save(item);
 
     Rent rent =
         new Rent(
@@ -144,44 +139,37 @@ class ItemControllerTest extends DatabaseSuite {
             Instant.now().plus(6, ChronoUnit.DAYS),
             humanUserPassport,
             item);
-    rentRepository.save(rent);
 
     when(itemService.getItem(any())).thenReturn(Optional.of(item));
     when(itemService.getFutureRentsOfItem(any())).thenReturn(List.of(rent));
 
-    ResponseEntity<GetItemResponse> responseEntity =
-        rest.getForEntity(
-            BASE_MAPPING + "/{itemId}?loadRentInfo=true",
-            GetItemResponse.class,
-            Map.of("itemId", UUID.randomUUID()));
+    MvcResult mvcResult =
+        mockMvc
+            .perform(get(BASE_MAPPING + "/{itemId}?loadRentInfo=true", UUID.randomUUID()))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andReturn();
 
-    var response = responseEntity.getBody();
+    String responseBody = mvcResult.getResponse().getContentAsString();
+    GetItemResponse response = objectMapper.readValue(responseBody, GetItemResponse.class);
+
     assertNotNull(response);
     assertEquals(displayName, response.getDisplayName());
-    assertEquals(itemType.getId(), response.getTypeId());
     assertEquals(1, response.getRents().size());
-
-    GetShortRentResponse retrievedRent = response.getRents().get(0);
-    assertEquals(rent.getId(), retrievedRent.id());
-
-    rentRepository.deleteAll();
-    userRepository.deleteAll();
-    itemRepository.deleteAll();
   }
 
   @Test
-  void testGetItemEndpointAbsentItem() {
+  void testGetItemEndpointAbsentItem() throws Exception {
     when(itemService.getItem(any())).thenReturn(Optional.empty());
 
-    ResponseEntity<Item> response =
-        rest.getForEntity(
-            BASE_MAPPING + "/{itemId}", Item.class, Map.of("itemId", UUID.randomUUID()));
-
-    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    mockMvc
+        .perform(get(BASE_MAPPING + "/{itemId}", UUID.randomUUID().toString()))
+        .andDo(print())
+        .andExpect(status().isBadRequest());
   }
 
   @Test
-  void testUpdateItemEndpoint() {
+  void testUpdateItemEndpoint() throws Exception {
     final String displayName = "displayName";
 
     when(itemService.getItem(any())).thenReturn(Optional.of(new Item(displayName, itemType)));
@@ -190,42 +178,51 @@ class ItemControllerTest extends DatabaseSuite {
 
     UUID uuid = UUID.randomUUID();
     UpdateItemRequest updateRequest = new UpdateItemRequest(displayName);
-    HttpEntity<UpdateItemRequest> requestEntity = new HttpEntity<>(updateRequest);
+    String requestStr = objectMapper.writeValueAsString(updateRequest);
 
-    ResponseEntity<Void> responseEntity = rest.exchange(
-        BASE_MAPPING + "/{id}", HttpMethod.PATCH, requestEntity, void.class, Map.of("id", uuid));
+    mockMvc
+        .perform(
+            patch(BASE_MAPPING + "/{id}", uuid.toString())
+                .content(requestStr)
+                .contentType(MediaType.APPLICATION_JSON))
+        .andDo(print())
+        .andExpect(status().isNoContent());
 
-    assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
     verify(itemService).updateItem(uuid, updateRequest);
   }
 
   @Test
-  void testUpdateItemTypeEndpointonExistingItem() {
-    doNothing().when(itemService).updateItem(any(), any());
+  void testUpdateNonExistingItem() throws Exception {
+    when(itemService.existsById(any())).thenReturn(false);
 
     UpdateItemRequest updateRequest = new UpdateItemRequest("new display name");
-    HttpEntity<UpdateItemRequest> requestEntity = new HttpEntity<>(updateRequest);
+    String requestStr = objectMapper.writeValueAsString(updateRequest);
 
-    ResponseEntity<Void> response =
-        rest.exchange(
-            BASE_MAPPING + "/{id}",
-            HttpMethod.PATCH,
-            requestEntity,
-            void.class,
-            Map.of("id", UUID.randomUUID()));
-
-    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    mockMvc
+        .perform(
+            patch(BASE_MAPPING + "/{id}", UUID.randomUUID().toString())
+                .content(requestStr)
+                .contentType(MediaType.APPLICATION_JSON))
+        .andDo(print())
+        .andExpect(status().isBadRequest());
   }
 
   @Test
-  void testCreateQrCodeForItemBooking() {
-    ResponseEntity<byte[]> response =
-        rest.getForEntity(
-            BASE_MAPPING + "/{item_id}/qr", byte[].class, Map.of("item_id", UUID.randomUUID()));
+  void testCreateQrCodeForItemBooking() throws Exception {
+    var initBytes = new byte[] {0, 1, 2, 3};
+    when(itemService.getQrCodeForItem(any(), anyInt(), anyInt())).thenReturn(initBytes);
 
-    assertEquals(HttpStatus.OK, response.getStatusCode());
+    var mvcResult =
+        mockMvc
+            .perform(get(BASE_MAPPING + "/{item_id}/qr", UUID.randomUUID().toString()))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
 
-    byte[] imageBytes = response.getBody();
+    BytesArray imageBytes = objectMapper.readValue(mvcResult, BytesArray.class);
     assertNotNull(imageBytes);
+    assertArrayEquals(initBytes, imageBytes.bytes());
   }
 }

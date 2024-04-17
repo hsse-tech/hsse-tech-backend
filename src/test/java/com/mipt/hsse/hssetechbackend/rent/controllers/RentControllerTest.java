@@ -36,7 +36,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(RentController.class)
 @Import(ObjectMapper.class)
-class RentControllerTest extends DatabaseSuite {
+class RentControllerTest {
   @Autowired MockMvc mockMvc;
   @Autowired ObjectMapper objectMapper;
 
