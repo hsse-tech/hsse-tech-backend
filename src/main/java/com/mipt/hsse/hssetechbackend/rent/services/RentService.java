@@ -1,6 +1,7 @@
 package com.mipt.hsse.hssetechbackend.rent.services;
 
 import com.mipt.hsse.hssetechbackend.auxiliary.VerificationResult;
+import com.mipt.hsse.hssetechbackend.auxiliary.serializablebytesarray.BytesArray;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.ConfirmationPhotoRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepository;
@@ -133,11 +134,11 @@ public class RentService {
     rentRepository.save(rent);
   }
 
-  public ByteArrayInputStream getPhotoForRent(UUID rentId) {
+  public BytesArray getPhotoForRent(UUID rentId) {
     if (rentRepository.existsById(rentId)) {
       try {
         byte[] photoBytes = photoRepository.getPhotoForRent(rentId);
-        return new ByteArrayInputStream(photoBytes);
+        return new BytesArray(photoBytes);
       } catch (IOException e) {
         throw new ServerErrorException("Unexpected IO error while saving photo", e);
       }
@@ -153,7 +154,7 @@ public class RentService {
     verifyConfirmRentFinish(rent).throwIfInvalid();
 
     try {
-      photoRepository.save(rentId, request.photoBytes());
+      photoRepository.save(rentId, request.photoBytesArray().bytes());
     } catch (IOException | NoSuchAlgorithmException | UnsupportedOperationException e) {
       throw new ServerErrorException("Unexpected IO error while saving photo", e);
     }

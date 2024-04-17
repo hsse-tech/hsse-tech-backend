@@ -3,191 +3,221 @@ package com.mipt.hsse.hssetechbackend.rent.controllers;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
+import com.mipt.hsse.hssetechbackend.auxiliary.serializablebytesarray.BytesArray;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.*;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateRentRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.PinPhotoConfirmationRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateRentRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.CreateRentResponse;
-import com.mipt.hsse.hssetechbackend.rent.exceptions.ClientServerError;
+import com.mipt.hsse.hssetechbackend.rent.controllers.responses.RentDTO;
+import com.mipt.hsse.hssetechbackend.rent.exceptions.RentProcessingException;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.VerificationFailedException;
 import com.mipt.hsse.hssetechbackend.rent.services.RentService;
-
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.*;
+import org.springframework.test.web.servlet.MockMvc;
 
-@SpringBootTest(webEnvironment = RANDOM_PORT)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@WebMvcTest(RentController.class)
+@Import(ObjectMapper.class)
 class RentControllerTest extends DatabaseSuite {
-  @Autowired private TestRestTemplate rest;
+  @Autowired MockMvc mockMvc;
+  @Autowired ObjectMapper objectMapper;
 
   @MockBean private RentService rentService;
-  @Autowired private JpaItemTypeRepository itemTypeRepository;
-  @Autowired private JpaUserRepository userRepository;
-  @Autowired private JpaHumanUserPassportRepository jpaHumanUserPassportRepository;
-  @Autowired private JpaItemRepository itemRepository;
-  @Autowired private JpaRentRepository rentRepository;
 
   private static final String BASE_MAPPING = "/api/renting/rent";
 
-  private Item item;
-  private HumanUserPassport userPassport;
+  private final ItemType itemType = new ItemType(BigDecimal.ZERO, "Item type name", 120, false);
+  private final Item item = new Item("Item name", itemType);
+  private final User user = new User("human");
+  private final HumanUserPassport userPassport =
+      new HumanUserPassport(123L, "Name", "Surname", "email@gmail.com", user);
 
   @BeforeEach
-  public void setupRestTemplate() {
-    rest.getRestTemplate().setRequestFactory(new HttpComponentsClientHttpRequestFactory());
-  }
-
-  @BeforeEach
-  public void createTestObjects() {
-    ItemType itemType = itemTypeRepository.save(new ItemType(BigDecimal.ZERO, "Item type name", 120, false));
-    item = itemRepository.save(new Item("Item name", itemType));
-
-    User user = new User("human");
-    userPassport =
-        jpaHumanUserPassportRepository.save(
-            new HumanUserPassport(123L, "Name", "Surname", "email@gmail.com", user));
-  }
-
-  @AfterEach
-  public void clear() {
-    rentRepository.deleteAll();
-    itemRepository.deleteAll();
-    itemTypeRepository.deleteAll();
-    jpaHumanUserPassportRepository.deleteAll();
-    userRepository.deleteAll();
+  void setupObjectMapper() {
+    objectMapper.registerModule(new JavaTimeModule());
   }
 
   @Test
-  void testCreateRentEndpoint() {
+  void testCreateRentEndpoint() throws Exception {
     Instant start = Instant.now().plus(1, ChronoUnit.HOURS);
     Instant end = Instant.now().plus(2, ChronoUnit.HOURS);
 
     when(rentService.createRent(any())).thenReturn(new Rent(start, end, userPassport, item));
 
-    CreateRentRequest createRentRequest = new CreateRentRequest(userPassport.getId(), item.getId(), start, end);
+    CreateRentRequest createRentRequest =
+        new CreateRentRequest(UUID.randomUUID(), UUID.randomUUID(), start, end);
+    String requestStr = objectMapper.writeValueAsString(createRentRequest);
 
-    ResponseEntity<CreateRentResponse> createResponse = rest.postForEntity(BASE_MAPPING, createRentRequest, CreateRentResponse.class);
-    assertEquals(HttpStatus.CREATED, createResponse.getStatusCode());
+    var mvcResult =
+        mockMvc
+            .perform(post(BASE_MAPPING).content(requestStr).contentType(MediaType.APPLICATION_JSON))
+            .andDo(print())
+            .andExpect(status().isCreated())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    CreateRentResponse createRentResponse =
+        objectMapper.readValue(mvcResult, CreateRentResponse.class);
 
     verify(rentService).createRent(createRentRequest);
 
-    Rent responseRent = Objects.requireNonNull(createResponse.getBody()).getRent();
+    Rent responseRent = createRentResponse.getRent();
     assertNotNull(responseRent);
-    assertEquals(item.getId(), responseRent.getItem().getId());
-    assertEquals(userPassport.getId(), responseRent.getRenter().getId());
   }
 
   @Test
-  void testDeleteRentEndpoint() {
+  void testBadRequestOnCreateRentFailed() throws Exception {
+    when(rentService.createRent(any())).thenThrow(new RentProcessingException());
+
+    CreateRentRequest createRentRequest =
+        new CreateRentRequest(UUID.randomUUID(), UUID.randomUUID(), Instant.now(), Instant.now());
+    String requestStr = objectMapper.writeValueAsString(createRentRequest);
+
+    mockMvc
+        .perform(post(BASE_MAPPING).content(requestStr).contentType(MediaType.APPLICATION_JSON))
+
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void getRentEndpoint() throws Exception {
+    Rent rent = new Rent(Instant.now(), Instant.now(), userPassport, item);
+    when(rentService.findById(any())).thenReturn(rent);
+
+    var mvcResult= mockMvc.perform(get(BASE_MAPPING + "/{rent_id}", UUID.randomUUID())).andDo(print()).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+    RentDTO retrievedRentDTO = objectMapper.readValue(mvcResult, RentDTO.class);
+
+    assertEquals(rent.getFactStart(), retrievedRentDTO.factStart());
+    assertEquals(rent.getFactEnd(), retrievedRentDTO.factEnd());
+    assertEquals(rent.getItem().getDisplayName(), retrievedRentDTO.item().getDisplayName());
+  }
+
+  @Test
+  void testDeleteRentEndpoint() throws Exception {
     UUID uuid = UUID.randomUUID();
-    rest.delete(BASE_MAPPING + "/{rentId}", Map.of("rentId", uuid));
+    mockMvc.perform(delete(BASE_MAPPING + "/{rent_id}", uuid));
 
     verify(rentService).deleteRent(uuid);
   }
 
   @Test
-  void testUpdateRentEndpoint() {
-    Instant start = Instant.now().plus(1, ChronoUnit.HOURS);
-    Instant end = Instant.now().plus(2, ChronoUnit.HOURS);
-    Rent testRent = new Rent(start, end, userPassport, item);
-    testRent = rentRepository.save(testRent);
-    UUID uuid = testRent.getId();
+  void testUpdateRentEndpoint() throws Exception {
+    UUID uuid = UUID.randomUUID();
 
-    UpdateRentRequest updateRequest = new UpdateRentRequest(Instant.now().plus(3, ChronoUnit.HOURS),
-        Instant.now().plus(4, ChronoUnit.HOURS));
-    HttpEntity<UpdateRentRequest> requestHttpEntity = new HttpEntity<>(updateRequest);
-    rest.exchange(BASE_MAPPING + "/{id}", HttpMethod.PATCH,
-        requestHttpEntity, void.class, Map.of("id", uuid));
+    UpdateRentRequest updateRequest =
+        new UpdateRentRequest(
+            Instant.now().plus(3, ChronoUnit.HOURS), Instant.now().plus(4, ChronoUnit.HOURS));
+    String requestStr = objectMapper.writeValueAsString(updateRequest);
+
+    mockMvc.perform(
+        patch(BASE_MAPPING + "/{id}", uuid)
+            .content(requestStr)
+            .contentType(MediaType.APPLICATION_JSON));
 
     verify(rentService).updateRent(uuid, updateRequest);
   }
 
   @Test
-  void testPinPhotoConfirmationEndpoint() {
-    UUID uuid = UUID.randomUUID();
-    PinPhotoConfirmationRequest request = new PinPhotoConfirmationRequest(new byte[] {1, 2, 3});
-    rest.postForEntity(BASE_MAPPING + "/{rentId}/confirm",
-        request, void.class,
-        Map.of("rentId", uuid));
+  void testBadRequestOnUpdateFailed() throws Exception {
+    doThrow(VerificationFailedException.class).when(rentService).updateRent(any(), any());
 
-    verify(rentService).confirmRentFinish(eq(uuid), any());
+    UUID uuid = UUID.randomUUID();
+    UpdateRentRequest updateRequest =
+        new UpdateRentRequest(
+            Instant.now(), Instant.now());
+    String requestStr = objectMapper.writeValueAsString(updateRequest);
+
+    mockMvc.perform(
+        patch(BASE_MAPPING + "/{id}", uuid)
+            .content(requestStr)
+            .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
   }
 
   @Test
-  void testGetPhotoConfirmationEndpoint() {
+  void testPinPhotoConfirmationEndpoint() throws Exception {
     UUID uuid = UUID.randomUUID();
-    rest.getForEntity(BASE_MAPPING + "/{rentId}/confirm",
-        byte[].class,
-        Map.of("rentId", uuid));
+    BytesArray bytesArray = new BytesArray(new byte[] {1, 2, 3, 4});
+    PinPhotoConfirmationRequest request = new PinPhotoConfirmationRequest(bytesArray);
+    String requestStr = objectMapper.writeValueAsString(request);
+
+    mockMvc.perform(
+        post(BASE_MAPPING + "/{rentId}/confirm", uuid)
+            .content(requestStr)
+            .contentType(MediaType.APPLICATION_JSON));
+
+    verify(rentService).confirmRentFinish(eq(uuid), eq(request));
+  }
+
+  @Test
+  void testGetPhotoConfirmationEndpoint() throws Exception {
+    UUID uuid = UUID.randomUUID();
+    BytesArray bytesArray = new BytesArray(new byte[] {0, 1, 2, 3});
+    when(rentService.getPhotoForRent(any())).thenReturn(bytesArray);
+
+    var mvcResult =
+        mockMvc
+            .perform(get(BASE_MAPPING + "/{rentId}/confirm", uuid))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    BytesArray responseBytesArray = objectMapper.readValue(mvcResult, BytesArray.class);
 
     verify(rentService).getPhotoForRent(uuid);
+    assertEquals(bytesArray, responseBytesArray);
   }
 
   @Test
-  void testStartRentEndpoint() {
+  void testStartRentEndpoint() throws Exception {
     UUID uuid = UUID.randomUUID();
-    var response = rest.postForEntity(BASE_MAPPING + "/{rentId}/begin",
-        null, ClientServerError.class,
-        Map.of("rentId", uuid));
-
+    mockMvc.perform(post(BASE_MAPPING + "/{rentId}/begin", uuid)).andExpect(status().isOk());
     verify(rentService).startRent(uuid);
-    assertEquals(HttpStatus.OK, response.getStatusCode());
   }
 
   @Test
-  void testFailStartRentEndpoint() {
+  void testFailStartRentEndpoint() throws Exception {
     doThrow(VerificationFailedException.class).when(rentService).startRent(any());
 
     UUID uuid = UUID.randomUUID();
-    var response = rest.postForEntity(BASE_MAPPING + "/{rentId}/begin",
-        null, ClientServerError.class,
-        Map.of("rentId", uuid));
+    mockMvc
+        .perform(post(BASE_MAPPING + "/{rentId}/begin", uuid))
+        .andExpect(status().isBadRequest());
 
     verify(rentService).startRent(uuid);
-    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
   }
 
   @Test
-  void testEndRentEndpoint() {
+  void testEndRentEndpoint() throws Exception {
     UUID uuid = UUID.randomUUID();
-    var response = rest.postForEntity(BASE_MAPPING + "/{rentId}/end",
-        null, ClientServerError.class,
-        Map.of("rentId", uuid));
+    mockMvc.perform(post(BASE_MAPPING + "/{rentId}/end", uuid)).andExpect(status().isOk());
 
     verify(rentService).endRent(uuid);
-    assertEquals(HttpStatus.OK, response.getStatusCode());
   }
 
   @Test
-  void testFailEndRentEndpoint() {
+  void testFailEndRentEndpoint() throws Exception {
     doThrow(VerificationFailedException.class).when(rentService).endRent(any());
 
     UUID uuid = UUID.randomUUID();
-    var response = rest.postForEntity(BASE_MAPPING + "/{rentId}/end",
-        null, ClientServerError.class,
-        Map.of("rentId", uuid));
+    mockMvc.perform(post(BASE_MAPPING + "/{rentId}/end", uuid)).andExpect(status().isBadRequest());
 
     verify(rentService).endRent(uuid);
-    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
   }
 }

@@ -1,8 +1,7 @@
 package com.mipt.hsse.hssetechbackend.rent.controllers;
 
 import com.google.zxing.WriterException;
-import com.google.zxing.client.j2se.MatrixToImageWriter;
-import com.google.zxing.common.BitMatrix;
+import com.mipt.hsse.hssetechbackend.auxiliary.serializablebytesarray.BytesArray;
 import com.mipt.hsse.hssetechbackend.data.entities.Item;
 import com.mipt.hsse.hssetechbackend.data.entities.Rent;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
@@ -11,16 +10,12 @@ import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetItemResponse;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetShortRentResponse;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.ClientServerError;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
-import com.mipt.hsse.hssetechbackend.rent.qrcodegeneration.QrCodeManager;
 import com.mipt.hsse.hssetechbackend.rent.services.ItemService;
 import jakarta.validation.Valid;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import javax.imageio.ImageIO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -83,45 +78,22 @@ public class ItemController {
   }
 
   @GetMapping(value = "/{item_id}/qr")
-  public ResponseEntity<byte[]> getItemBookingQRCode(@PathVariable("item_id") UUID itemId,
-                                                     @Value("${item-qrcode-width}") int WIDTH,
-                                                     @Value("${item-qrcode-height}") int HEIGHT) {
-    BitMatrix qrCodeMatrix;
-    try {
-      // TODO: When we have domain, it should be put in here
-      qrCodeMatrix = QrCodeManager.createQR("https://{DOMAIN}/rent/" + itemId, HEIGHT, WIDTH);
-    } catch (WriterException e) {
-      throw new RuntimeException(e);
-    }
-    BufferedImage image = MatrixToImageWriter.toBufferedImage(qrCodeMatrix);
-
-    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-    try {
-      ImageIO.write(image, "png", byteArrayOutputStream);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-    byte[] imageInBytes = byteArrayOutputStream.toByteArray();
-
+  public ResponseEntity<BytesArray> getItemBookingQRCode(
+      @PathVariable("item_id") UUID itemId,
+      @Value("${item-qrcode-width}") int WIDTH,
+      @Value("${item-qrcode-height}") int HEIGHT)
+      throws IOException, WriterException {
+    byte[] qrCodeBytes = itemService.getQrCodeForItem(itemId, WIDTH, HEIGHT);
+    BytesArray serializableBytes = new BytesArray(qrCodeBytes);
     return ResponseEntity.status(HttpStatus.OK)
-        .header(HttpHeaders.CONTENT_DISPOSITION, "filename=\"image.png\"")
-        .contentType(MediaType.IMAGE_PNG)
-        .body(imageInBytes);
+        .body(serializableBytes);
   }
 
   @PostMapping("/{item_id}/try-open")
   public void provideAccessToItemIfAllowed(@PathVariable("item_id") UUID itemId) {
     if (!itemService.existsById(itemId)) throw new EntityNotFoundException();
 
-    UUID lockId = itemService.getItemLockId(itemId);
-
-    // TODO: Lock service is not implemented yet
-    throw new UnsupportedOperationException("Lock service is not implemented yet");
-    //    if (!lockService.existsById(lockId))
-    //      throw new EntityNotFoundException("The lock that is assigned to this item does not
-    // exist");
-    //
-    //    lockService.requireOpenById(lockId);
+    itemService.provideAccessToItem(itemId);
   }
 
   @DeleteMapping("/{itemId}")

@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
+import com.mipt.hsse.hssetechbackend.auxiliary.serializablebytesarray.BytesArray;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.*;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.PinPhotoConfirmationRequest;
@@ -79,21 +80,21 @@ class ConfirmRentFinishTest extends DatabaseSuite {
 
     when(rentRepository.findById(any())).thenReturn(Optional.of(rent));
 
-    byte[] imageBytes = new byte[] {1, 2, 3};
+    BytesArray bytesArray = new BytesArray(new byte[] {0, 1, 2, 3});
     UUID uuid = UUID.randomUUID();
-    PinPhotoConfirmationRequest request = new PinPhotoConfirmationRequest(imageBytes);
+    PinPhotoConfirmationRequest request = new PinPhotoConfirmationRequest(bytesArray);
     rentService.confirmRentFinish(uuid, request);
 
-    verify(photoRepository).save(uuid, imageBytes);
+    verify(photoRepository).save(uuid, bytesArray.bytes());
   }
 
   @Test
   void testFailConfirmNonExistingRent() {
     when(rentRepository.findById(any())).thenReturn(Optional.empty());
 
-    byte[] imageBytes = new byte[] {1, 2, 3};
     UUID uuid = UUID.randomUUID();
-    PinPhotoConfirmationRequest request = new PinPhotoConfirmationRequest(imageBytes);
+    BytesArray bytesArray = new BytesArray(new byte[] {0, 1, 2, 3});
+    PinPhotoConfirmationRequest request = new PinPhotoConfirmationRequest(bytesArray);
     assertThrows(EntityNotFoundException.class, () -> rentService.confirmRentFinish(uuid, request));
   }
 
@@ -103,9 +104,9 @@ class ConfirmRentFinishTest extends DatabaseSuite {
 
     when(rentRepository.findById(any())).thenReturn(Optional.of(rent));
 
-    byte[] imageBytes = new byte[] {1, 2, 3};
     UUID uuid = UUID.randomUUID();
-    PinPhotoConfirmationRequest request = new PinPhotoConfirmationRequest(imageBytes);
+    BytesArray bytesArray = new BytesArray(new byte[] {0, 1, 2, 3});
+    PinPhotoConfirmationRequest request = new PinPhotoConfirmationRequest(bytesArray);
     assertThrows(VerificationFailedException.class, () -> rentService.confirmRentFinish(uuid, request));
   }
 
@@ -117,9 +118,9 @@ class ConfirmRentFinishTest extends DatabaseSuite {
 
     when(rentRepository.findById(any())).thenReturn(Optional.of(rent));
 
-    byte[] imageBytes = new byte[] {1, 2, 3};
     UUID uuid = UUID.randomUUID();
-    PinPhotoConfirmationRequest request = new PinPhotoConfirmationRequest(imageBytes);
+    BytesArray bytesArray = new BytesArray(new byte[] {0, 1, 2, 3});
+    PinPhotoConfirmationRequest request = new PinPhotoConfirmationRequest(bytesArray);
     assertThrows(VerificationFailedException.class, () -> rentService.confirmRentFinish(uuid, request));
   }
 
@@ -135,9 +136,9 @@ class ConfirmRentFinishTest extends DatabaseSuite {
 
     when(rentRepository.findById(any())).thenReturn(Optional.of(rent));
 
-    byte[] imageBytes = new byte[] {1, 2, 3};
     UUID uuid = UUID.randomUUID();
-    PinPhotoConfirmationRequest request = new PinPhotoConfirmationRequest(imageBytes);
+    BytesArray bytesArray = new BytesArray(new byte[] {0, 1, 2, 3});
+    PinPhotoConfirmationRequest request = new PinPhotoConfirmationRequest(bytesArray);
     assertThrows(VerificationFailedException.class, () -> rentService.confirmRentFinish(uuid, request));
   }
 
@@ -149,8 +150,8 @@ class ConfirmRentFinishTest extends DatabaseSuite {
     when(rentRepository.findById(any())).thenReturn(Optional.of(rent));
     when(photoRepository.existsPhotoForRent(any())).thenReturn(true);
 
-    byte[] imageBytes = new byte[] {1, 2, 3};
-    PinPhotoConfirmationRequest request = new PinPhotoConfirmationRequest(imageBytes);
+    BytesArray bytesArray = new BytesArray(new byte[] {0, 1, 2, 3});
+    PinPhotoConfirmationRequest request = new PinPhotoConfirmationRequest(bytesArray);
 
     assertThrows(VerificationFailedException.class, () -> rentService.confirmRentFinish(UUID.randomUUID(), request));
   }
