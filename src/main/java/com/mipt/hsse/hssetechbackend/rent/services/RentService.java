@@ -1,24 +1,19 @@
 package com.mipt.hsse.hssetechbackend.rent.services;
 
 import com.mipt.hsse.hssetechbackend.auxiliary.VerificationResult;
-import com.mipt.hsse.hssetechbackend.auxiliary.serializablebytesarray.BytesArray;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.ConfirmationPhotoRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaRentRepository;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateRentRequest;
-import com.mipt.hsse.hssetechbackend.rent.controllers.requests.PinPhotoConfirmationRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateRentRequest;
-import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
-import com.mipt.hsse.hssetechbackend.rent.exceptions.RentProcessingException;
-import com.mipt.hsse.hssetechbackend.rent.exceptions.VerificationFailedException;
+import com.mipt.hsse.hssetechbackend.rent.exceptions.*;
 import com.mipt.hsse.hssetechbackend.rent.rentprocessing.createrentprocessing.CreateRentProcessData;
 import com.mipt.hsse.hssetechbackend.rent.rentprocessing.createrentprocessing.CreateRentProcessor;
 import com.mipt.hsse.hssetechbackend.rent.rentprocessing.deleterentprocessing.DeleteRentProcessData;
 import com.mipt.hsse.hssetechbackend.rent.rentprocessing.deleterentprocessing.DeleteRentProcessor;
 import jakarta.transaction.Transactional;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
@@ -78,7 +73,7 @@ public class RentService {
     for (var processor : createRentProcessors) {
       VerificationResult verificationResult = processor.processCreate(processData);
       if (!verificationResult.isValid()) {
-        throw new RentProcessingException(verificationResult.getErrorMessage());
+        throw new CreateRentProcessingException(verificationResult.getErrorMessage());
       }
     }
 
@@ -99,7 +94,7 @@ public class RentService {
     for (var processor : deleteRentProcessors) {
       VerificationResult verificationResult = processor.processDelete(processData);
       if (!verificationResult.isValid()) {
-        throw new RentProcessingException(verificationResult.getErrorMessage());
+        throw new DeleteRentProcessingException(verificationResult.getErrorMessage());
       }
     }
 
@@ -134,11 +129,10 @@ public class RentService {
     rentRepository.save(rent);
   }
 
-  public BytesArray getPhotoForRent(UUID rentId) {
+  public byte[] getPhotoForRent(UUID rentId) {
     if (rentRepository.existsById(rentId)) {
       try {
-        byte[] photoBytes = photoRepository.getPhotoForRent(rentId);
-        return new BytesArray(photoBytes);
+        return photoRepository.getPhotoForRent(rentId);
       } catch (IOException e) {
         throw new ServerErrorException("Unexpected IO error while saving photo", e);
       }
@@ -147,14 +141,14 @@ public class RentService {
     }
   }
 
-  public void confirmRentFinish(UUID rentId, PinPhotoConfirmationRequest request) {
+  public void confirmRentFinish(UUID rentId, byte[] photoBytes) {
     Optional<Rent> rentOpt = rentRepository.findById(rentId);
     Rent rent = rentOpt.orElseThrow(EntityNotFoundException::new);
 
     verifyConfirmRentFinish(rent).throwIfInvalid();
 
     try {
-      photoRepository.save(rentId, request.photoBytesArray().bytes());
+      photoRepository.save(rentId, photoBytes);
     } catch (IOException | NoSuchAlgorithmException | UnsupportedOperationException e) {
       throw new ServerErrorException("Unexpected IO error while saving photo", e);
     }

@@ -9,7 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.mipt.hsse.hssetechbackend.auxiliary.serializablebytesarray.BytesArray;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
@@ -189,7 +188,7 @@ class ItemControllerTest {
 
   @Test
   void testUpdateNonExistingItem() throws Exception {
-    when(itemService.existsById(any())).thenReturn(false);
+    doThrow(EntityNotFoundException.class).when(itemService).updateItem(any(), any());
 
     UpdateItemRequest updateRequest = new UpdateItemRequest("new display name");
     String requestStr = objectMapper.writeValueAsString(updateRequest);
@@ -214,12 +213,11 @@ class ItemControllerTest {
             .andDo(print())
             .andExpect(status().isOk())
             .andReturn()
-            .getResponse()
-            .getContentAsString();
+            .getResponse();
 
-    BytesArray imageBytes = objectMapper.readValue(mvcResult, BytesArray.class);
-    assertNotNull(imageBytes);
-    assertArrayEquals(initBytes, imageBytes.bytes());
+    byte[] responseBytes = mvcResult.getContentAsByteArray();
+    assertNotNull(responseBytes);
+    assertArrayEquals(initBytes, responseBytes);
   }
 
   @Test

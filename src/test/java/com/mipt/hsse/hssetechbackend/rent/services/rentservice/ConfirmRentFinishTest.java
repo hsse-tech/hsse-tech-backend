@@ -1,14 +1,13 @@
 package com.mipt.hsse.hssetechbackend.rent.services.rentservice;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.AdditionalMatchers.aryEq;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
-import com.mipt.hsse.hssetechbackend.auxiliary.serializablebytesarray.BytesArray;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.*;
-import com.mipt.hsse.hssetechbackend.rent.controllers.requests.PinPhotoConfirmationRequest;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.VerificationFailedException;
 import com.mipt.hsse.hssetechbackend.rent.rentprocessing.createrentprocessing.UnoccupiedTimeCreateRentProcessor;
@@ -77,12 +76,11 @@ class ConfirmRentFinishTest extends DatabaseSuite {
 
     when(rentRepository.findById(any())).thenReturn(Optional.of(rent));
 
-    BytesArray bytesArray = new BytesArray(new byte[] {0, 1, 2, 3});
+    byte[] photoBytes = new byte[] {0, 1, 2, 3};
     UUID uuid = UUID.randomUUID();
-    PinPhotoConfirmationRequest request = new PinPhotoConfirmationRequest(bytesArray);
-    rentService.confirmRentFinish(uuid, request);
+    rentService.confirmRentFinish(uuid, photoBytes);
 
-    verify(photoRepository).save(uuid, bytesArray.bytes());
+    verify(photoRepository).save(eq(uuid), aryEq(photoBytes));
   }
 
   @Test
@@ -90,9 +88,9 @@ class ConfirmRentFinishTest extends DatabaseSuite {
     when(rentRepository.findById(any())).thenReturn(Optional.empty());
 
     UUID uuid = UUID.randomUUID();
-    BytesArray bytesArray = new BytesArray(new byte[] {0, 1, 2, 3});
-    PinPhotoConfirmationRequest request = new PinPhotoConfirmationRequest(bytesArray);
-    assertThrows(EntityNotFoundException.class, () -> rentService.confirmRentFinish(uuid, request));
+    byte[] photoBytes = new byte[] {0, 1, 2, 3};
+    assertThrows(
+        EntityNotFoundException.class, () -> rentService.confirmRentFinish(uuid, photoBytes));
   }
 
   @Test
@@ -103,10 +101,9 @@ class ConfirmRentFinishTest extends DatabaseSuite {
     when(rentRepository.findById(any())).thenReturn(Optional.of(rent));
 
     UUID uuid = UUID.randomUUID();
-    BytesArray bytesArray = new BytesArray(new byte[] {0, 1, 2, 3});
-    PinPhotoConfirmationRequest request = new PinPhotoConfirmationRequest(bytesArray);
+    byte[] photoBytes = new byte[] {0, 1, 2, 3};
     assertThrows(
-        VerificationFailedException.class, () -> rentService.confirmRentFinish(uuid, request));
+        VerificationFailedException.class, () -> rentService.confirmRentFinish(uuid, photoBytes));
   }
 
   @Test
@@ -119,10 +116,9 @@ class ConfirmRentFinishTest extends DatabaseSuite {
     when(rentRepository.findById(any())).thenReturn(Optional.of(rent));
 
     UUID uuid = UUID.randomUUID();
-    BytesArray bytesArray = new BytesArray(new byte[] {0, 1, 2, 3});
-    PinPhotoConfirmationRequest request = new PinPhotoConfirmationRequest(bytesArray);
+    byte[] photoBytes = new byte[] {0, 1, 2, 3};
     assertThrows(
-        VerificationFailedException.class, () -> rentService.confirmRentFinish(uuid, request));
+        VerificationFailedException.class, () -> rentService.confirmRentFinish(uuid, photoBytes));
   }
 
   @Test
@@ -143,10 +139,9 @@ class ConfirmRentFinishTest extends DatabaseSuite {
     when(rentRepository.findById(any())).thenReturn(Optional.of(rent));
 
     UUID uuid = UUID.randomUUID();
-    BytesArray bytesArray = new BytesArray(new byte[] {0, 1, 2, 3});
-    PinPhotoConfirmationRequest request = new PinPhotoConfirmationRequest(bytesArray);
+    byte[] photoBytes = new byte[] {0, 1, 2, 3};
     assertThrows(
-        VerificationFailedException.class, () -> rentService.confirmRentFinish(uuid, request));
+        VerificationFailedException.class, () -> rentService.confirmRentFinish(uuid, photoBytes));
   }
 
   @Test
@@ -158,11 +153,9 @@ class ConfirmRentFinishTest extends DatabaseSuite {
     when(rentRepository.findById(any())).thenReturn(Optional.of(rent));
     when(photoRepository.existsPhotoForRent(any())).thenReturn(true);
 
-    BytesArray bytesArray = new BytesArray(new byte[] {0, 1, 2, 3});
-    PinPhotoConfirmationRequest request = new PinPhotoConfirmationRequest(bytesArray);
-
+    byte[] photoBytes = new byte[] {0, 1, 2, 3};
     assertThrows(
         VerificationFailedException.class,
-        () -> rentService.confirmRentFinish(UUID.randomUUID(), request));
+        () -> rentService.confirmRentFinish(UUID.randomUUID(), photoBytes));
   }
 }

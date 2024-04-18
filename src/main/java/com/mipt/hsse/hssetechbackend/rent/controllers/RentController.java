@@ -1,25 +1,21 @@
 package com.mipt.hsse.hssetechbackend.rent.controllers;
 
-import ch.qos.logback.core.net.server.Client;
-import com.mipt.hsse.hssetechbackend.auxiliary.serializablebytesarray.BytesArray;
+import com.mipt.hsse.hssetechbackend.apierrorhandling.ApiError;
+import com.mipt.hsse.hssetechbackend.apierrorhandling.RestExceptionHandler;
 import com.mipt.hsse.hssetechbackend.data.entities.Rent;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.*;
-import com.mipt.hsse.hssetechbackend.rent.controllers.responses.CreateRentResponse;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.RentDTO;
-import com.mipt.hsse.hssetechbackend.rent.exceptions.ClientServerError;
-import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
-import com.mipt.hsse.hssetechbackend.rent.exceptions.RentProcessingException;
-import com.mipt.hsse.hssetechbackend.rent.exceptions.VerificationFailedException;
+import com.mipt.hsse.hssetechbackend.rent.exceptions.*;
 import com.mipt.hsse.hssetechbackend.rent.services.RentService;
-import com.sun.source.tree.NewClassTree;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.UUID;
-
-import jdk.jshell.Snippet;
-import org.hibernate.query.NativeQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -35,16 +31,9 @@ public class RentController {
   }
 
   @PostMapping
-  public ResponseEntity<CreateRentResponse> createRent(
-      @Valid @RequestBody CreateRentRequest request) {
-    try {
-      Rent rent = rentService.createRent(request);
-      CreateRentResponse response = CreateRentResponse.respondSuccess(rent);
-      return new ResponseEntity<>(response, HttpStatus.CREATED);
-    } catch (RentProcessingException e) {
-      return new ResponseEntity<>(
-          CreateRentResponse.respondFailed(e.toString()), HttpStatus.BAD_REQUEST);
-    }
+  public ResponseEntity<Rent> createRent(@Valid @RequestBody CreateRentRequest request) {
+    Rent rent = rentService.createRent(request);
+    return new ResponseEntity<>(rent, HttpStatus.CREATED);
   }
 
   @DeleteMapping("/{rent_id}")
@@ -53,27 +42,25 @@ public class RentController {
   }
 
   @PatchMapping("/{rent_id}")
-  public ResponseEntity<ClientServerError> updateRent(@PathVariable("rent_id") UUID rentId,
-                                                      @Valid @RequestBody UpdateRentRequest request) {
-    try {
+  @ResponseStatus(HttpStatus.OK)
+  public void updateRent(
+      @PathVariable("rent_id") UUID rentId, @Valid @RequestBody UpdateRentRequest request) {
       rentService.updateRent(rentId, request);
-      return ResponseEntity.ok(null);
-    } catch (VerificationFailedException e) {
-      return ResponseEntity.badRequest().body(new ClientServerError(e.toString()));
-    }
   }
 
-  @PostMapping("/{rent_id}/confirm")
+  @PostMapping(value = "/{rent_id}/confirm", consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   public void pinPhotoConfirmation(
-      @PathVariable("rent_id") UUID rentId,
-      @Valid @RequestBody PinPhotoConfirmationRequest request) {
-    rentService.confirmRentFinish(rentId, request);
+      @PathVariable("rent_id") UUID rentId, HttpServletRequest photoServletRequest)
+      throws IOException {
+    byte[] photoBytes = photoServletRequest.getInputStream().readAllBytes();
+
+    rentService.confirmRentFinish(rentId, photoBytes);
   }
 
   @GetMapping("/{rent_id}/confirm")
-  public ResponseEntity<BytesArray> getPhotoConfirmation(
-      @PathVariable("rent_id") UUID rentId) {
-    return new ResponseEntity<>(rentService.getPhotoForRent(rentId), HttpStatus.OK);
+  public @ResponseBody Resource getPhotoConfirmation(@PathVariable("rent_id") UUID rentId) {
+    byte[] photoBytes = rentService.getPhotoForRent(rentId);
+    return new ByteArrayResource(photoBytes);
   }
 
   @GetMapping("/{rent_id}")
@@ -81,29 +68,36 @@ public class RentController {
     return new ResponseEntity<>(new RentDTO(rentService.findById(rentId)), HttpStatus.OK);
   }
 
+  @ResponseStatus(HttpStatus.OK)
   @PostMapping("{rent_id}/begin")
-  public ResponseEntity<ClientServerError> startRent(@PathVariable("rent_id") UUID rentId) {
-    try {
-      rentService.startRent(rentId);
-      return ResponseEntity.ok(null);
-    } catch (VerificationFailedException e) {
-      return ResponseEntity.badRequest().body(new ClientServerError(e.getMessage()));
-    }
+  public void startRent(@PathVariable("rent_id") UUID rentId) {
+    rentService.startRent(rentId);
   }
 
   @PostMapping("{rent_id}/end")
-  public ResponseEntity<ClientServerError> endRent(@PathVariable("rent_id") UUID rentId) {
-    try {
-      rentService.endRent(rentId);
-      return ResponseEntity.ok(null);
-    } catch (VerificationFailedException e) {
-      return ResponseEntity.badRequest().body(new ClientServerError(e.getMessage()));
-    }
+  @ResponseStatus(HttpStatus.OK)
+  public void endRent(@PathVariable("rent_id") UUID rentId) {
+    rentService.endRent(rentId);
   }
 
-  @ExceptionHandler
-  public ResponseEntity<ClientServerError> entityNotFoundExceptionHandler(
-      EntityNotFoundException e) {
-    return new ResponseEntity<>(new ClientServerError(e.getMessage()), HttpStatus.BAD_REQUEST);
+
+  @ExceptionHandler(EntityNotFoundException.class)
+  protected ResponseEntity<ApiError> handleEntityNotFoundException(EntityNotFoundException ex) {
+    ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, ex.getMessage());
+    return RestExceptionHandler.buildResponseEntity(apiError);
+  }
+
+  @ExceptionHandler(VerificationFailedException.class)
+  protected ResponseEntity<ApiError> handleVerificationFailedException(
+      VerificationFailedException ex) {
+    ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, ex.getMessage());
+    return RestExceptionHandler.buildResponseEntity(apiError);
+  }
+
+  @ExceptionHandler({CreateRentProcessingException.class, DeleteRentProcessingException.class})
+  protected ResponseEntity<ApiError> handleRentProcessingException(
+      RentProcessingException ex) {
+    ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, ex.getMessage());
+    return RestExceptionHandler.buildResponseEntity(apiError);
   }
 }

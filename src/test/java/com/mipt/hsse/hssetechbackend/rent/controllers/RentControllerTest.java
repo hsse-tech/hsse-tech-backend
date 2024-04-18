@@ -1,6 +1,7 @@
 package com.mipt.hsse.hssetechbackend.rent.controllers;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.AdditionalMatchers.aryEq;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -9,15 +10,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.mipt.hsse.hssetechbackend.auxiliary.serializablebytesarray.BytesArray;
+import com.mipt.hsse.hssetechbackend.apierrorhandling.ApiError;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
-import com.mipt.hsse.hssetechbackend.data.repositories.*;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateRentRequest;
-import com.mipt.hsse.hssetechbackend.rent.controllers.requests.PinPhotoConfirmationRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateRentRequest;
-import com.mipt.hsse.hssetechbackend.rent.controllers.responses.CreateRentResponse;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.RentDTO;
-import com.mipt.hsse.hssetechbackend.rent.exceptions.RentProcessingException;
+import com.mipt.hsse.hssetechbackend.rent.exceptions.CreateRentProcessingException;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.VerificationFailedException;
 import com.mipt.hsse.hssetechbackend.rent.services.RentService;
 import java.math.BigDecimal;
@@ -70,26 +68,31 @@ class RentControllerTest {
             .andReturn()
             .getResponse()
             .getContentAsString();
-    CreateRentResponse createRentResponse =
-        objectMapper.readValue(mvcResult, CreateRentResponse.class);
+    Rent responseRent = objectMapper.readValue(mvcResult, Rent.class);
 
     verify(rentService).createRent(createRentRequest);
 
-    Rent responseRent = createRentResponse.getRent();
     assertNotNull(responseRent);
   }
 
   @Test
   void testBadRequestOnCreateRentFailed() throws Exception {
-    when(rentService.createRent(any())).thenThrow(new RentProcessingException());
+    final String errorText = "Error text";
+    when(rentService.createRent(any())).thenThrow(new CreateRentProcessingException(errorText));
 
     CreateRentRequest createRentRequest =
         new CreateRentRequest(UUID.randomUUID(), UUID.randomUUID(), Instant.now(), Instant.now());
     String requestStr = objectMapper.writeValueAsString(createRentRequest);
 
-    mockMvc
-        .perform(post(BASE_MAPPING).content(requestStr).contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isBadRequest());
+    var mvcResult =
+        mockMvc
+            .perform(post(BASE_MAPPING).content(requestStr).contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    ApiError exception = objectMapper.readValue(mvcResult, ApiError.class);
+    assertEquals(errorText, exception.getMessage());
   }
 
   @Test
@@ -139,51 +142,56 @@ class RentControllerTest {
 
   @Test
   void testBadRequestOnUpdateFailed() throws Exception {
-    doThrow(VerificationFailedException.class).when(rentService).updateRent(any(), any());
+    String errorText = "Error text";
+    doThrow(new VerificationFailedException(errorText)).when(rentService).updateRent(any(), any());
 
     UUID uuid = UUID.randomUUID();
     UpdateRentRequest updateRequest = new UpdateRentRequest(Instant.now(), Instant.now());
     String requestStr = objectMapper.writeValueAsString(updateRequest);
 
-    mockMvc
-        .perform(
-            patch(BASE_MAPPING + "/{id}", uuid)
-                .content(requestStr)
-                .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isBadRequest());
+    var mvcResult =
+        mockMvc
+            .perform(
+                patch(BASE_MAPPING + "/{id}", uuid)
+                    .content(requestStr)
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+    ApiError exception = objectMapper.readValue(mvcResult, ApiError.class);
+    assertEquals(errorText, exception.getMessage());
   }
 
   @Test
   void testPinPhotoConfirmationEndpoint() throws Exception {
     UUID uuid = UUID.randomUUID();
-    BytesArray bytesArray = new BytesArray(new byte[] {1, 2, 3, 4});
-    PinPhotoConfirmationRequest request = new PinPhotoConfirmationRequest(bytesArray);
-    String requestStr = objectMapper.writeValueAsString(request);
+    byte[] photoBytes = new byte[] {1, 2, 3, 4};
 
     mockMvc.perform(
         post(BASE_MAPPING + "/{rentId}/confirm", uuid)
-            .content(requestStr)
-            .contentType(MediaType.APPLICATION_JSON));
+            .content(photoBytes)
+            .contentType(MediaType.APPLICATION_OCTET_STREAM_VALUE));
 
-    verify(rentService).confirmRentFinish(eq(uuid), eq(request));
+    verify(rentService).confirmRentFinish(eq(uuid), aryEq(photoBytes));
   }
 
   @Test
   void testGetPhotoConfirmationEndpoint() throws Exception {
     UUID uuid = UUID.randomUUID();
-    BytesArray bytesArray = new BytesArray(new byte[] {0, 1, 2, 3});
-    when(rentService.getPhotoForRent(any())).thenReturn(bytesArray);
+    byte[] photoBytes = new byte[] {0, 1, 2, 3};
+    when(rentService.getPhotoForRent(any())).thenReturn(photoBytes);
 
-    var mvcResult =
+    byte[] responseBytes =
         mockMvc
             .perform(get(BASE_MAPPING + "/{rentId}/confirm", uuid))
             .andReturn()
             .getResponse()
-            .getContentAsString();
-    BytesArray responseBytesArray = objectMapper.readValue(mvcResult, BytesArray.class);
+            .getContentAsByteArray();
 
     verify(rentService).getPhotoForRent(uuid);
-    assertEquals(bytesArray, responseBytesArray);
+    assertArrayEquals(photoBytes, responseBytes);
   }
 
   @Test
@@ -195,14 +203,23 @@ class RentControllerTest {
 
   @Test
   void testFailStartRentEndpoint() throws Exception {
-    doThrow(VerificationFailedException.class).when(rentService).startRent(any());
+    String errorText = "Error text";
+    doThrow(new VerificationFailedException(errorText)).when(rentService).startRent(any());
 
     UUID uuid = UUID.randomUUID();
-    mockMvc
-        .perform(post(BASE_MAPPING + "/{rentId}/begin", uuid))
-        .andExpect(status().isBadRequest());
+
+    var mvcResult =
+        mockMvc
+            .perform(post(BASE_MAPPING + "/{rentId}/begin", uuid))
+            .andExpect(status().isBadRequest())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
 
     verify(rentService).startRent(uuid);
+
+    ApiError exception = objectMapper.readValue(mvcResult, ApiError.class);
+    assertEquals(errorText, exception.getMessage());
   }
 
   @Test
@@ -215,11 +232,21 @@ class RentControllerTest {
 
   @Test
   void testFailEndRentEndpoint() throws Exception {
-    doThrow(VerificationFailedException.class).when(rentService).endRent(any());
+    String errorText = "Error text";
+    doThrow(new VerificationFailedException(errorText)).when(rentService).endRent(any());
 
     UUID uuid = UUID.randomUUID();
-    mockMvc.perform(post(BASE_MAPPING + "/{rentId}/end", uuid)).andExpect(status().isBadRequest());
+    var mvcResult =
+        mockMvc
+            .perform(post(BASE_MAPPING + "/{rentId}/end", uuid))
+            .andExpect(status().isBadRequest())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
 
     verify(rentService).endRent(uuid);
+
+    ApiError exception = objectMapper.readValue(mvcResult, ApiError.class);
+    assertEquals(errorText, exception.getMessage());
   }
 }
