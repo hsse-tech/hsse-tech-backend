@@ -4,6 +4,7 @@ import com.mipt.hsse.hssetechbackend.data.entities.ClientTransactionStatus;
 import com.mipt.hsse.hssetechbackend.data.entities.Transaction;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaTransactionRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaWalletRepository;
+import com.mipt.hsse.hssetechbackend.payments.exceptions.TransactionManipulationException;
 import com.mipt.hsse.hssetechbackend.payments.exceptions.TransactionNotFoundException;
 import com.mipt.hsse.hssetechbackend.payments.exceptions.WalletNotFoundException;
 import com.mipt.hsse.hssetechbackend.payments.exceptions.WalletUpdatingException;
@@ -19,11 +20,14 @@ public class TransactionService implements TransactionServiceBase {
 
   private final JpaWalletRepository jpaWalletRepository;
   private final JpaTransactionRepository jpaTransactionRepository;
+  private final WalletService walletService;
 
   public TransactionService(JpaWalletRepository jpaWalletRepository,
-                            JpaTransactionRepository jpaTransactionRepository) {
+                            JpaTransactionRepository jpaTransactionRepository,
+                            WalletService walletService) {
     this.jpaWalletRepository = jpaWalletRepository;
     this.jpaTransactionRepository = jpaTransactionRepository;
+    this.walletService = walletService;
   }
 
   @Override
@@ -39,24 +43,41 @@ public class TransactionService implements TransactionServiceBase {
     var transaction = new Transaction(transactionInfo.amount(), transactionInfo.name(), transactionInfo.description().orElse(null));
 
     transaction.setWallet(wallet);
-    wallet.setBalance(wallet.getBalance().subtract(transactionInfo.amount()));
 
     jpaTransactionRepository.save(transaction);
-    jpaWalletRepository.save(wallet);
 
     return transaction;
   }
 
   @Override
   @Transactional(propagation = Propagation.REQUIRED)
-  public Transaction setTransactionStatus(UUID id, ClientTransactionStatus status) {
+  public void commitTransaction(UUID id) throws TransactionManipulationException {
+    var target = jpaTransactionRepository.findById(id)
+            .orElseThrow(TransactionNotFoundException::new);
+
+    if (target.getStatus() != ClientTransactionStatus.IN_PROCESS) {
+      throw new TransactionManipulationException();
+    }
+
+    var targetWallet = target.getWallet();
+    walletService.changeWalletBalanceOn(targetWallet.getId(), target.getAmount().negate());
+    target.setStatus(ClientTransactionStatus.SUCCESS);
+
+    jpaTransactionRepository.save(target);
+  }
+
+  @Override
+  @Transactional(propagation = Propagation.REQUIRED)
+  public void failTransaction(UUID id) throws TransactionManipulationException {
     var targetTransaction = jpaTransactionRepository.findById(id)
-            .orElseThrow(() ->
-                    new TransactionNotFoundException("Transaction for status update not found"));
+            .orElseThrow(TransactionNotFoundException::new);
 
-    targetTransaction.setStatus(status);
+    if (targetTransaction.getStatus() != ClientTransactionStatus.IN_PROCESS) {
+      throw new TransactionManipulationException();
+    }
+
+    targetTransaction.setStatus(ClientTransactionStatus.FAILED);
+
     jpaTransactionRepository.save(targetTransaction);
-
-    return targetTransaction;
   }
 }

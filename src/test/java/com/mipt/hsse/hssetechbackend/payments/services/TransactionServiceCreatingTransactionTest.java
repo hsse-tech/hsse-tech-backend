@@ -11,7 +11,6 @@ import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepos
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaUserRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaWalletRepository;
 import com.mipt.hsse.hssetechbackend.payments.exceptions.WalletNotFoundException;
-import com.mipt.hsse.hssetechbackend.payments.exceptions.WalletUpdatingException;
 import com.mipt.hsse.hssetechbackend.payments.services.dto.TransactionInfo;
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -32,7 +31,7 @@ import static com.mipt.hsse.hssetechbackend.BigDecimalHelper.*;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-@Import({TransactionService.class})
+@Import({TransactionService.class, WalletService.class})
 public class TransactionServiceCreatingTransactionTest extends DatabaseSuite {
   @Autowired
   private JpaUserRepository userRepository;
@@ -69,7 +68,7 @@ public class TransactionServiceCreatingTransactionTest extends DatabaseSuite {
     userRepository.deleteAll();
     walletRepository.deleteAll();
   }
-  
+
   @Test
   public void testTransactionCreation() {
     var transactionInfo = new TransactionInfo(BigDecimal.valueOf(50.00), testWallet.getId(), "Гель для душа", Optional.of("О полмолив, мой нежный гель"));
@@ -77,7 +76,7 @@ public class TransactionServiceCreatingTransactionTest extends DatabaseSuite {
     Transaction resultTrans = transactionService.createTransaction(transactionInfo);
 
     assertNotNull(resultTrans);
-    assertEquals(50, walletRepository.findAll().get(0).getBalance());
+    assertEquals(100, walletRepository.findAll().get(0).getBalance());
     assertEquals(testWallet.getId(), resultTrans.getWallet().getId());
   }
 
@@ -92,13 +91,6 @@ public class TransactionServiceCreatingTransactionTest extends DatabaseSuite {
   public void testTransactionCreationDescriptionEmpty() {
     var transactionInfo = new TransactionInfo(BigDecimal.valueOf(50.00), testWallet.getId(), "Гель для душа", Optional.empty());
     assertDoesNotThrow(() -> transactionService.createTransaction(transactionInfo));
-    assertEquals(50, walletRepository.findAll().get(0).getBalance());
-  }
-
-  @Test
-  public void testTransactionNotEnoughMoney() {
-    var transactionInfo = new TransactionInfo(BigDecimal.valueOf(150.00), testWallet.getId(), "Гель для душа", Optional.of("О полмолив, мой нежный гель"));
-
-    assertThrows(WalletUpdatingException.class, () -> transactionService.createTransaction(transactionInfo));
+    assertEquals(100, walletRepository.findAll().get(0).getBalance());
   }
 }

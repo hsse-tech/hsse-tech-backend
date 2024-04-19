@@ -4,6 +4,7 @@ import com.mipt.hsse.hssetechbackend.DatabaseSuite;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.*;
 import com.mipt.hsse.hssetechbackend.payments.services.TransactionService;
+import com.mipt.hsse.hssetechbackend.payments.services.WalletService;
 import com.mipt.hsse.hssetechbackend.rent.rentprocessing.createrentprocessing.CreateRentProcessData;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +26,7 @@ import static com.mipt.hsse.hssetechbackend.BigDecimalHelper.*;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-@Import({PaymentCreateRentProcessor.class, TransactionService.class})
+@Import({PaymentCreateRentProcessor.class, TransactionService.class, WalletService.class})
 public class PaymentCreatingRentTests extends DatabaseSuite {
   @Autowired
   private JpaUserRepository userRepository;
