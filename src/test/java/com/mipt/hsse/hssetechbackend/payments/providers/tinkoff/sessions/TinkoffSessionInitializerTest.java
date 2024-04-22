@@ -72,9 +72,9 @@ class TinkoffSessionInitializerTest {
   @Test
   public void testCreatingSessionButFailedOnSomeError() {
     when(rest.post(
-            eq("/v2/Init"),
-            isA(CreatePaymentSessionTinkoffEntity.class),
-            eq(SerializationMode.SIGN_SHA256_TOKEN)))
+              eq("/v2/Init"),
+              isA(CreatePaymentSessionTinkoffEntity.class),
+              eq(SerializationMode.SIGN_SHA256_TOKEN)))
             .thenReturn(new TinkoffResponse<>(false, null));
 
     var response = initializer.initialize(new SessionParams(140000, "21090"));
