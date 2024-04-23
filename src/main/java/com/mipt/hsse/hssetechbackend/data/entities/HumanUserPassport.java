@@ -25,7 +25,7 @@ public class HumanUserPassport {
   private User user;
 
   @Column(name = "yandex_id", nullable = false)
-  private Long yandexId;
+  private String yandexId;
 
   @Column(name = "first_name", nullable = false, length = Integer.MAX_VALUE)
   private String firstName;
@@ -45,7 +45,8 @@ public class HumanUserPassport {
   @OneToOne(mappedBy = "owner")
   private Wallet wallet;
 
-  public HumanUserPassport(Long yandexId, String firstName, String lastName, String email, User user) {
+  public HumanUserPassport(String yandexId, String firstName, String lastName,
+                           String email, User user) {
     this.yandexId = yandexId;
     this.firstName = firstName;
     this.lastName = lastName;

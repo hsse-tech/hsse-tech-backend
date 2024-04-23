@@ -5,4 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;
 
-public interface JpaHumanUserPassportRepository extends JpaRepository<HumanUserPassport, UUID> {}
+public interface JpaHumanUserPassportRepository extends JpaRepository<HumanUserPassport, UUID> {
+    HumanUserPassport findHumanUserPassportByYandexId(String id);
+    boolean existsByYandexId(String id);
+}
