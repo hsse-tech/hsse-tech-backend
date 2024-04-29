@@ -11,7 +11,8 @@ class RequestsSignerTerminalSignTest {
 
   @BeforeAll
   public static void setUp() {
-    signer = new RequestsSigner("TINKOFF_TEST_KEY", "TINKOFF_TEST_PASSWORD");
+    signer = new RequestsSigner("TINKOFF_TEST_KEY",
+            new TinkoffPropsSerializer("TINKOFF_TEST_PASSWORD"));
   }
 
   @Test
