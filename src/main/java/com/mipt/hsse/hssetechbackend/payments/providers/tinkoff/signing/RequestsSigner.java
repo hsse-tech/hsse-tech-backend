@@ -9,7 +9,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 @Service
-public class RequestsSigner {
+public class RequestsSigner implements RequestsSignerBase {
   private final String terminalKey;
   private final TinkoffPropsSerializer propsSerializer;
 
@@ -27,6 +27,7 @@ public class RequestsSigner {
    * @param tinkoffRequest Запрос для подписи
    * @param needSha256Sign True, если требуется дополнительная подпись запроса
    */
+  @Override
   public void createSign(TinkoffRequestBase tinkoffRequest, boolean needSha256Sign) {
     tinkoffRequest.setTerminalKey(terminalKey);
 
