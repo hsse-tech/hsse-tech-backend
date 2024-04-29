@@ -5,10 +5,13 @@ import org.springframework.beans.factory.annotation.Value;
 
 public class RequestsSigner {
   private final String terminalKey;
+  private final String password;
 
   public RequestsSigner(
-          @Value("#{environment.getProperty('TINKOFF_TERMINAL_KEY')}") String terminalKey) {
+          @Value("#{environment.getProperty('TINKOFF_TERMINAL_KEY')}") String terminalKey,
+          @Value("#{environment.getProperty('TINKOFF_PASSWORD')}") String password) {
     this.terminalKey = terminalKey;
+    this.password = password;
   }
 
   /**
