@@ -4,7 +4,7 @@ import com.mipt.hsse.hssetechbackend.payments.providers.SessionParams;
 import com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.entities.requests.CreatePaymentSessionTinkoffEntity;
 import com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.entities.responses.CreatePaymentSessionTinkoffResponse;
 import com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.entities.responses.TinkoffResponse;
-import com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.helpers.TinkoffApiClient;
+import com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.helpers.TinkoffApiClientBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -13,12 +13,12 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 class TinkoffSessionInitializerTest {
-  private TinkoffApiClient rest;
+  private TinkoffApiClientBase rest;
   private TinkoffSessionInitializer initializer;
 
   @BeforeEach
   public void setUp() {
-    rest = mock(TinkoffApiClient.class);
+    rest = mock(TinkoffApiClientBase.class);
     initializer = new TinkoffSessionInitializer(rest);
   }
 
