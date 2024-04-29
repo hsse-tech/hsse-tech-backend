@@ -4,7 +4,6 @@ import com.mipt.hsse.hssetechbackend.payments.providers.SessionParams;
 import com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.entities.requests.CreatePaymentSessionTinkoffEntity;
 import com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.entities.responses.CreatePaymentSessionTinkoffResponse;
 import com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.entities.responses.TinkoffResponse;
-import com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.helpers.SerializationMode;
 import com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.helpers.TinkoffApiClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,15 +31,13 @@ class TinkoffSessionInitializerTest {
 
     when(rest.post(
             eq("/v2/Init"),
-            isA(CreatePaymentSessionTinkoffEntity.class),
-            eq(SerializationMode.SIGN_SHA256_TOKEN)))
+            isA(CreatePaymentSessionTinkoffEntity.class)))
         .thenReturn(new TinkoffResponse<>(true, testResponse));
 
     var response = initializer.initialize(new SessionParams(140000, "21090"));
 
     verify(rest).post(eq("/v2/Init"),
-            isA(CreatePaymentSessionTinkoffEntity.class),
-            eq(SerializationMode.SIGN_SHA256_TOKEN));
+            isA(CreatePaymentSessionTinkoffEntity.class));
 
     assertTrue(response.isSuccess());
     assertEquals("https://securepay.tinkoff.ru/new/fU1ppgqa", response.paymentUrl());
@@ -56,15 +53,13 @@ class TinkoffSessionInitializerTest {
 
     when(rest.post(
             eq("/v2/Init"),
-            isA(CreatePaymentSessionTinkoffEntity.class),
-            eq(SerializationMode.SIGN_SHA256_TOKEN)))
+            isA(CreatePaymentSessionTinkoffEntity.class)))
             .thenReturn(new TinkoffResponse<>(true, testResponse));
 
     var response = initializer.initialize(new SessionParams(140000, "21090"));
 
     verify(rest).post(eq("/v2/Init"),
-            isA(CreatePaymentSessionTinkoffEntity.class),
-            eq(SerializationMode.SIGN_SHA256_TOKEN));
+            isA(CreatePaymentSessionTinkoffEntity.class));
 
     assertFalse(response.isSuccess());
   }
@@ -73,15 +68,13 @@ class TinkoffSessionInitializerTest {
   public void testCreatingSessionButFailedOnSomeError() {
     when(rest.post(
               eq("/v2/Init"),
-              isA(CreatePaymentSessionTinkoffEntity.class),
-              eq(SerializationMode.SIGN_SHA256_TOKEN)))
+              isA(CreatePaymentSessionTinkoffEntity.class)))
             .thenReturn(new TinkoffResponse<>(false, null));
 
     var response = initializer.initialize(new SessionParams(140000, "21090"));
 
     verify(rest).post(eq("/v2/Init"),
-            isA(CreatePaymentSessionTinkoffEntity.class),
-            eq(SerializationMode.SIGN_SHA256_TOKEN));
+            isA(CreatePaymentSessionTinkoffEntity.class));
 
     assertFalse(response.isSuccess());
   }

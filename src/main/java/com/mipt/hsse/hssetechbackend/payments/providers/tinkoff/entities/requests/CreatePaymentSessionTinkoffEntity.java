@@ -3,6 +3,7 @@ package com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.entities.reques
 import lombok.Getter;
 
 @Getter
+@TinkoffSign
 public final class CreatePaymentSessionTinkoffEntity extends TinkoffRequestBase {
   private final int amount;
   private final String orderId;

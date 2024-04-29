@@ -8,8 +8,6 @@ import com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.entities.respons
 import com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.entities.responses.TinkoffResponse;
 import com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.helpers.TinkoffApiClient;
 
-import static com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.helpers.SerializationMode.SIGN_SHA256_TOKEN;
-
 public class TinkoffSessionInitializer implements AcquiringSessionInitializer {
   private final TinkoffApiClient tinkoffApi;
   private final static String PAYMENT_SESSION_INIT_ROUTE = "/v2/Init";
@@ -22,8 +20,7 @@ public class TinkoffSessionInitializer implements AcquiringSessionInitializer {
   public SessionData initialize(SessionParams sessionParams) {
     TinkoffResponse<CreatePaymentSessionTinkoffResponse> response = tinkoffApi.post(
             PAYMENT_SESSION_INIT_ROUTE,
-            new CreatePaymentSessionTinkoffEntity(sessionParams.amount(), sessionParams.orderId()),
-            SIGN_SHA256_TOKEN);
+            new CreatePaymentSessionTinkoffEntity(sessionParams.amount(), sessionParams.orderId()));
 
     if (!response.isSuccess()) {
       return new SessionData(sessionParams.amount(), sessionParams.orderId(), false, null);
