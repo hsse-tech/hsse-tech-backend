@@ -3,42 +3,38 @@ package com.mipt.hsse.hssetechbackend.rent.controllers;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.mipt.hsse.hssetechbackend.DatabaseSuite;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemTypeRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemTypeRequest;
+import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.rent.services.ItemTypeService;
 import java.math.BigDecimal;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.*;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
-@SpringBootTest(webEnvironment = RANDOM_PORT)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class ItemTypeControllerTest extends DatabaseSuite {
-  @Autowired private TestRestTemplate rest;
+@WebMvcTest(ItemTypeController.class)
+@Import(ObjectMapper.class)
+class ItemTypeControllerTest {
+  private static final String BASE_MAPPING = "/api/renting/item-type";
+  @Autowired MockMvc mockMvc;
+  @Autowired ObjectMapper objectMapper;
   @MockBean private ItemTypeService itemTypeService;
 
-  private static final String BASE_MAPPING = "/api/renting/item-type";
-
-  @BeforeEach
-  public void setup() {
-    rest.getRestTemplate().setRequestFactory(new HttpComponentsClientHttpRequestFactory());
-  }
-
   @Test
-  void testCreateItemTypeEndpoint() {
+  void testCreateItemTypeEndpoint() throws Exception {
     final BigDecimal cost = BigDecimal.valueOf(100);
     final String displayName = "displayName";
     final int maxRentTime = 60;
@@ -49,45 +45,57 @@ class ItemTypeControllerTest extends DatabaseSuite {
 
     CreateItemTypeRequest request =
         new CreateItemTypeRequest(cost, displayName, maxRentTime, isPhotoConfirmRequired);
+    String requestStr = objectMapper.writeValueAsString(request);
 
-    ResponseEntity<ItemType> createResponse =
-        rest.postForEntity(BASE_MAPPING, request, ItemType.class);
-    assertEquals(HttpStatus.CREATED, createResponse.getStatusCode());
+    MvcResult mvcResult =
+        mockMvc
+            .perform(post(BASE_MAPPING).content(requestStr).contentType(MediaType.APPLICATION_JSON))
+            .andDo(print())
+            .andExpect(status().isCreated())
+            .andReturn();
 
-    verify(itemTypeService).createItemType(request);
+    String responseBody = mvcResult.getResponse().getContentAsString();
+    ItemType responseItemType = objectMapper.readValue(responseBody, ItemType.class);
 
-    ItemType responseItemType = createResponse.getBody();
     assertNotNull(responseItemType);
     assertEquals(cost, responseItemType.getCost());
     assertEquals(displayName, responseItemType.getDisplayName());
     assertEquals(maxRentTime, responseItemType.getMaxRentTimeMinutes());
     assertEquals(isPhotoConfirmRequired, responseItemType.isPhotoRequiredOnFinish());
+
+    verify(itemTypeService).createItemType(request);
   }
 
   @Test
-  void testCreateItemTypeEndpointOnInvalidReturnBadRequest() {
+  void testCreateItemTypeEndpointOnInvalidReturnBadRequest() throws Exception {
     when(itemTypeService.createItemType(any())).thenReturn(null);
 
     CreateItemTypeRequest request =
         new CreateItemTypeRequest(BigDecimal.valueOf(-100.5), "", null, false);
-    ResponseEntity<ItemType> createResponse =
-        rest.postForEntity(BASE_MAPPING, request, ItemType.class);
-    assertEquals(HttpStatus.BAD_REQUEST, createResponse.getStatusCode());
+    String requestStr = objectMapper.writeValueAsString(request);
+
+    mockMvc
+        .perform(post(BASE_MAPPING).content(requestStr).contentType(MediaType.APPLICATION_JSON))
+        .andDo(print())
+        .andExpect(status().isBadRequest());
   }
 
   @Test
-  void testGetItemTypeEndpoint() {
+  void testGetItemTypeEndpoint() throws Exception {
     ItemType itemType = new ItemType(BigDecimal.ZERO, "testName", 60, false);
 
     when(itemTypeService.getItemType(any())).thenReturn(Optional.of(itemType));
 
-    ResponseEntity<ItemType> response =
-        rest.getForEntity(
-            BASE_MAPPING + "/{itemTypeId}",
-            ItemType.class,
-            Map.of("itemTypeId", UUID.randomUUID()));
+    MvcResult mvcResult =
+        mockMvc
+            .perform(get(BASE_MAPPING + "/{itemTypeId}", UUID.randomUUID().toString()))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andReturn();
 
-    ItemType returnedItemType = response.getBody();
+    String responseBody = mvcResult.getResponse().getContentAsString();
+    ItemType returnedItemType = objectMapper.readValue(responseBody, ItemType.class);
+
     assertNotNull(returnedItemType);
     assertEquals(itemType.getDisplayName(), returnedItemType.getDisplayName());
     assertEquals(itemType.getCost(), returnedItemType.getCost());
@@ -95,18 +103,17 @@ class ItemTypeControllerTest extends DatabaseSuite {
   }
 
   @Test
-  void testGetItemTypeEndpointOnGetNonExistReturnBadRequest() {
+  void testGetItemTypeEndpointOnGetNonExistReturnBadRequest() throws Exception {
     when(itemTypeService.getItemType(any())).thenReturn(Optional.empty());
 
-    ResponseEntity<ItemType> response =
-        rest.getForEntity(
-            BASE_MAPPING + "/{itemId}", ItemType.class, Map.of("itemId", UUID.randomUUID()));
-
-    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    mockMvc
+        .perform(get(BASE_MAPPING + "/{itemId}", UUID.randomUUID().toString()))
+        .andDo(print())
+        .andExpect(status().isBadRequest());
   }
 
   @Test
-  void testUpdateItemTypeEndpoint() {
+  void testUpdateItemTypeEndpoint() throws Exception {
     final BigDecimal cost = BigDecimal.valueOf(100);
     final String displayName = "displayName";
     final Integer maxRentTime = null;
@@ -120,39 +127,46 @@ class ItemTypeControllerTest extends DatabaseSuite {
     UUID uuid = UUID.randomUUID();
     UpdateItemTypeRequest updateRequest =
         new UpdateItemTypeRequest(displayName, cost, isPhotoConfirmRequired, maxRentTime);
-    HttpEntity<UpdateItemTypeRequest> requestEntity = new HttpEntity<>(updateRequest);
+    String requestStr = objectMapper.writeValueAsString(updateRequest);
 
-    rest.exchange(
-        BASE_MAPPING + "/{id}", HttpMethod.PATCH, requestEntity, void.class, Map.of("id", uuid));
+    mockMvc
+        .perform(
+            patch(BASE_MAPPING + "/{id}", uuid.toString())
+                .content(requestStr)
+                .contentType(MediaType.APPLICATION_JSON))
+        .andDo(print())
+        .andExpect(status().isNoContent());
 
     verify(itemTypeService).updateItemType(uuid, updateRequest);
   }
 
   @Test
-  void testUpdateItemTypeEndpointOnUpdateNonExistReturnBadRequest() {
-    doNothing().when(itemTypeService).updateItemType(any(), any());
+  void testUpdateItemTypeEndpointOnUpdateNonExistReturnBadRequest() throws Exception {
+    doThrow(EntityNotFoundException.class).when(itemTypeService).updateItemType(any(), any());
 
     UpdateItemTypeRequest updateRequest =
         new UpdateItemTypeRequest("name", BigDecimal.ZERO, false, 60);
-    HttpEntity<UpdateItemTypeRequest> requestEntity = new HttpEntity<>(updateRequest);
+    String requestStr = objectMapper.writeValueAsString(updateRequest);
 
-    ResponseEntity<Void> response =
-        rest.exchange(
-            BASE_MAPPING + "/{id}",
-            HttpMethod.PATCH,
-            requestEntity,
-            void.class,
-            Map.of("id", UUID.randomUUID()));
-
-    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    mockMvc
+        .perform(
+            patch(BASE_MAPPING + "/{id}", UUID.randomUUID().toString())
+                .content(requestStr)
+                .contentType(MediaType.APPLICATION_JSON))
+        .andDo(print())
+        .andExpect(status().isBadRequest());
   }
 
   @Test
-  void testDeleteItemTypeEndpoint() {
+  void testDeleteItemTypeEndpoint() throws Exception {
     doNothing().when(itemTypeService).deleteItemType(any());
 
     UUID uuid = UUID.randomUUID();
-    rest.delete(BASE_MAPPING + "/{itemTypeId}", Map.of("itemTypeId", uuid));
+
+    mockMvc
+        .perform(delete(BASE_MAPPING + "/{itemTypeId}", uuid.toString()))
+        .andDo(print())
+        .andExpect(status().isOk());
 
     verify(itemTypeService).deleteItemType(uuid);
   }

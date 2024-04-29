@@ -1,7 +1,9 @@
 package com.mipt.hsse.hssetechbackend.data.entities;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
@@ -14,6 +16,7 @@ import java.util.UUID;
 @Getter
 @Entity
 @Table(name = "human_user_passport")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class HumanUserPassport {
   @Id
   @Column(name = "original_id", nullable = false)
@@ -51,9 +54,5 @@ public class HumanUserPassport {
     this.lastName = lastName;
     this.email = email;
     this.user = user;
-  }
-
-  public HumanUserPassport() {
-
   }
 }

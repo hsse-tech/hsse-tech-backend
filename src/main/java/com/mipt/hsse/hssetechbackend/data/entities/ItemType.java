@@ -1,5 +1,6 @@
 package com.mipt.hsse.hssetechbackend.data.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
@@ -60,6 +61,7 @@ public class ItemType {
     return isPhotoRequiredOnFinish;
   }
 
+  @JsonIgnore
   public boolean isPaymentRequired() {
     return cost.compareTo(BigDecimal.ZERO) > 0;
   }

@@ -13,7 +13,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,15 +28,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class ItemServiceTest extends DatabaseSuite {
+  private final ItemType itemType = new ItemType(BigDecimal.ZERO, "Item type name", 60, false);
   @Autowired private ItemService itemService;
-
   @Autowired private JpaItemTypeRepository itemTypeRepository;
   @Autowired private JpaItemRepository itemRepository;
   @Autowired private JpaUserRepository userRepository;
   @Autowired private JpaHumanUserPassportRepository humanUserPassportRepository;
   @Autowired private JpaRentRepository rentRepository;
-
-  private final ItemType itemType = new ItemType(BigDecimal.ZERO, "Item type name", 60, false);
 
   @BeforeEach
   void save() {
@@ -69,7 +66,8 @@ class ItemServiceTest extends DatabaseSuite {
 
     User user = new User("user");
 
-    HumanUserPassport humanUserPassport = new HumanUserPassport(123L, "firstName", "lastName", "test@gmail.com", user);
+    HumanUserPassport humanUserPassport =
+        new HumanUserPassport(123L, "firstName", "lastName", "test@gmail.com", user);
     humanUserPassport = humanUserPassportRepository.save(humanUserPassport);
 
     Item item = new Item(displayName, itemType);
@@ -78,32 +76,32 @@ class ItemServiceTest extends DatabaseSuite {
     Item needlessItem = new Item("Dummy item", itemType);
     needlessItem = itemRepository.save(needlessItem);
 
-    Rent rentBeforeNow = new Rent(
-        Instant.now().minus(5, ChronoUnit.DAYS),
-        Instant.now().minus(4, ChronoUnit.DAYS),
-        humanUserPassport,
-        item);
+    Rent rentBeforeNow =
+        new Rent(
+            Instant.now().minus(5, ChronoUnit.DAYS),
+            Instant.now().minus(4, ChronoUnit.DAYS),
+            humanUserPassport,
+            item);
     rentRepository.save(rentBeforeNow);
 
-    Rent rentBeginningNow = new Rent(
-        Instant.now(),
-        Instant.now().plus(1, ChronoUnit.DAYS),
-        humanUserPassport,
-        item);
+    Rent rentBeginningNow =
+        new Rent(Instant.now(), Instant.now().plus(1, ChronoUnit.DAYS), humanUserPassport, item);
     rentRepository.save(rentBeginningNow);
 
-    Rent rentAfterNow = new Rent(
-        Instant.now().plus(5, ChronoUnit.DAYS),
-        Instant.now().plus(6, ChronoUnit.DAYS),
-        humanUserPassport,
-        item);
+    Rent rentAfterNow =
+        new Rent(
+            Instant.now().plus(5, ChronoUnit.DAYS),
+            Instant.now().plus(6, ChronoUnit.DAYS),
+            humanUserPassport,
+            item);
     rentRepository.save(rentAfterNow);
 
-    Rent rentOfAnotherItem = new Rent(
-        Instant.now().plus(7, ChronoUnit.DAYS),
-        Instant.now().plus(8, ChronoUnit.DAYS),
-        humanUserPassport,
-        needlessItem);
+    Rent rentOfAnotherItem =
+        new Rent(
+            Instant.now().plus(7, ChronoUnit.DAYS),
+            Instant.now().plus(8, ChronoUnit.DAYS),
+            humanUserPassport,
+            needlessItem);
     rentRepository.save(rentOfAnotherItem);
 
     List<Rent> futureRentsOfItem = itemService.getFutureRentsOfItem(item.getId());
@@ -116,7 +114,7 @@ class ItemServiceTest extends DatabaseSuite {
     userRepository.deleteAll();
     itemRepository.deleteAll();
   }
-  
+
   @Test
   void testFailCreateItemOfAbsentType() {
     final String itemName = "Particular item name";
@@ -147,7 +145,8 @@ class ItemServiceTest extends DatabaseSuite {
     // Update item
     UpdateItemRequest updateItemRequest = new UpdateItemRequest("newDisplayName");
     assertThrows(
-        EntityNotFoundException.class, () -> itemService.updateItem(UUID.randomUUID(), updateItemRequest));
+        EntityNotFoundException.class,
+        () -> itemService.updateItem(UUID.randomUUID(), updateItemRequest));
   }
 
   @Test

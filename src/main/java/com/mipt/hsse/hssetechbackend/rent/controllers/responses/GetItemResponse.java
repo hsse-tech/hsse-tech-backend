@@ -28,7 +28,11 @@ public class GetItemResponse {
   private final List<GetShortRentResponse> rents;
 
   @JsonCreator
-  public GetItemResponse(UUID itemId, UUID typeId, String displayName, List<GetShortRentResponse> rents) {
+  public GetItemResponse(
+      @JsonProperty("item_id") UUID itemId,
+      @JsonProperty("type_id") UUID typeId,
+      @JsonProperty("display_name") String displayName,
+      @JsonProperty("rent_info") List<GetShortRentResponse> rents) {
     this.itemId = itemId;
     this.typeId = typeId;
     this.displayName = displayName;
