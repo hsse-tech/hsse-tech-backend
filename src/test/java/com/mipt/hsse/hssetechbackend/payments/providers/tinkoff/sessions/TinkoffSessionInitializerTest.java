@@ -31,13 +31,15 @@ class TinkoffSessionInitializerTest {
 
     when(rest.post(
             eq("/v2/Init"),
-            isA(CreatePaymentSessionTinkoffEntity.class)))
+            isA(CreatePaymentSessionTinkoffEntity.class),
+            any()))
         .thenReturn(new TinkoffResponse<>(true, testResponse));
 
     var response = initializer.initialize(new SessionParams(140000, "21090"));
 
     verify(rest).post(eq("/v2/Init"),
-            isA(CreatePaymentSessionTinkoffEntity.class));
+            isA(CreatePaymentSessionTinkoffEntity.class),
+            any());
 
     assertTrue(response.isSuccess());
     assertEquals("https://securepay.tinkoff.ru/new/fU1ppgqa", response.paymentUrl());
@@ -53,13 +55,15 @@ class TinkoffSessionInitializerTest {
 
     when(rest.post(
             eq("/v2/Init"),
-            isA(CreatePaymentSessionTinkoffEntity.class)))
+            isA(CreatePaymentSessionTinkoffEntity.class),
+            any()))
             .thenReturn(new TinkoffResponse<>(true, testResponse));
 
     var response = initializer.initialize(new SessionParams(140000, "21090"));
 
     verify(rest).post(eq("/v2/Init"),
-            isA(CreatePaymentSessionTinkoffEntity.class));
+            isA(CreatePaymentSessionTinkoffEntity.class),
+            any());
 
     assertFalse(response.isSuccess());
   }
@@ -68,13 +72,15 @@ class TinkoffSessionInitializerTest {
   public void testCreatingSessionButFailedOnSomeError() {
     when(rest.post(
               eq("/v2/Init"),
-              isA(CreatePaymentSessionTinkoffEntity.class)))
+              isA(CreatePaymentSessionTinkoffEntity.class),
+              any()))
             .thenReturn(new TinkoffResponse<>(false, null));
 
     var response = initializer.initialize(new SessionParams(140000, "21090"));
 
     verify(rest).post(eq("/v2/Init"),
-            isA(CreatePaymentSessionTinkoffEntity.class));
+            isA(CreatePaymentSessionTinkoffEntity.class),
+            any());
 
     assertFalse(response.isSuccess());
   }

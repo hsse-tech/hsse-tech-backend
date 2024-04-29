@@ -20,7 +20,8 @@ public class TinkoffSessionInitializer implements AcquiringSessionInitializer {
   public SessionData initialize(SessionParams sessionParams) {
     TinkoffResponse<CreatePaymentSessionTinkoffResponse> response = tinkoffApi.post(
             PAYMENT_SESSION_INIT_ROUTE,
-            new CreatePaymentSessionTinkoffEntity(sessionParams.amount(), sessionParams.orderId()));
+            new CreatePaymentSessionTinkoffEntity(sessionParams.amount(), sessionParams.orderId()),
+            CreatePaymentSessionTinkoffResponse.class);
 
     if (!response.isSuccess()) {
       return new SessionData(sessionParams.amount(), sessionParams.orderId(), false, null);
