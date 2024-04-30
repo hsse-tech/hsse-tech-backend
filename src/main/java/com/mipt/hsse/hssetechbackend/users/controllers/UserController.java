@@ -90,17 +90,17 @@ public class UserController {
         }
         if (emailId == -1)
             throw new IOException("no phystech mail found");
-        if(jpaHumanUserPassportRepository.existsByYandexId(token.psuid())){
+        if (jpaHumanUserPassportRepository.existsByYandexId(token.psuid())) {
             throw new IOException("already exists");
         }
         com.mipt.hsse.hssetechbackend.data.entities.User user =
                 new com.mipt.hsse.hssetechbackend.data.entities.User("average");
-        if(!jpaUserRepository.exists(Example.of(user))){
+        if (!jpaUserRepository.exists(Example.of(user))) {
             jpaUserRepository.save(user);
         }
         HumanUserPassport humanUserPassport =
-                new HumanUserPassport(token.psuid(),token.display_name(),
-                        token.display_name(),token.emails().get(emailId),user);
+                new HumanUserPassport(token.psuid(), token.display_name(),
+                        token.display_name(), token.emails().get(emailId), user);
         jpaHumanUserPassportRepository.save(humanUserPassport);
         humanUserPassport =
                 jpaHumanUserPassportRepository.findHumanUserPassportByYandexId(token.psuid());
@@ -115,7 +115,7 @@ public class UserController {
 
     @PostMapping("{id}/ban")
     void BanUser(@PathVariable UUID id, @RequestBody String cookie) {
-        if (CheckConnection(cookie) && GetConnection(cookie).getUser().getRoles().contains(new Role(0))) {
+        if (CheckConnection(cookie) && GetConnection(cookie).getUser().getRoles().contains(new Role("admin"))) {
             HumanUserPassport passport = GetConnection(cookie);
             passport.setIsBanned(true);
             jpaHumanUserPassportRepository.save(passport);
@@ -124,7 +124,7 @@ public class UserController {
 
     @PostMapping("{id}/unban")
     void UnbanUser(@PathVariable UUID id, @RequestBody String cookie) {
-        if (CheckConnection(cookie) && GetConnection(cookie).getUser().getRoles().contains(new Role(0))) {
+        if (CheckConnection(cookie) && GetConnection(cookie).getUser().getRoles().contains(new Role("admin"))) {
             HumanUserPassport passport = GetConnection(cookie);
             passport.setIsBanned(false);
             jpaHumanUserPassportRepository.save(passport);
