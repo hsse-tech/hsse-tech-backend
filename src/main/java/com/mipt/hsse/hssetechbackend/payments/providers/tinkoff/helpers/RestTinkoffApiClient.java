@@ -8,11 +8,10 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-@Service
 public class RestTinkoffApiClient implements TinkoffApiClientBase {
   private final RestTemplate restTemplate;
 
-  public RestTinkoffApiClient(@Qualifier("TINKOFF_REST_CLIENT") RestTemplate restTemplate) {
+  public RestTinkoffApiClient(RestTemplate restTemplate) {
     this.restTemplate = restTemplate;
   }
 

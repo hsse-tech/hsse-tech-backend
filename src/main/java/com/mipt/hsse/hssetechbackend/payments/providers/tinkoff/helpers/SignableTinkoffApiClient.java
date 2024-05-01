@@ -4,9 +4,10 @@ import com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.entities.request
 import com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.entities.requests.TinkoffSign;
 import com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.entities.responses.TinkoffResponse;
 import com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.signing.RequestsSignerBase;
-import org.springframework.stereotype.Service;
 
-@Service
+/**
+ * Представляет собой обертку над обычным Tinkoff API клиентом, который просто подписывает запросы.
+ */
 public class SignableTinkoffApiClient implements TinkoffApiClientBase {
   private final TinkoffApiClientBase http;
   private final RequestsSignerBase requestsSigner;
