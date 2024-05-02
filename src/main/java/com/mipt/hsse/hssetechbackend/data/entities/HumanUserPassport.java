@@ -3,7 +3,10 @@ package com.mipt.hsse.hssetechbackend.data.entities;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,7 +17,7 @@ import java.util.UUID;
 @Getter
 @Entity
 @Table(name = "human_user_passport")
-public class HumanUserPassport {
+public class HumanUserPassport implements UserDetails {
   @Id
   @Column(name = "original_id", nullable = false)
   private UUID id;
@@ -56,5 +59,40 @@ public class HumanUserPassport {
 
   public HumanUserPassport() {
 
+  }
+
+  @Override
+  public Collection<? extends GrantedAuthority> getAuthorities() {
+    return getUser().getRoles();
+  }
+
+  @Override
+  public String getPassword() {
+    return null;
+  }
+
+  @Override
+  public String getUsername() {
+    return getYandexId();
+  }
+
+  @Override
+  public boolean isAccountNonExpired() {
+    return true;
+  }
+
+  @Override
+  public boolean isAccountNonLocked() {
+    return getIsBanned();
+  }
+
+  @Override
+  public boolean isCredentialsNonExpired() {
+    return true;
+  }
+
+  @Override
+  public boolean isEnabled() {
+    return true;
   }
 }

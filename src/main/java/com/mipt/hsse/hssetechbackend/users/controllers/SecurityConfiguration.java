@@ -31,6 +31,8 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http//.csrf(AbstractHttpConfigurer::disable)
+//                .csrf((csrf) -> csrf
+//                        .ignoringRequestMatchers("/**"))
                 // Своего рода отключение CORS (разрешение запросов со всех доменов)
                 .cors(cors -> cors.configurationSource(request -> {
                     var corsConfiguration = new CorsConfiguration();
@@ -41,12 +43,18 @@ public class SecurityConfiguration {
                     return corsConfiguration;
                 }))
                 // Настройка доступа к конечным точкам
-                .authorizeHttpRequests(request -> request
+                .authorizeHttpRequests(request -> request.anyRequest().permitAll()
                         // Можно указать конкретный путь, * - 1 уровень вложенности, ** - любое количество уровней вложенности
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/swagger-resources/*", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/endpoint", "/admin/**").hasRole("ADMIN")
-                        .anyRequest().authenticated())
+//                        .requestMatchers("/api/users/register",//todo manage
+//                                // permissions
+//                                "/api/users/auth","/**").anonymous()
+//                        .requestMatchers("/swagger-ui/**", "/swagger" +
+//                                "-resources/*", "/v3/api-docs/**",
+//                                "/auth","/register").permitAll()
+//                        .requestMatchers("/endpoint", "/admin/**",
+//                                "api/users/**").hasRole(
+//                                "admin").requestMatchers("/**").hasRole("user")
+                )
                 .sessionManagement(manager -> manager.sessionCreationPolicy(STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

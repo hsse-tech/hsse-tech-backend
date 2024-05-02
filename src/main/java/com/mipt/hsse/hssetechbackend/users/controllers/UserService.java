@@ -1,7 +1,9 @@
 package com.mipt.hsse.hssetechbackend.users.controllers;
 
 import com.mipt.hsse.hssetechbackend.data.entities.Role;
+import com.mipt.hsse.hssetechbackend.data.entities.HumanUserPassport;
 import com.mipt.hsse.hssetechbackend.data.entities.User;
+import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaRoleRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaUserRepository;
 import lombok.RequiredArgsConstructor;
@@ -10,18 +12,19 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
-    private final JpaUserRepository repository;
+    private final JpaHumanUserPassportRepository repository;
     private final JpaRoleRepository roles;
-
     /**
      * Сохранение пользователя
      *
      * @return сохраненный пользователь
      */
-    public User save(User user) {
+    public HumanUserPassport save(HumanUserPassport user) {
         return repository.save(user);
     }
 
@@ -31,8 +34,8 @@ public class UserService {
      *
      * @return созданный пользователь
      */
-    public User create(User user) {
-        if (repository.existsByUsername(user.getUsername())) {
+    public HumanUserPassport create(HumanUserPassport user) {
+        if (repository.existsByYandexId(user.getUsername())) {
             // Заменить на свои исключения
             throw new RuntimeException("Пользователь с таким именем уже существует");
         }
@@ -40,7 +43,15 @@ public class UserService {
 //        if (repository.existsByEmail(user.getEmail())) {
 //            throw new RuntimeException("Пользователь с таким email уже существует");
 //        }
-
+        if (user.getUser() == null) {
+            user.setUser(new User("user"));
+            var userRoles = user.getUser().getRoles();
+            if (!roles.existsByName("user")) {
+                var adminRole = new Role("user");
+                roles.save(adminRole);
+            }
+            userRoles.add(roles.getRoleByName("user"));
+        }
         return save(user);
     }
 
@@ -49,9 +60,9 @@ public class UserService {
      *
      * @return пользователь
      */
-    public User getByUsername(String username) {
-        return (User) repository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
+    public HumanUserPassport getByUsername(String username) {
+        return repository.findHumanUserPassportByYandexId(username)
+                .orElse(null);
 
     }
 
@@ -71,7 +82,7 @@ public class UserService {
      *
      * @return текущий пользователь
      */
-    public User getCurrentUser() {
+    public HumanUserPassport getCurrentUser() {
         // Получение имени пользователя из контекста Spring Security
         var username = SecurityContextHolder.getContext().getAuthentication().getName();
         return getByUsername(username);
@@ -86,13 +97,13 @@ public class UserService {
     @Deprecated
     public void getAdmin() {
         var user = getCurrentUser();
-        var userRoles = user.getRoles();
+        var userRoles = user.getUser().getRoles();
         if (!roles.existsByName("admin")) {
             var adminRole = new Role("admin");
             roles.save(adminRole);
         }
         userRoles.add(roles.getRoleByName("admin"));
-        user.setRoles(userRoles);
+        user.getUser().setRoles(userRoles);
         save(user);
     }
 }
