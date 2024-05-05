@@ -1,7 +1,7 @@
 package com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.helpers;
 
 import com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.entities.requests.TinkoffRequestBase;
-import com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.entities.requests.TinkoffSign;
+import com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.signing.TinkoffSign;
 import com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.entities.responses.TinkoffResponse;
 import com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.signing.RequestsSignerBase;
 

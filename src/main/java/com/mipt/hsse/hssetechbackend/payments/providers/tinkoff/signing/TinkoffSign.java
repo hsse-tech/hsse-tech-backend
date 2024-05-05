@@ -1,4 +1,4 @@
-package com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.entities.requests;
+package com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.signing;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
