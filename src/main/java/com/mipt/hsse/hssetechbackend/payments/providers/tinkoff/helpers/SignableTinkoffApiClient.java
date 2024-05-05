@@ -50,8 +50,6 @@ public class SignableTinkoffApiClient implements TinkoffApiClientBase {
   private void sign(TinkoffRequestBase payload) {
     var type = payload.getClass();
 
-    var hasSignAttr = type.getAnnotation(TinkoffSign.class) != null;
-
-    requestsSigner.createSign(payload, hasSignAttr);
+    requestsSigner.createSign(payload, type.isAnnotationPresent(TinkoffSign.class));
   }
 }

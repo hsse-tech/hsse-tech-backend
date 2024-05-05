@@ -31,8 +31,10 @@ public class RequestsSigner implements RequestsSignerBase {
   public void createSign(TinkoffRequestBase tinkoffRequest, boolean needSha256Sign) {
     tinkoffRequest.setTerminalKey(terminalKey);
 
-    if (!needSha256Sign) return;
+    if (needSha256Sign) signBySha256Token(tinkoffRequest);
+  }
 
+  private void signBySha256Token(TinkoffRequestBase tinkoffRequest) {
     var result = propsSerializer.serialize(tinkoffRequest);
     try {
       var sha256 = MessageDigest.getInstance("SHA-256");
