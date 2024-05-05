@@ -7,7 +7,9 @@ import com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.entities.request
 import com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.entities.responses.CreatePaymentSessionTinkoffResponse;
 import com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.entities.responses.TinkoffResponse;
 import com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.helpers.TinkoffApiClientBase;
+import org.springframework.stereotype.Component;
 
+@Component
 public class TinkoffSessionInitializer implements AcquiringSessionInitializer {
   private final TinkoffApiClientBase tinkoffApi;
   private final static String PAYMENT_SESSION_INIT_ROUTE = "/v2/Init";
