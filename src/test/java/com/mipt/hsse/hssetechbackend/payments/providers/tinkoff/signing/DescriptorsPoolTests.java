@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class TypeParserTests {
+class DescriptorsPoolTests {
   private static class EntityWithoutSignMark extends TinkoffRequestBase {
 
   }
@@ -93,37 +93,37 @@ class TypeParserTests {
     }
   }
 
-  private TypeParser parser;
+  private DescriptorsPool parser;
 
   @BeforeEach
   public void setUp() {
-    parser = new TypeParser("usaf8fw8fsw21g");
+    parser = new DescriptorsPool("usaf8fw8fsw21g");
   }
 
   @Test
   public void testDetectingSigningNoSign() {
-    TypeDescriptor typeDescriptor = parser.generateDescriptor(EntityWithoutSignMark.class);
+    TypeDescriptor typeDescriptor = parser.getDescriptor(EntityWithoutSignMark.class);
 
     assertFalse(typeDescriptor.isNeedSign());
   }
 
   @Test
   public void testDetectingSigningNeedSign() {
-    TypeDescriptor typeDescriptor = parser.generateDescriptor(EntityWithSignMark.class);
+    TypeDescriptor typeDescriptor = parser.getDescriptor(EntityWithSignMark.class);
 
     assertTrue(typeDescriptor.isNeedSign());
   }
 
   @Test
   public void testSerializingBasicObject() {
-    TypeDescriptor typeDescriptor = parser.generateDescriptor(BasicObject.class);
+    TypeDescriptor typeDescriptor = parser.getDescriptor(BasicObject.class);
 
     assertEquals("abcusaf8fw8fsw21g", typeDescriptor.serialize(new BasicObject()));
   }
 
   @Test
   public void testSerializingObjectWithNestedObjects() {
-    TypeDescriptor typeDescriptor = parser.generateDescriptor(ObjectWithNestedObjects.class);
+    TypeDescriptor typeDescriptor = parser.getDescriptor(ObjectWithNestedObjects.class);
 
     assertEquals("abcusaf8fw8fsw21g", typeDescriptor.serialize(new ObjectWithNestedObjects()));
   }
@@ -134,10 +134,26 @@ class TypeParserTests {
 
     obj.setTerminalKey("MerchantTerminalKey");
 
-    TypeDescriptor typeDescriptor = parser.generateDescriptor(TinkoffExampleObject.class);
+    TypeDescriptor typeDescriptor = parser.getDescriptor(TinkoffExampleObject.class);
 
     var result = typeDescriptor.serialize(obj);
 
     assertEquals("19200Подарочная карта на 1000 рублей21090usaf8fw8fsw21gMerchantTerminalKey", result);
+  }
+
+  @Test
+  public void testCachingDescriptor() {
+    var objABasic = parser.getDescriptor(BasicObject.class);
+    var objBBasic = parser.getDescriptor(BasicObject.class);
+
+    var objANested = parser.getDescriptor(ObjectWithNestedObjects.class);
+    var objBNested = parser.getDescriptor(ObjectWithNestedObjects.class);
+
+    var objAExample = parser.getDescriptor(TinkoffExampleObject.class);
+    var objBExample = parser.getDescriptor(TinkoffExampleObject.class);
+
+    assertSame(objABasic, objBBasic);
+    assertSame(objANested, objBNested);
+    assertSame(objAExample, objBExample);
   }
 }
