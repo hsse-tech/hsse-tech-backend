@@ -1,38 +1,96 @@
 package com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.signing;
 
 import com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.entities.requests.TinkoffRequestBase;
-import lombok.Getter;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class TinkoffPropsSerializerTest {
+  private static class EntityWithoutSignMark extends TinkoffRequestBase {
+
+  }
+
+  @TinkoffSign
+  private static class EntityWithSignMark extends TinkoffRequestBase {
+
+  }
+
   @SuppressWarnings("FieldMayBeFinal")
-  @Getter
   private static class BasicObject extends TinkoffRequestBase {
-    private String a = "a";
-    private String c = "c";
-    private String b = "b";
+
+    @TinkoffProperty(name = "A")
+    public String getA() {
+      return "a";
+    }
+
+    @TinkoffProperty(name = "C")
+    public String getC() {
+      return "c";
+    }
+
+    @TinkoffProperty(name = "B")
+    public String getB() {
+      return "b";
+    }
   }
 
   @SuppressWarnings("FieldMayBeFinal")
-  @Getter
   private static class ObjectWithNestedObjects extends TinkoffRequestBase {
-    private String a = "a";
-    private String c = "c";
-    private String b = "b";
-    private BasicObject obj = new BasicObject();
+    @TinkoffProperty(name = "A")
+    public String getA() {
+      return "a";
+    }
+
+    @TinkoffProperty(name = "C")
+    public String getC() {
+      return "c";
+    }
+
+    @TinkoffProperty(name = "B")
+    public String getB() {
+      return "b";
+    }
+
+    @TinkoffProperty(name = "Obj")
+    public Object getObj() {
+      return new BasicObject();
+    }
   }
 
-  @SuppressWarnings("FieldMayBeFinal")
-  @Getter
+  @SuppressWarnings({"FieldMayBeFinal", "FieldCanBeLocal"})
   private static class TinkoffExampleObject extends TinkoffRequestBase {
     private int amount = 19200;
     private String orderId = "21090";
     private String description = "Подарочная карта на 1000 рублей";
     private Object data = new Object();
     private Object Receipt = new Object();
+
+    @TinkoffProperty(name = "Amount")
+    public int getAmount() {
+      return amount;
+    }
+
+    @SuppressWarnings("unused")
+    @TinkoffProperty(name = "OrderId")
+    public String getOrderId() {
+      return orderId;
+    }
+
+    @TinkoffProperty(name = "Description")
+    public String getDescription() {
+      return description;
+    }
+
+    @TinkoffProperty(name = "Data")
+    public Object getData() {
+      return data;
+    }
+
+    @TinkoffProperty(name = "Receipt")
+    public Object getReceipt() {
+      return Receipt;
+    }
   }
 
   private static TinkoffPropsSerializer serializer;
