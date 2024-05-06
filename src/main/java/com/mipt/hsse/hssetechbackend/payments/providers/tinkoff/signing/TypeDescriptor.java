@@ -26,22 +26,12 @@ public class TypeDescriptor {
           Short.class, short.class,
           Long.class, long.class);
 
-  private static class PropertyInfo {
-    @Getter
-    private String propName;
-
-    private final Function<Object, String> extractString;
-
-    public PropertyInfo(String propName, Function<Object, String> extractString) {
-      this.propName = propName;
-      this.extractString = extractString;
-    }
-
+  private record PropertyInfo(String propName, Function<Object, String> extractString) {
     public String getValue(Object object) {
       return extractString.apply(object);
     }
 
-    public static PropertyInfo fromMethod(Method method) {
+    public static PropertyInfo executable(Method method) {
       return new PropertyInfo(
               method.getAnnotation(TinkoffProperty.class).name(),
               (o) -> {
@@ -82,13 +72,13 @@ public class TypeDescriptor {
     for (Class<?> contextClass = type; contextClass != null; contextClass = contextClass.getSuperclass()) {
       for (Method method : contextClass.getDeclaredMethods()) {
         if (isGetter(method) && trustedClasses.contains(method.getReturnType())) {
-          props.add(PropertyInfo.fromMethod(method));
+          props.add(PropertyInfo.executable(method));
         }
       }
     }
 
     props.add(PropertyInfo.constant(PASSWORD_FIELD_NAME, password));
-    props.sort(Comparator.comparing(PropertyInfo::getPropName));
+    props.sort(Comparator.comparing(PropertyInfo::propName));
 
     return new TypeDescriptor(needSign, props);
   }
