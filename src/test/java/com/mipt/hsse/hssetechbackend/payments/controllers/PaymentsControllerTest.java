@@ -14,6 +14,7 @@ import com.mipt.hsse.hssetechbackend.payments.services.WalletServiceBase;
 
 import java.util.UUID;
 
+import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -46,5 +47,27 @@ class PaymentsControllerTest {
 
     http.perform(post("/api/payment/top-up-balance").content(reqJson).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().is3xxRedirection());
+  }
+
+  @Test
+  public void testTopUpShouldNotBeSuccessfulBecauseUserNotFound() throws Exception {
+    when(walletService.getWalletByOwner(any())).thenThrow(new EntityNotFoundException());
+    when(topUpBalanceProviderBase.topUpBalance(any(), any())).thenReturn(new TopUpSession(true, "https://payment-session.com"));
+
+    var reqJson = objectMapper.writeValueAsString(new TopUpBalanceRequest(UUID.randomUUID(), 100));
+
+    http.perform(post("/api/payment/top-up-balance").content(reqJson).contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  public void testTopUpShouldNotBeSuccessfulBecauseSessionInitializationFailed() throws Exception {
+    when(walletService.getWalletByOwner(any())).thenReturn(new Wallet());
+    when(topUpBalanceProviderBase.topUpBalance(any(), any())).thenReturn(new TopUpSession(false, "https://payment-session.com"));
+
+    var reqJson = objectMapper.writeValueAsString(new TopUpBalanceRequest(UUID.randomUUID(), 100));
+
+    http.perform(post("/api/payment/top-up-balance").content(reqJson).contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
   }
 }

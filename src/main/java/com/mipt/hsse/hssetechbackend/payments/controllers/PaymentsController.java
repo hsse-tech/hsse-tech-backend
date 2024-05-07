@@ -1,14 +1,17 @@
 package com.mipt.hsse.hssetechbackend.payments.controllers;
 
+import com.mipt.hsse.hssetechbackend.apierrorhandling.ApiError;
+import com.mipt.hsse.hssetechbackend.apierrorhandling.RestExceptionHandler;
 import com.mipt.hsse.hssetechbackend.payments.controllers.requests.TopUpBalanceRequest;
 import com.mipt.hsse.hssetechbackend.payments.providers.TopUpBalanceProviderBase;
 import com.mipt.hsse.hssetechbackend.payments.services.WalletServiceBase;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 
 @Controller
@@ -24,11 +27,20 @@ public class PaymentsController {
   }
 
   @PostMapping("top-up-balance")
-  public RedirectView topUpBalance(@RequestBody TopUpBalanceRequest topUpBalanceRequest) {
+  public void topUpBalance(@RequestBody TopUpBalanceRequest topUpBalanceRequest, HttpServletResponse response) throws IOException {
     var wallet = walletService.getWalletByOwner(topUpBalanceRequest.userId());
 
     var result = topUpBalanceProvider.topUpBalance(wallet.getId(), BigDecimal.valueOf(topUpBalanceRequest.amount()));
 
-    return new RedirectView(result.paymentUrl());
+    if (result.successfullyCreated()) {
+      response.sendRedirect(result.paymentUrl());
+    } else {
+      throw new RuntimeException("Top up balance returned failed");
+    }
+  }
+
+  @ExceptionHandler
+  public ResponseEntity<ApiError> exceptionHandler(Exception e) {
+    return RestExceptionHandler.buildResponseEntity(new ApiError(HttpStatus.BAD_REQUEST, e.getMessage()));
   }
 }
