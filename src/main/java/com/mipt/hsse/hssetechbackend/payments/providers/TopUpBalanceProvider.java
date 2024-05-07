@@ -14,7 +14,7 @@ import java.util.UUID;
 import static com.mipt.hsse.hssetechbackend.RublesToKopeckConverter.convertToKopeck;
 
 @Service
-public class TopUpBalanceProvider {
+public class TopUpBalanceProvider implements TopUpBalanceProviderBase {
   private final TransactionServiceBase transactionService;
   private final AcquiringSessionInitializer acquiringSessionInitializer;
 
@@ -26,6 +26,7 @@ public class TopUpBalanceProvider {
     this.acquiringSessionInitializer = acquiringSessionInitializer;
   }
 
+  @Override
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public TopUpSession topUpBalance(UUID walletId, BigDecimal amount) {
     var transaction = transactionService.createTransaction(
