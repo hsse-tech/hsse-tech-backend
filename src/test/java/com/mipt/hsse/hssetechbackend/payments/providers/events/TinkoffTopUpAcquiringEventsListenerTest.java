@@ -6,6 +6,7 @@ import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepos
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaTransactionRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaUserRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaWalletRepository;
+import com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.events.TinkoffTopUpAcquiringEventsListener;
 import com.mipt.hsse.hssetechbackend.payments.services.TransactionService;
 import com.mipt.hsse.hssetechbackend.payments.services.WalletService;
 import org.junit.jupiter.api.AfterEach;
@@ -94,7 +95,7 @@ class TinkoffTopUpAcquiringEventsListenerTest extends DatabaseSuite {
     testTransaction.setWallet(testWallet);
     transactionRepository.save(testTransaction);
 
-    listener.onAcquiringNoficationReceived(
+    listener.onAcquiringNotificationReceived(
             new MerchantNotification(50 * 100, testTransaction.getId().toString(), true, tinkoffStatus));
 
     assertFalse(transactionRepository.findAll().isEmpty());

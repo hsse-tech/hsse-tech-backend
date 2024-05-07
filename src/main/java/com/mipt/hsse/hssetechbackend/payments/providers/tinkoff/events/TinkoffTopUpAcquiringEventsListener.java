@@ -1,6 +1,8 @@
-package com.mipt.hsse.hssetechbackend.payments.providers.events;
+package com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.events;
 
 import com.mipt.hsse.hssetechbackend.payments.exceptions.TransactionManipulationException;
+import com.mipt.hsse.hssetechbackend.payments.providers.events.AcquiringEventsListener;
+import com.mipt.hsse.hssetechbackend.payments.providers.events.MerchantNotification;
 import com.mipt.hsse.hssetechbackend.payments.services.TransactionServiceBase;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -22,7 +24,7 @@ public class TinkoffTopUpAcquiringEventsListener implements AcquiringEventsListe
 
   @Override
   @Transactional(propagation = Propagation.REQUIRES_NEW)
-  public void onAcquiringNoficationReceived(MerchantNotification notification) {
+  public void onAcquiringNotificationReceived(MerchantNotification notification) {
     var transactionId = UUID.fromString(notification.orderId());
 
     try {
