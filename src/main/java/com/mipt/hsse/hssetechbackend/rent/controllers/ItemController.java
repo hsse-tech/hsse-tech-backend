@@ -5,12 +5,15 @@ import com.mipt.hsse.hssetechbackend.apierrorhandling.ApiError;
 import com.mipt.hsse.hssetechbackend.apierrorhandling.RestExceptionHandler;
 import com.mipt.hsse.hssetechbackend.data.entities.Item;
 import com.mipt.hsse.hssetechbackend.data.entities.Rent;
+import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoAlreadyExistsException;
+import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoNotFoundException;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetItemResponse;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetShortRentResponse;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.rent.services.ItemService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.List;
@@ -41,6 +44,22 @@ public class ItemController {
   public ResponseEntity<Item> createItem(@Valid @RequestBody CreateItemRequest request) {
     Item createdItem = itemService.createItem(request);
     return new ResponseEntity<>(createdItem, HttpStatus.CREATED);
+  }
+
+  @PostMapping(value = "/{item_id}/photo", consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  @ResponseStatus(HttpStatus.OK)
+  public void pinItemThumbnailPhoto(
+      @PathVariable("item_id") UUID itemId, HttpServletRequest photoServletRequest)
+      throws IOException {
+    byte[] photoBytes = photoServletRequest.getInputStream().readAllBytes();
+
+    itemService.saveItemPhoto(itemId, photoBytes);
+  }
+
+  @GetMapping(value = "/{item_id}/photo")
+  public @ResponseBody Resource getItemThumbnailPhoto(@PathVariable("item_id") UUID itemId) {
+    byte[] photoBytes = itemService.getItemPhoto(itemId);
+    return new ByteArrayResource(photoBytes);
   }
 
   @PatchMapping("/{id}")
@@ -90,13 +109,13 @@ public class ItemController {
   }
 
   @DeleteMapping("/{itemId}")
-  public void deleteItem(@PathVariable("itemId") UUID itemId) {
+  public void deleteItem(@PathVariable("itemId") UUID itemId) throws IOException {
     itemService.deleteItem(itemId);
   }
 
-  @ExceptionHandler(EntityNotFoundException.class)
-  public ResponseEntity<ApiError> entityNotFoundExceptionHandler(
-      EntityNotFoundException ex) {
+  @ExceptionHandler({EntityNotFoundException.class, PhotoAlreadyExistsException.class, PhotoNotFoundException.class})
+  public ResponseEntity<ApiError> exceptionHandler(
+      Exception ex) {
     ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, ex.getMessage());
     return RestExceptionHandler.buildResponseEntity(apiError);
   }

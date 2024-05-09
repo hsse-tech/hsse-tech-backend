@@ -1,6 +1,7 @@
 package com.mipt.hsse.hssetechbackend.rent.controllers;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.AdditionalMatchers.aryEq;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -10,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
+import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoNotFoundException;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetItemResponse;
@@ -82,6 +84,43 @@ class ItemControllerTest {
         .perform(post(BASE_MAPPING).content(requestStr).contentType(MediaType.APPLICATION_JSON))
         .andDo(print())
         .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void pinThumbnailPhotoToItem() throws Exception {
+    byte[] photoBytes = new byte[] {1, 2, 3};
+
+    doNothing().when(itemService).saveItemPhoto(any(), any());
+
+    UUID uuid = UUID.randomUUID();
+    mockMvc.perform(post(BASE_MAPPING + "/" + uuid + "/photo").content(photoBytes).contentType(MediaType.APPLICATION_OCTET_STREAM))
+        .andDo(print())
+        .andExpect(status().isOk());
+
+    verify(itemService).saveItemPhoto(eq(uuid), aryEq(photoBytes));
+  }
+
+  @Test
+  void getItemThumbnailPhoto() throws Exception {
+    byte[] photoBytes = new byte[] {1, 2, 3};
+
+    when(itemService.getItemPhoto(any())).thenReturn(photoBytes);
+
+    UUID uuid = UUID.randomUUID();
+    var mvcResult = mockMvc.perform(get(BASE_MAPPING + "/" + uuid + "/photo"))
+        .andDo(print())
+            .andReturn().getResponse().getContentAsByteArray();
+
+    verify(itemService).getItemPhoto(eq(uuid));
+    assertArrayEquals(photoBytes, mvcResult);
+  }
+
+  @Test
+  void testBadRequestOnGetNonExistingPhoto() throws Exception {
+    when(itemService.getItemPhoto(any())).thenThrow(PhotoNotFoundException.class);
+
+    mockMvc.perform(get(BASE_MAPPING + "/" + UUID.randomUUID() + "/photo"))
+            .andExpect(status().isBadRequest());
   }
 
   @Test

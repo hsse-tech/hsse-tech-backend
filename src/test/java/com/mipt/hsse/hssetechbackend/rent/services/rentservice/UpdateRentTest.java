@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.*;
+import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepositoryOnDrive;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateRentRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateRentRequest;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
@@ -29,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 @DataJpaTest
 @Import({
   RentService.class,
-  ConfirmationPhotoRepositoryOnDrive.class,
+  PhotoRepositoryOnDrive.class,
   UnoccupiedTimeCreateRentProcessor.class
 })
 @Transactional(propagation = Propagation.NOT_SUPPORTED)

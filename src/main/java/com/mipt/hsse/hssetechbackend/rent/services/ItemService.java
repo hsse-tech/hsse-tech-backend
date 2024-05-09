@@ -9,6 +9,8 @@ import com.mipt.hsse.hssetechbackend.data.entities.Rent;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemTypeRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaRentRepository;
+import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepository;
+import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepository.PhotoType;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
@@ -16,25 +18,30 @@ import com.mipt.hsse.hssetechbackend.rent.qrcodegeneration.QrCodeManager;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import javax.imageio.ImageIO;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ServerErrorException;
 
 @Service
 public class ItemService {
   private final JpaItemRepository itemRepository;
   private final JpaItemTypeRepository itemTypeRepository;
   private final JpaRentRepository rentRepository;
+  private final PhotoRepository photoRepository;
 
   public ItemService(
       JpaItemRepository itemRepository,
       JpaItemTypeRepository itemTypeRepository,
-      JpaRentRepository rentRepository) {
+      JpaRentRepository rentRepository,
+      PhotoRepository photoRepository) {
     this.itemRepository = itemRepository;
     this.itemTypeRepository = itemTypeRepository;
     this.rentRepository = rentRepository;
+    this.photoRepository = photoRepository;
   }
 
   public Item createItem(CreateItemRequest request) {
@@ -60,9 +67,10 @@ public class ItemService {
     itemRepository.save(item);
   }
 
-  public void deleteItem(UUID itemId) {
+  public void deleteItem(UUID itemId) throws IOException {
     if (itemRepository.existsById(itemId)) {
       itemRepository.deleteById(itemId);
+      photoRepository.deletePhoto(PhotoType.ITEM_THUMBNAIL, itemId);
     }
   }
 
@@ -79,12 +87,12 @@ public class ItemService {
     return itemRepository.existsById(itemId);
   }
 
-  public UUID getItemLockId(UUID itemId) {
+  public Optional<UUID> getLockForItem(UUID itemId) {
     throw new UnsupportedOperationException();
   }
 
   public void provideAccessToItem(UUID itemId) {
-    UUID lockId = getItemLockId(itemId);
+    UUID lockId = getLockForItem(itemId).orElseThrow(EntityNotFoundException::new);
 
     // TODO: Lock service is not implemented yet
     throw new UnsupportedOperationException("Lock service is not implemented yet");
@@ -96,7 +104,8 @@ public class ItemService {
     //    lockService.requireOpenById(lockId);
   }
 
-  public byte[] getQrCodeForItem(UUID itemId, int width, int height) throws WriterException, IOException {
+  public byte[] getQrCodeForItem(UUID itemId, int width, int height)
+      throws WriterException, IOException {
     // TODO: When we have domain, it should be put in here
     BitMatrix qrCodeMatrix =
         QrCodeManager.createQR("https://{DOMAIN}/rent/" + itemId, height, width);
@@ -105,5 +114,29 @@ public class ItemService {
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
     ImageIO.write(image, "png", byteArrayOutputStream);
     return byteArrayOutputStream.toByteArray();
+  }
+
+  public void saveItemPhoto(UUID itemId, byte[] photoBytes) {
+    if (!itemRepository.existsById(itemId)) {
+      throw new EntityNotFoundException(Item.class, itemId);
+    }
+
+    try {
+      photoRepository.save(PhotoType.ITEM_THUMBNAIL, itemId, photoBytes);
+    } catch (IOException | NoSuchAlgorithmException | UnsupportedOperationException e) {
+      throw new ServerErrorException("Unexpected IO error while saving photo", e);
+    }
+  }
+
+  public byte[] getItemPhoto(UUID itemId) {
+    if (!itemRepository.existsById(itemId)) {
+      throw new EntityNotFoundException(Item.class, itemId);
+    }
+
+    try {
+      return photoRepository.findPhoto(PhotoType.ITEM_THUMBNAIL, itemId);
+    } catch (IOException e) {
+      throw new ServerErrorException("Unexpected IO error while saving photo", e);
+    }
   }
 }

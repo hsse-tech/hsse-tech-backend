@@ -10,6 +10,7 @@ import com.mipt.hsse.hssetechbackend.data.entities.Item;
 import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
 import com.mipt.hsse.hssetechbackend.data.entities.User;
 import com.mipt.hsse.hssetechbackend.data.repositories.*;
+import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepositoryOnDrive;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateRentRequest;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.RentProcessingException;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.VerificationFailedException;
@@ -32,7 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 @DataJpaTest
 @Import({
   RentService.class,
-  ConfirmationPhotoRepositoryOnDrive.class,
+  PhotoRepositoryOnDrive.class,
   UnoccupiedTimeCreateRentProcessor.class
 })
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
