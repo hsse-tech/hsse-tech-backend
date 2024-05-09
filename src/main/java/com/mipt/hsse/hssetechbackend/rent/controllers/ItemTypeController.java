@@ -8,6 +8,7 @@ import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemTypeReq
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.rent.services.ItemTypeService;
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
@@ -50,6 +51,11 @@ public class ItemTypeController {
 
     if (itemType.isPresent()) return new ResponseEntity<>(itemType.get(), HttpStatus.OK);
     else throw new EntityNotFoundException();
+  }
+
+  @GetMapping
+  public List<ItemType> getAllItemTypes() {
+    return itemTypeService.getAllItemTypes();
   }
 
   @ExceptionHandler(EntityNotFoundException.class)

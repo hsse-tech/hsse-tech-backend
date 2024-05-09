@@ -70,6 +70,17 @@ public class ItemController {
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
+  /**
+   * Returns the shortened information about all items present.<br>
+   * "Shortened" means that the information about the rents of the items does not get uploaded
+   */
+  @GetMapping()
+  public ResponseEntity<List<GetItemResponse>> getAllItems() {
+    List<Item> allItems = itemService.getAllItems();
+    List<GetItemResponse> itemsResponses =  allItems.stream().map(GetItemResponse::new).toList();
+    return ResponseEntity.ok(itemsResponses);
+  }
+
   @GetMapping(value = "/{item_id}/qr", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   public @ResponseBody Resource getItemBookingQRCode(
       @PathVariable("item_id") UUID itemId,

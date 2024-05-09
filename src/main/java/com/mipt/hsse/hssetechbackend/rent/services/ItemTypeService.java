@@ -6,6 +6,7 @@ import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemTypeReq
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemTypeRequest;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -62,5 +63,9 @@ public class ItemTypeService {
     if (itemTypeRepository.existsById(itemTypeId)) {
       itemTypeRepository.deleteById(itemTypeId);
     }
+  }
+
+  public List<ItemType> getAllItemTypes() {
+    return itemTypeRepository.findAll();
   }
 }

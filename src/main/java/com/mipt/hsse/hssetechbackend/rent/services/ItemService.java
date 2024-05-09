@@ -106,4 +106,8 @@ public class ItemService {
     ImageIO.write(image, "png", byteArrayOutputStream);
     return byteArrayOutputStream.toByteArray();
   }
+
+  public List<Item> getAllItems() {
+    return itemRepository.findAll();
+  }
 }
