@@ -23,8 +23,9 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.util.*;
 import java.net.http.*;
-@Controller
-//@RequestMapping("/api/users")
+
+@RestController
+@RequestMapping("/api/users")
 public class UserController {
     JpaUserRepository jpaUserRepository;
     JpaHumanUserPassportRepository jpaHumanUserPassportRepository;
@@ -51,7 +52,7 @@ public class UserController {
                                          HttpServletResponse response) throws IOException, InterruptedException {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://login.yandex.ru/info?format=jwt")).header("Authorization","OAuth "+code).build();
+                .uri(URI.create("https://login.yandex.ru/info?format=jwt")).header("Authorization", "OAuth " + code).build();
         HttpResponse yaResp = client.send(request,
                 HttpResponse.BodyHandlers.ofString());
         code = yaResp.body().toString();
@@ -65,32 +66,44 @@ public class UserController {
         response.sendRedirect("/");
         return ResponseEntity.ok().body(HttpStatus.MOVED_PERMANENTLY);
     }
+
     @GetMapping("/adminonly")
-    String admo(){
+    String admo() {
         return "u are admin";
     }
+
     @GetMapping("/useronly")
-    String usro(){
+    String usro() {
         return "u are user";
     }
+
     @GetMapping("/free")
-    String free(){
-        return "u are free";
+    @ResponseStatus(HttpStatus.OK)
+    public String free() {
+        return "resp";
     }
+
     @GetMapping("/anyone")
-    String anyone(){
+    @ResponseStatus(HttpStatus.OK)
+    String anyone() {
         return "u are anyone";
     }
 
     @GetMapping("/api/users/{idS}")
     HumanUserPassport GetUser(@PathVariable String idS) {
         var id = UUID.fromString(idS);
+        if (!jpaHumanUserPassportRepository.existsById(id)) {
+            return null;
+        }
         return jpaHumanUserPassportRepository.findHumanUserPassportById(id);
     }
 
-    @PostMapping("api/admin/{idS}/ban")
+    @PostMapping("/api/admin/{idS}/ban")
     void BanUser(@PathVariable String idS) {
         var id = UUID.fromString(idS);
+        if (!jpaHumanUserPassportRepository.existsById(id)) {
+            return;
+        }
         HumanUserPassport passport =
                 jpaHumanUserPassportRepository.findHumanUserPassportById(id);
         passport.setIsBanned(true);
@@ -98,9 +111,12 @@ public class UserController {
     }
 
 
-    @PostMapping("api/admin/{idS}/unban")
+    @PostMapping("/api/admin/{idS}/unban")
     void UnbanUser(@PathVariable String idS) {
         var id = UUID.fromString(idS);
+        if (!jpaHumanUserPassportRepository.existsById(id)) {
+            return;
+        }
 
         HumanUserPassport passport =
                 jpaHumanUserPassportRepository.findHumanUserPassportById(id);
@@ -109,9 +125,12 @@ public class UserController {
 
     }
 
-    @DeleteMapping("api/admin/{idS}")
+    @DeleteMapping("/api/admin/{idS}")
     void DeleteUser(@PathVariable String idS) {
         var id = UUID.fromString(idS);
+        if (!jpaHumanUserPassportRepository.existsById(id)) {
+            return;
+        }
         HumanUserPassport passport =
                 jpaHumanUserPassportRepository.findHumanUserPassportById(id);
         passport.setIsBanned(true);
