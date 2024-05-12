@@ -25,7 +25,7 @@ import java.util.*;
 import java.net.http.*;
 
 @RestController
-@RequestMapping("/api/users")
+//@RequestMapping("/api/users")
 public class UserController {
     JpaUserRepository jpaUserRepository;
     JpaHumanUserPassportRepository jpaHumanUserPassportRepository;
