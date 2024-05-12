@@ -8,14 +8,21 @@ import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepos
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaUserRepository;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.users.controllers.requests.YandexToken;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.data.domain.Example;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import com.mipt.hsse.hssetechbackend.data.entities.User;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
 import java.util.*;
-
+import java.net.http.*;
 @Controller
 //@RequestMapping("/api/users")
 public class UserController {
@@ -29,14 +36,50 @@ public class UserController {
     }
 
 
-    @PostMapping("register")
+    @PostMapping("/register")
     String Register(@RequestBody String body) {
         return "you have been registred";
     }
 
-    @PostMapping("auth")
+    @PostMapping("/auth")
     String Auth(@RequestBody String body) {
         return "you have been authkfjdked";
+    }
+
+    @GetMapping("/yandex_oauth_callback")
+    public ResponseEntity<?> yandexOauth(@RequestParam String code,
+                                         HttpServletResponse response) throws IOException, InterruptedException {
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://login.yandex.ru/info?format=jwt")).header("Authorization","OAuth "+code).build();
+        HttpResponse yaResp = client.send(request,
+                HttpResponse.BodyHandlers.ofString());
+        code = yaResp.body().toString();
+        Cookie cookie = new Cookie("Authorization", code);
+        //создаем объект Cookie,
+        //в конструкторе указываем значения для name и value
+        cookie.setPath("/");//устанавливаем путь
+//        cookie.setMaxAge(86400);//здесь устанавливается время жизни куки
+        response.addCookie(cookie);//добавляем Cookie в запрос
+        response.setContentType("text/plain");
+        response.sendRedirect("/");
+        return ResponseEntity.ok().body(HttpStatus.MOVED_PERMANENTLY);
+    }
+    @GetMapping("/adminonly")
+    String admo(){
+        return "u are admin";
+    }
+    @GetMapping("/useronly")
+    String usro(){
+        return "u are user";
+    }
+    @GetMapping("/free")
+    String free(){
+        return "u are free";
+    }
+    @GetMapping("/anyone")
+    String anyone(){
+        return "u are anyone";
     }
 
     @GetMapping("/api/users/{idS}")

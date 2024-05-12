@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,10 +18,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 
 @Component
 @RequiredArgsConstructor
+@Order(1)
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     //    public static final String BEARER_PREFIX = "Bearer ";
     public static final String HEADER_NAME = "Authorization";
@@ -35,7 +38,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         // Получаем токен из заголовка
-        var authHeader = request.getHeader(HEADER_NAME);
+        String authHeader = ""/* = request.getHeader(HEADER_NAME)*/;
+        if (request.getCookies() != null)
+            for (var cookie : request.getCookies()) {
+                if (cookie.getName().equals(HEADER_NAME)) {
+                    authHeader = cookie.getValue();
+                    break;
+                }
+            }
         if (StringUtils.isEmpty(authHeader) /*|| !authHeader.startsWith(BEARER_PREFIX)*/) {
             filterChain.doFilter(request, response);
             return;
@@ -57,7 +67,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         throw new IOException("non-phystech email");
                     }
                     userService.create(passport);
-                    if(passport.getUser().getRoles().isEmpty()){
+                    if (passport.getUser().getRoles().isEmpty()) {
 
                         //todo set roles
                     }

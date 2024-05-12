@@ -46,11 +46,11 @@ public class UserService {
         if (user.getUser() == null) {
             user.setUser(new User("user"));
             var userRoles = user.getUser().getRoles();
-            if (!roles.existsByName("user")) {
-                var adminRole = new Role("user");
+            if (!roles.existsByName("ROLE_USER")) {
+                var adminRole = new Role("ROLE_USER");
                 roles.save(adminRole);
             }
-            userRoles.add(roles.getRoleByName("user"));
+            userRoles.add(roles.getRoleByName("ROLE_USER"));
         }
         return save(user);
     }
@@ -98,11 +98,11 @@ public class UserService {
     public void getAdmin() {
         var user = getCurrentUser();
         var userRoles = user.getUser().getRoles();
-        if (!roles.existsByName("admin")) {
-            var adminRole = new Role("admin");
+        if (!roles.existsByName("ROLE_ADMIN")) {
+            var adminRole = new Role("ROLE_ADMIN");
             roles.save(adminRole);
         }
-        userRoles.add(roles.getRoleByName("admin"));
+        userRoles.add(roles.getRoleByName("ROLE_ADMIN"));
         user.getUser().setRoles(userRoles);
         save(user);
     }

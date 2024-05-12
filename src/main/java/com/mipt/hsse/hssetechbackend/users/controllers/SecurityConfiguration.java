@@ -14,11 +14,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.List;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
+
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.FrameOptionsConfig;
 
 @Configuration
 @EnableWebSecurity
@@ -33,6 +36,9 @@ public class SecurityConfiguration {
         http//.csrf(AbstractHttpConfigurer::disable)
 //                .csrf((csrf) -> csrf
 //                        .ignoringRequestMatchers("/**"))
+//                .headers(header -> {
+//                    header.frameOptions(FrameOptionsConfig::disable);
+//                })
                 // Своего рода отключение CORS (разрешение запросов со всех доменов)
                 .cors(cors -> cors.configurationSource(request -> {
                     var corsConfiguration = new CorsConfiguration();
@@ -43,24 +49,39 @@ public class SecurityConfiguration {
                     return corsConfiguration;
                 }))
                 // Настройка доступа к конечным точкам
-                .authorizeHttpRequests(request -> request.anyRequest().permitAll()
-                        // Можно указать конкретный путь, * - 1 уровень вложенности, ** - любое количество уровней вложенности
-//                        .requestMatchers("/api/users/register",//todo manage
-//                                // permissions
-//                                "/api/users/auth","/**").anonymous()
-//                        .requestMatchers("/swagger-ui/**", "/swagger" +
-//                                "-resources/*", "/v3/api-docs/**",
-//                                "/auth","/register").permitAll()
-//                        .requestMatchers("/endpoint", "/admin/**",
-//                                "api/users/**").hasRole(
-//                                "admin").requestMatchers("/**").hasRole("user")
+                .authorizeHttpRequests(request -> {
+                            request.anyRequest().permitAll();
+                            // Можно указать конкретный путь, * - 1 уровень вложенности, ** - любое количество уровней вложенности
+//                            request.requestMatchers("/api/users/register",//todo manage
+//                                            // permissions
+//                                            "/api/users/auth", "/free").anonymous()
+//                                    .requestMatchers("/anyone").permitAll()
+//                                    .requestMatchers("/swagger-ui/**", "/swagger" +
+//                                                    "-resources/*", "/v3/api-docs/**",
+//                                            "/auth", "/register",
+//                                            "/useronly").hasRole(
+//                                            "USER")
+//                                    .requestMatchers("/endpoint", "/admin/**",
+//                                            "api/users/**", "/adminonly").hasRole(
+//                                            "ADMIN");
+                        }
                 )
                 .sessionManagement(manager -> manager.sessionCreationPolicy(STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
-
+//@Bean
+//public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+//    http.addFilterBefore(jwtAuthenticationFilter,
+//                    UsernamePasswordAuthenticationFilter.class)
+//            .authorizeHttpRequests((request)->{
+//                request.anyRequest().permitAll();
+//            });
+//    return http.build();
+//}
+//
+//
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
