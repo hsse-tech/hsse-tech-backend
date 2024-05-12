@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
-import java.util.Map;
 import java.util.UUID;
 import org.springframework.stereotype.Repository;
 
@@ -12,10 +11,6 @@ import org.springframework.stereotype.Repository;
 public class PhotoRepositoryOnDrive implements PhotoRepository {
   private static final int UUID_LENGTH = 32;
   private static final int PATH_PART_LENGTH = 8;
-  private static final Map<PhotoType, String> photoType2Directory = Map.of(
-      PhotoType.RENT_CONFIRMATION, "rent_confirmation",
-      PhotoType.ITEM_THUMBNAIL, "item_thumbnail"
-  );
   private static String BASE_PATH;
 
   static {
@@ -62,7 +57,7 @@ public class PhotoRepositoryOnDrive implements PhotoRepository {
   }
 
   private Path getFilePathForPhoto(PhotoType photoType, UUID id) {
-    String photoTypeDirectory = photoType2Directory.get(photoType);
+    String photoTypeDirectory = photoType.getFolderName();
     Path filePath = Path.of(BASE_PATH, photoTypeDirectory);
 
     // Add a sequence of folders representing the UUID split into short parts
