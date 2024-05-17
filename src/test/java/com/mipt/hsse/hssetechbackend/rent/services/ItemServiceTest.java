@@ -1,14 +1,21 @@
 package com.mipt.hsse.hssetechbackend.rent.services;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.AdditionalMatchers.aryEq;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.*;
+import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoAlreadyExistsException;
+import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepository;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -19,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +43,7 @@ class ItemServiceTest extends DatabaseSuite {
   @Autowired private JpaUserRepository userRepository;
   @Autowired private JpaHumanUserPassportRepository humanUserPassportRepository;
   @Autowired private JpaRentRepository rentRepository;
+  @MockBean private PhotoRepository photoRepository;
 
   @BeforeEach
   void save() {
@@ -58,6 +67,41 @@ class ItemServiceTest extends DatabaseSuite {
     Item extractedItem = itemRepository.findById(item.getId()).orElseThrow();
     assertEquals(itemName, extractedItem.getDisplayName());
     assertEquals(itemType.getId(), extractedItem.getType().getId());
+  }
+
+  @Test
+  void testSetItemThumbnailPhoto() throws Exception {
+    byte[] photoBytes = new byte[]{1, 2, 3};
+    Item item = new Item("test name", itemType);
+    UUID uuid = itemRepository.save(item).getId();
+
+    itemService.saveItemPhoto(uuid, photoBytes);
+
+    verify(photoRepository).save(eq(PhotoRepository.PhotoType.ITEM_THUMBNAIL), eq(uuid), aryEq(photoBytes));
+  }
+
+  @Test
+  void testSetItemPhotoThumbnailAlreadyExisting() throws Exception {
+    byte[] photoBytes = new byte[]{1, 2, 3};
+    Item item = new Item("test name", itemType);
+    UUID uuid = itemRepository.save(item).getId();
+
+    doThrow(PhotoAlreadyExistsException.class).when(photoRepository).save(any(), any(), any());
+
+    assertThrows(PhotoAlreadyExistsException.class, () -> itemService.saveItemPhoto(uuid, photoBytes));
+  }
+
+  @Test
+  void testGetItemThumbnailPhoto() throws Exception {
+    byte[] photoBytes = new byte[]{1, 2, 3};
+
+    when(photoRepository.findPhoto(any(), any())).thenReturn(photoBytes);
+
+    Item item = new Item("test name", itemType);
+    UUID uuid = itemRepository.save(item).getId();
+    byte[] retrievedBytes = itemService.getItemPhoto(uuid);
+
+    assertArrayEquals(photoBytes, retrievedBytes);
   }
 
   @Test
@@ -164,7 +208,7 @@ class ItemServiceTest extends DatabaseSuite {
   }
 
   @Test
-  void testDeleteItem() {
+  void testDeleteItem() throws IOException {
     final String itemName = "Particular item name";
 
     var createItemRequest = new CreateItemRequest(itemName, itemType.getId());
@@ -173,5 +217,20 @@ class ItemServiceTest extends DatabaseSuite {
     itemService.deleteItem(item.getId());
 
     assertTrue(itemRepository.findById(item.getId()).isEmpty());
+  }
+
+  @Test
+  void testDeleteImageOnDeleteItem() throws IOException, NoSuchAlgorithmException {
+    var createItemRequest = new CreateItemRequest("item name", itemType.getId());
+    UUID uuid = itemService.createItem(createItemRequest).getId();
+
+    // Pin photo
+    byte[] photo = new byte[] {1, 2, 3};
+    itemService.saveItemPhoto(uuid, photo);
+    verify(photoRepository).save(eq(PhotoRepository.PhotoType.ITEM_THUMBNAIL), eq(uuid), aryEq(photo));
+
+    // Delete item; expected to also delete photo
+    itemService.deleteItem(uuid);
+    verify(photoRepository).deletePhoto(eq(PhotoRepository.PhotoType.ITEM_THUMBNAIL), eq(uuid));
   }
 }
