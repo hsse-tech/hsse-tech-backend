@@ -116,6 +116,10 @@ public class ItemService {
     return byteArrayOutputStream.toByteArray();
   }
 
+  public List<Item> getAllItems() {
+    return itemRepository.findAll();
+  }
+  
   public void saveItemPhoto(UUID itemId, byte[] photoBytes) {
     if (!itemRepository.existsById(itemId)) {
       throw new EntityNotFoundException(Item.class, itemId);
