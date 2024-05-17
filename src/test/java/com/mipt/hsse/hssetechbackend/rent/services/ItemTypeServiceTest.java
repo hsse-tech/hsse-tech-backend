@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
 import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemTypeRepository;
+import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepositoryOnDrive;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemTypeRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemTypeRequest;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
@@ -22,7 +23,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @DataJpaTest
-@Import({ItemService.class, ItemTypeService.class})
+@Import({ItemService.class, ItemTypeService.class, PhotoRepositoryOnDrive.class})
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class ItemTypeServiceTest extends DatabaseSuite {

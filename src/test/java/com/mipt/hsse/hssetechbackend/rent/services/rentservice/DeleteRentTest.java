@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.*;
+import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepositoryOnDrive;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.rent.rentprocessing.createrentprocessing.UnoccupiedTimeCreateRentProcessor;
 import com.mipt.hsse.hssetechbackend.rent.services.RentService;
@@ -28,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 @DataJpaTest
 @Import({
   RentService.class,
-  ConfirmationPhotoRepositoryOnDrive.class,
+  PhotoRepositoryOnDrive.class,
   UnoccupiedTimeCreateRentProcessor.class
 })
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
