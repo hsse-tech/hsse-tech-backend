@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import com.mipt.hsse.hssetechbackend.payments.exceptions.WalletNotFoundException;
 import com.mipt.hsse.hssetechbackend.payments.exceptions.WalletUpdatingException;
+import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +45,13 @@ public class WalletService implements WalletServiceBase {
   public Wallet getWallet(UUID id) {
     return walletRepository.findById(id)
             .orElseThrow(WalletNotFoundException::new);
+  }
+
+  @Override
+  public Wallet getWalletByOwner(UUID ownerId) {
+    return userRepository.findById(ownerId)
+            .orElseThrow(() -> new EntityNotFoundException("User not found"))
+            .getWallet();
   }
 
   @Override
