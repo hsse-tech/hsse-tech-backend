@@ -21,7 +21,6 @@ public class PaymentsController {
   private final WalletServiceBase walletService;
 
   public PaymentsController(TopUpBalanceProviderBase topUpBalanceProvider, WalletServiceBase walletService) {
-
     this.topUpBalanceProvider = topUpBalanceProvider;
     this.walletService = walletService;
   }
