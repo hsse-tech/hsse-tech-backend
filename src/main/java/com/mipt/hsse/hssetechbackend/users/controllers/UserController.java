@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.data.domain.Example;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import com.mipt.hsse.hssetechbackend.data.entities.User;
@@ -114,6 +115,16 @@ public class UserController {
             return null;
         }
         return jpaHumanUserPassportRepository.findHumanUserPassportById(id);
+    }
+
+    @GetMapping("/api/users/profile")
+    HumanUserPassport GetSelf(){
+        var id =
+                ((HumanUserPassport)SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getYandexId();
+        if(!jpaHumanUserPassportRepository.existsByYandexId(id)){
+            return null;
+        }
+        return jpaHumanUserPassportRepository.findHumanUserPassportByYandexId(id).get();
     }
 
     @PostMapping("/api/admin/{idS}/ban")

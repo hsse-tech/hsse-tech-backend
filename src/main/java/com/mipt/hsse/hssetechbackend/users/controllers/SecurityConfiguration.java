@@ -62,10 +62,10 @@ public class SecurityConfiguration {
                                     .requestMatchers("/swagger-ui/**", "/swagger" +
                                                     "-resources/*", "/v3/api-docs/**",
                                             "/auth", "/register",
-                                            "/useronly").hasRole(
+                                            "/useronly","/api/users/profile").hasRole(
                                             "USER")
                                     .requestMatchers("/endpoint", "/admin/**",
-                                            "api/users/**", "/adminonly").hasRole(
+                                            "api/users/**", "/adminonly","/api/users/profile").hasRole(
                                             "ADMIN");
                         }
                 )
