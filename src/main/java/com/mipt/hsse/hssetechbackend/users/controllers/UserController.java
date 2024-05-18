@@ -8,6 +8,7 @@ import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepos
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaUserRepository;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.users.controllers.requests.YandexToken;
+import com.mipt.hsse.hssetechbackend.users.controllers.responses.HumanUserPassportResponse;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -47,8 +48,9 @@ public class UserController {
     String Auth(@RequestBody String body) {
         return "you have been authkfjdked";
     }
+
     @GetMapping("/yandex_oauth_callback")
-    public String redirectYandex(){
+    public String redirectYandex() {
         return """
                 <html><head>
                     <title>redirect</title>
@@ -109,22 +111,22 @@ public class UserController {
     }
 
     @GetMapping("/api/users/{idS}")
-    HumanUserPassport GetUser(@PathVariable String idS) {
+    HumanUserPassportResponse GetUser(@PathVariable String idS) {
         var id = UUID.fromString(idS);
         if (!jpaHumanUserPassportRepository.existsById(id)) {
             return null;
         }
-        return jpaHumanUserPassportRepository.findHumanUserPassportById(id);
+        return new HumanUserPassportResponse(jpaHumanUserPassportRepository.findHumanUserPassportById(id));
     }
 
     @GetMapping("/api/users/profile")
-    HumanUserPassport GetSelf(){
+    HumanUserPassportResponse GetSelf() {
         var id =
-                ((HumanUserPassport)SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getYandexId();
-        if(!jpaHumanUserPassportRepository.existsByYandexId(id)){
+                ((HumanUserPassport) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getYandexId();
+        if (!jpaHumanUserPassportRepository.existsByYandexId(id)) {
             return null;
         }
-        return jpaHumanUserPassportRepository.findHumanUserPassportByYandexId(id).get();
+        return new HumanUserPassportResponse(jpaHumanUserPassportRepository.findHumanUserPassportByYandexId(id).get());
     }
 
     @PostMapping("/api/admin/{idS}/ban")
