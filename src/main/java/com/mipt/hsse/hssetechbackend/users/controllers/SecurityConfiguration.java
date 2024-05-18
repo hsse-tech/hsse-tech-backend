@@ -10,11 +10,13 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.List;
@@ -40,38 +42,42 @@ public class SecurityConfiguration {
 //                    header.frameOptions(FrameOptionsConfig::disable);
 //                })
                 // Своего рода отключение CORS (разрешение запросов со всех доменов)
-                .cors(cors -> cors.configurationSource(request -> {
-                    var corsConfiguration = new CorsConfiguration();
-                    corsConfiguration.setAllowedOriginPatterns(List.of("*"));
-                    corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-                    corsConfiguration.setAllowedHeaders(List.of("*"));
-                    corsConfiguration.setAllowCredentials(true);
-                    return corsConfiguration;
-                }))
+                .csrf().disable()
+//                .cors(cors -> cors.configurationSource(request -> {
+//                    var corsConfiguration = new CorsConfiguration();
+//                    corsConfiguration.setAllowedOriginPatterns(List.of("*"));
+//                    corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+//                    corsConfiguration.setAllowedHeaders(List.of("*"));
+//                    corsConfiguration.setAllowCredentials(true);
+//                    return corsConfiguration;
+//                }))
                 // Настройка доступа к конечным точкам
                 .authorizeHttpRequests(request -> {
-                            request.anyRequest().permitAll();
+//                            request.anyRequest().permitAll();
                             // Можно указать конкретный путь, * - 1 уровень вложенности, ** - любое количество уровней вложенности
-//                            request.requestMatchers("/api/users/register",//todo manage
-//                                            // permissions
-//                                            "/api/users/auth", "/free").anonymous()
-//                                    .requestMatchers("/anyone").permitAll()
-//                                    .requestMatchers("/swagger-ui/**", "/swagger" +
-//                                                    "-resources/*", "/v3/api-docs/**",
-//                                            "/auth", "/register",
-//                                            "/useronly").hasRole(
-//                                            "USER")
-//                                    .requestMatchers("/endpoint", "/admin/**",
-//                                            "api/users/**", "/adminonly").hasRole(
-//                                            "ADMIN");
+                            request.requestMatchers("/api/users/register",//todo manage
+                                            // permissions
+                                            "/api/users/auth", "/free",
+                                            "/anyone","/yandex_oauth_callback","/yandex_oauth_callbackSecond").permitAll()
+                                    .requestMatchers("/swagger-ui/**", "/swagger" +
+                                                    "-resources/*", "/v3/api-docs/**",
+                                            "/auth", "/register",
+                                            "/useronly").hasRole(
+                                            "USER")
+                                    .requestMatchers("/endpoint", "/admin/**",
+                                            "api/users/**", "/adminonly").hasRole(
+                                            "ADMIN");
                         }
                 )
+//                .authorizeRequests()
+//                .anyRequest().permitAll().and()
                 .sessionManagement(manager -> manager.sessionCreationPolicy(STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
-//@Bean
+
+    //@Bean
 //public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 //    http.addFilterBefore(jwtAuthenticationFilter,
 //                    UsernamePasswordAuthenticationFilter.class)
@@ -100,4 +106,10 @@ public class SecurityConfiguration {
             throws Exception {
         return config.getAuthenticationManager();
     }
+
+//    @Bean
+//    public WebSecurityCustomizer webSecurityCustomizer() {
+//        return (web) -> web.ignoring()
+//                .requestMatchers(new AntPathRequestMatcher("/**"));
+//    }
 }

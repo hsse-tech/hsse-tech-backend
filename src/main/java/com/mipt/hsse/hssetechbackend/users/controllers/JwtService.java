@@ -1,26 +1,46 @@
 package com.mipt.hsse.hssetechbackend.users.controllers;
 
 import com.mipt.hsse.hssetechbackend.data.entities.HumanUserPassport;
-import com.mipt.hsse.hssetechbackend.data.entities.User;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.MacAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import io.jsonwebtoken.Claims;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Function;
 
 @Service
 public class JwtService {
-    //    @Value("${token.signing.key}")//todo
-    private String jwtSigningKey = "EOaLSZHkZTKe5k9mAD6M8kGiSVKcP7VJRReVhRZ5OFp3zsw4mveP9QKDRGhytaWvFd15rnvdRfhllfa0pv6QkjbitqKgaqneH4cHUCYEDs0pggrXnwg10RpdSSWdtEeHvoKlBXhQQgXSLkRRWR94NQ8z383r52HLKEcyxoYMHtqL2pyL7UKgnF2jCnwdxSL3T5EP1v0cGCR6lVcob47mGrxdGhpBU6uOjhJop2UHgXlI9NLInj2uvznwi58vkEAYdAHxK1NnXxkzBvNLPqmUBz44qIMvw4ZsZ0F2xTSUL82SprKe5yE9sCrmE5Qpa0Fb";
+//    private String jwtSigningKey = "EOaLSZHkZTKe5k9mAD6M8kGiSVKcP7VJRReVhRZ5OFp3zsw4mveP9QKDRGhytaWvFd15rnvdRfhllfa0pv6QkjbitqKgaqneH4cHUCYEDs0pggrXnwg10RpdSSWdtEeHvoKlBXhQQgXSLkRRWR94NQ8z383r52HLKEcyxoYMHtqL2pyL7UKgnF2jCnwdxSL3T5EP1v0cGCR6lVcob47mGrxdGhpBU6uOjhJop2UHgXlI9NLInj2uvznwi58vkEAYdAHxK1NnXxkzBvNLPqmUBz44qIMvw4ZsZ0F2xTSUL82SprKe5yE9sCrmE5Qpa0Fb";
+
+    @Value("${token.signing.key}")//todo
+    private String jwtSigningKey;
+    private MacAlgorithm custom512 = null;
+
+    public JwtService() {
+        //create a custom MacAlgorithm with a custom minKeyBitLength
+        try {
+            int minKeyBitLength = 30;
+            String id = "HS512";
+            String jcaName = "HmacSHA512";
+            Class<?> c = Class.forName("io.jsonwebtoken.impl.security.DefaultMacAlgorithm");
+            Constructor<?> ctor = c.getDeclaredConstructor(String.class, String.class, int.class);
+            ctor.setAccessible(true);
+            MacAlgorithm custom = (MacAlgorithm) ctor.newInstance(id, jcaName, minKeyBitLength);
+            this.custom512 = custom;
+        }
+        catch (Exception e){
+
+        }
+    }
 
     /**
      * Извлечение имени пользователя из токена
@@ -128,8 +148,7 @@ public class JwtService {
      * @return данные
      */
     private Claims extractAllClaims(String token) {
-        return Jwts.parser().setSigningKey(getSigningKey()).build().parseClaimsJws(token)
-                .getBody();
+        return Jwts.parser().verifyWith(getSigningKey()).build().parseSignedClaims(token).getPayload();
     }
 
     /**
@@ -137,8 +156,11 @@ public class JwtService {
      *
      * @return ключ
      */
-    private Key getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(jwtSigningKey);
-        return Keys.hmacShaKeyFor(keyBytes);
+    private SecretKey getSigningKey() {
+        var key =
+                new SecretKeySpec(jwtSigningKey.getBytes(java.nio.charset.StandardCharsets.UTF_8), "HmacSHA512");
+        return key;
+//        byte[] keyBytes = Decoders.BASE64.decode(jwtSigningKey);
+//        return Keys.hmacShaKeyFor(keyBytes);
     }
 }

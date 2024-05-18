@@ -23,7 +23,8 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.util.*;
 import java.net.http.*;
-@Controller
+
+@RestController
 //@RequestMapping("/api/users")
 public class UserController {
     JpaUserRepository jpaUserRepository;
@@ -45,17 +46,35 @@ public class UserController {
     String Auth(@RequestBody String body) {
         return "you have been authkfjdked";
     }
-
     @GetMapping("/yandex_oauth_callback")
-    public ResponseEntity<?> yandexOauth(@RequestParam String code,
+    public String redirectYandex(){
+        return """
+                <html><head>
+                    <title>redirect</title>
+                                
+                    <meta charset="utf-8">
+                    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1">\s
+                </head>
+                                
+                <body class="vsc-initialized">
+                <script>
+                    window.location.href = window.location.href.split('#')[0]+"Second?"+window.location.href.split('#')[1];
+                </script>
+                </body></html>
+                """;
+    }
+
+    @GetMapping("/yandex_oauth_callbackSecond")
+    public ResponseEntity<?> yandexOauth(@RequestParam String access_token,
                                          HttpServletResponse response) throws IOException, InterruptedException {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://login.yandex.ru/info?format=jwt")).header("Authorization","OAuth "+code).build();
+                .uri(URI.create("https://login.yandex.ru/info?format=jwt")).header("Authorization", "OAuth " + access_token).build();
         HttpResponse yaResp = client.send(request,
                 HttpResponse.BodyHandlers.ofString());
-        code = yaResp.body().toString();
-        Cookie cookie = new Cookie("Authorization", code);
+        access_token = yaResp.body().toString();
+        Cookie cookie = new Cookie("Authorization", access_token);
         //создаем объект Cookie,
         //в конструкторе указываем значения для name и value
         cookie.setPath("/");//устанавливаем путь
@@ -65,32 +84,44 @@ public class UserController {
         response.sendRedirect("/");
         return ResponseEntity.ok().body(HttpStatus.MOVED_PERMANENTLY);
     }
+
     @GetMapping("/adminonly")
-    String admo(){
+    String admo() {
         return "u are admin";
     }
+
     @GetMapping("/useronly")
-    String usro(){
+    String usro() {
         return "u are user";
     }
+
     @GetMapping("/free")
-    String free(){
-        return "u are free";
+    @ResponseStatus(HttpStatus.OK)
+    public String free() {
+        return "resp";
     }
+
     @GetMapping("/anyone")
-    String anyone(){
+    @ResponseStatus(HttpStatus.OK)
+    String anyone() {
         return "u are anyone";
     }
 
     @GetMapping("/api/users/{idS}")
     HumanUserPassport GetUser(@PathVariable String idS) {
         var id = UUID.fromString(idS);
+        if (!jpaHumanUserPassportRepository.existsById(id)) {
+            return null;
+        }
         return jpaHumanUserPassportRepository.findHumanUserPassportById(id);
     }
 
-    @PostMapping("api/admin/{idS}/ban")
+    @PostMapping("/api/admin/{idS}/ban")
     void BanUser(@PathVariable String idS) {
         var id = UUID.fromString(idS);
+        if (!jpaHumanUserPassportRepository.existsById(id)) {
+            return;
+        }
         HumanUserPassport passport =
                 jpaHumanUserPassportRepository.findHumanUserPassportById(id);
         passport.setIsBanned(true);
@@ -98,9 +129,12 @@ public class UserController {
     }
 
 
-    @PostMapping("api/admin/{idS}/unban")
+    @PostMapping("/api/admin/{idS}/unban")
     void UnbanUser(@PathVariable String idS) {
         var id = UUID.fromString(idS);
+        if (!jpaHumanUserPassportRepository.existsById(id)) {
+            return;
+        }
 
         HumanUserPassport passport =
                 jpaHumanUserPassportRepository.findHumanUserPassportById(id);
@@ -109,9 +143,12 @@ public class UserController {
 
     }
 
-    @DeleteMapping("api/admin/{idS}")
+    @DeleteMapping("/api/admin/{idS}")
     void DeleteUser(@PathVariable String idS) {
         var id = UUID.fromString(idS);
+        if (!jpaHumanUserPassportRepository.existsById(id)) {
+            return;
+        }
         HumanUserPassport passport =
                 jpaHumanUserPassportRepository.findHumanUserPassportById(id);
         passport.setIsBanned(true);
