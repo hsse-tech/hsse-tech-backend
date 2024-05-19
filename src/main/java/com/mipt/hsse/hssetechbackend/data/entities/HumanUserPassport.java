@@ -1,14 +1,13 @@
 package com.mipt.hsse.hssetechbackend.data.entities;
 
 import jakarta.persistence.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
 
 /**
  * Представляет сущность человек, зашедшего под Yandex ID
@@ -28,7 +27,7 @@ public class HumanUserPassport implements UserDetails {
   private User user;
 
   @Column(name = "yandex_id", nullable = false)
-  private String yandexId;
+  private long yandexId;
 
   @Column(name = "first_name", nullable = false, length = Integer.MAX_VALUE)
   private String firstName;
@@ -49,6 +48,11 @@ public class HumanUserPassport implements UserDetails {
   private Wallet wallet;
 
   public HumanUserPassport(String yandexId, String firstName, String lastName,
+                           String email, User user) {
+    this(Long.parseLong(yandexId), firstName, lastName, email, user);
+  }
+
+  public HumanUserPassport(Long yandexId, String firstName, String lastName,
                            String email, User user) {
     this.yandexId = yandexId;
     this.firstName = firstName;
@@ -73,7 +77,7 @@ public class HumanUserPassport implements UserDetails {
 
   @Override
   public String getUsername() {
-    return getYandexId();
+    return String.valueOf(yandexId);
   }
 
   @Override

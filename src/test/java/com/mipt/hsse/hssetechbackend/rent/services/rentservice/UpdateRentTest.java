@@ -5,13 +5,14 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.*;
+import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepositoryOnDrive;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateRentRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateRentRequest;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.VerificationFailedException;
 import com.mipt.hsse.hssetechbackend.rent.rentprocessing.createrentprocessing.UnoccupiedTimeCreateRentProcessor;
 import com.mipt.hsse.hssetechbackend.rent.services.RentService;
-import com.mipt.hsse.hssetechbackend.testsauxiliary.EqualsManager;
+import com.mipt.hsse.hssetechbackend.testsauxiliary.InstantHelper;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -29,25 +30,22 @@ import org.springframework.transaction.annotation.Transactional;
 @DataJpaTest
 @Import({
   RentService.class,
-  ConfirmationPhotoRepositoryOnDrive.class,
+  PhotoRepositoryOnDrive.class,
   UnoccupiedTimeCreateRentProcessor.class
 })
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class UpdateRentTest extends DatabaseSuite {
-  @Autowired private JpaItemRepository itemRepository;
-  @Autowired private JpaItemTypeRepository itemTypeRepository;
-  @Autowired private JpaUserRepository userRepository;
-  @Autowired private JpaHumanUserPassportRepository humanUserPassportRepository;
-
-  @Autowired private JpaRentRepository rentRepository;
-
   private final User user = new User("test");
   private final HumanUserPassport userPassport =
       new HumanUserPassport(123L, "Test", "User", "test@phystech.edu", user);
   private final ItemType itemType = new ItemType(BigDecimal.ZERO, "TestItemType", 120, false);
   private final Item item = new Item("TestItem", itemType);
-
+  @Autowired private JpaItemRepository itemRepository;
+  @Autowired private JpaItemTypeRepository itemTypeRepository;
+  @Autowired private JpaUserRepository userRepository;
+  @Autowired private JpaHumanUserPassportRepository humanUserPassportRepository;
+  @Autowired private JpaRentRepository rentRepository;
   @Autowired private RentService rentService;
 
   @BeforeEach
@@ -82,8 +80,9 @@ class UpdateRentTest extends DatabaseSuite {
     rentService.updateRent(rentId, new UpdateRentRequest(newStartTime, newEndTime));
 
     Rent retrievedRent = rentService.findById(rentId);
-    assertTrue(EqualsManager.equalsInstantsWithDelta(retrievedRent.getPlannedStart(), newStartTime));
-    assertTrue(EqualsManager.equalsInstantsWithDelta(retrievedRent.getPlannedEnd(), newEndTime));
+    assertTrue(
+        InstantHelper.equalsInstantsWithDelta(retrievedRent.getPlannedStart(), newStartTime));
+    assertTrue(InstantHelper.equalsInstantsWithDelta(retrievedRent.getPlannedEnd(), newEndTime));
   }
 
   @Test
@@ -153,5 +152,4 @@ class UpdateRentTest extends DatabaseSuite {
     assertThrows(
         VerificationFailedException.class, () -> rentService.updateRent(rentId, updateRentRequest));
   }
-
 }

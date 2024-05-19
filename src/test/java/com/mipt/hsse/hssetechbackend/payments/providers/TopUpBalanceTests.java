@@ -48,7 +48,7 @@ public class TopUpBalanceTests extends DatabaseSuite {
   private JpaHumanUserPassportRepository passportRepository;
 
   @Autowired
-  private TopUpBalanceProvider topUpBalanceProvider;
+  private TopUpBalanceProviderBase topUpBalanceProviderBase;
 
   @Autowired
   private JpaTransactionRepository transactionRepository;
@@ -84,7 +84,7 @@ public class TopUpBalanceTests extends DatabaseSuite {
             .thenReturn(
                     new SessionData(100 * 100, "some guid", true, "TEST_URI"));
 
-    TopUpSession result = topUpBalanceProvider.topUpBalance(testWallet.getId(), BigDecimal.valueOf(100));
+    TopUpSession result = topUpBalanceProviderBase.topUpBalance(testWallet.getId(), BigDecimal.valueOf(100));
 
     assertTrue(result.successfullyCreated());
     assertEquals("TEST_URI", result.paymentUrl());
@@ -108,7 +108,7 @@ public class TopUpBalanceTests extends DatabaseSuite {
     when(acquiringSessionInitializer.initialize(any()))
             .thenReturn(new SessionData(0, null, false, null));
 
-    TopUpSession result = topUpBalanceProvider.topUpBalance(testWallet.getId(), BigDecimal.valueOf(100));
+    TopUpSession result = topUpBalanceProviderBase.topUpBalance(testWallet.getId(), BigDecimal.valueOf(100));
 
     assertFalse(result.successfullyCreated());
     assertNull(result.paymentUrl());

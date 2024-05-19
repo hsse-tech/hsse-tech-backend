@@ -1,18 +1,14 @@
 package com.mipt.hsse.hssetechbackend.users.controllers;
 
-import com.mipt.hsse.hssetechbackend.data.entities.Role;
 import com.mipt.hsse.hssetechbackend.data.entities.HumanUserPassport;
+import com.mipt.hsse.hssetechbackend.data.entities.Role;
 import com.mipt.hsse.hssetechbackend.data.entities.User;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaRoleRepository;
-import com.mipt.hsse.hssetechbackend.data.repositories.JpaUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
-
-import java.util.HashSet;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +31,7 @@ public class UserService {
      * @return созданный пользователь
      */
     public HumanUserPassport create(HumanUserPassport user) {
-        if (repository.existsByYandexId(user.getUsername())) {
+        if (repository.existsByYandexId(user.getYandexId())) {
             // Заменить на свои исключения
             throw new RuntimeException("Пользователь с таким именем уже существует");
         }
@@ -61,7 +57,7 @@ public class UserService {
      * @return пользователь
      */
     public HumanUserPassport getByUsername(String username) {
-        return repository.findHumanUserPassportByYandexId(username)
+        return repository.findHumanUserPassportByYandexId(Long.parseLong(username))
                 .orElse(null);
 
     }

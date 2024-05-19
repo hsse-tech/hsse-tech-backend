@@ -1,15 +1,24 @@
 package com.mipt.hsse.hssetechbackend.rent.controllers.responses;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mipt.hsse.hssetechbackend.data.entities.Rent;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 public class CreateRentResponse {
+  @JsonProperty("rent")
   private final Rent rent;
+
+  @JsonProperty("error-message")
   private final String errorMessage;
+
+  @JsonCreator
+  private CreateRentResponse(
+      @JsonProperty("rent") Rent rent, @JsonProperty("error-message") String errorMessage) {
+    this.rent = rent;
+    this.errorMessage = errorMessage;
+  }
 
   public static CreateRentResponse respondSuccess(Rent rent) {
     return new CreateRentResponse(rent, "");
