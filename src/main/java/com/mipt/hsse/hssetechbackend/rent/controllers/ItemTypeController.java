@@ -1,12 +1,14 @@
 package com.mipt.hsse.hssetechbackend.rent.controllers;
 
+import com.mipt.hsse.hssetechbackend.apierrorhandling.ApiError;
+import com.mipt.hsse.hssetechbackend.apierrorhandling.RestExceptionHandler;
 import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemTypeRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemTypeRequest;
-import com.mipt.hsse.hssetechbackend.rent.exceptions.ClientServerError;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.rent.services.ItemTypeService;
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
@@ -31,14 +33,10 @@ public class ItemTypeController {
   }
 
   @PatchMapping("/{id}")
-  public ResponseEntity<Void> updateItemType(
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void updateItemType(
       @PathVariable("id") UUID itemTypeId, @Valid @RequestBody UpdateItemTypeRequest request) {
-    if (itemTypeService.getItemType(itemTypeId).isPresent()) {
       itemTypeService.updateItemType(itemTypeId, request);
-      return ResponseEntity.noContent().build();
-    } else {
-      throw new EntityNotFoundException();
-    }
   }
 
   @DeleteMapping("/{id}")
@@ -55,9 +53,15 @@ public class ItemTypeController {
     else throw new EntityNotFoundException();
   }
 
-  @ExceptionHandler
-  public ResponseEntity<ClientServerError> entityNotFoundExceptionHandler(
-      EntityNotFoundException e) {
-    return new ResponseEntity<>(new ClientServerError(e.getMessage()), HttpStatus.BAD_REQUEST);
+  @GetMapping
+  public List<ItemType> getAllItemTypes() {
+    return itemTypeService.getAllItemTypes();
+  }
+
+  @ExceptionHandler(EntityNotFoundException.class)
+  public ResponseEntity<ApiError> entityNotFoundExceptionHandler(
+      EntityNotFoundException ex) {
+    ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, ex.getMessage());
+    return RestExceptionHandler.buildResponseEntity(apiError);
   }
 }

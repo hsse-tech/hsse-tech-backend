@@ -10,5 +10,7 @@ public interface WalletServiceBase {
 
   Wallet getWallet(UUID id);
 
+  Wallet getWalletByOwner(UUID ownerId);
+
   Wallet changeWalletBalanceOn(UUID walletId, BigDecimal newBalance);
 }

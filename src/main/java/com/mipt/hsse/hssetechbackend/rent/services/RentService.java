@@ -2,22 +2,19 @@ package com.mipt.hsse.hssetechbackend.rent.services;
 
 import com.mipt.hsse.hssetechbackend.auxiliary.VerificationResult;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
-import com.mipt.hsse.hssetechbackend.data.repositories.ConfirmationPhotoRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaRentRepository;
+import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepository;
+import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepository.PhotoType;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateRentRequest;
-import com.mipt.hsse.hssetechbackend.rent.controllers.requests.PinPhotoConfirmationRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateRentRequest;
-import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
-import com.mipt.hsse.hssetechbackend.rent.exceptions.RentProcessingException;
-import com.mipt.hsse.hssetechbackend.rent.exceptions.VerificationFailedException;
+import com.mipt.hsse.hssetechbackend.rent.exceptions.*;
 import com.mipt.hsse.hssetechbackend.rent.rentprocessing.createrentprocessing.CreateRentProcessData;
 import com.mipt.hsse.hssetechbackend.rent.rentprocessing.createrentprocessing.CreateRentProcessor;
 import com.mipt.hsse.hssetechbackend.rent.rentprocessing.deleterentprocessing.DeleteRentProcessData;
 import com.mipt.hsse.hssetechbackend.rent.rentprocessing.deleterentprocessing.DeleteRentProcessor;
 import jakarta.transaction.Transactional;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
@@ -36,7 +33,7 @@ public class RentService {
   private final JpaItemRepository itemRepository;
   private final List<CreateRentProcessor> createRentProcessors;
   private final List<DeleteRentProcessor> deleteRentProcessors;
-  private final ConfirmationPhotoRepository photoRepository;
+  private final PhotoRepository photoRepository;
   private final long MIN_RENT_DURATION_MINUTES;
 
   public RentService(
@@ -45,7 +42,7 @@ public class RentService {
       JpaItemRepository itemRepository,
       List<CreateRentProcessor> createRentProcessors,
       List<DeleteRentProcessor> deleteRentProcessors,
-      ConfirmationPhotoRepository photoRepository,
+      PhotoRepository photoRepository,
       @Value("${min-rent-duration-minutes}") long minRentDurationMinutes) {
     this.rentRepository = rentRepository;
     this.userRepository = userRepository;
@@ -77,7 +74,7 @@ public class RentService {
     for (var processor : createRentProcessors) {
       VerificationResult verificationResult = processor.processCreate(processData);
       if (!verificationResult.isValid()) {
-        throw new RentProcessingException(verificationResult.getErrorMessage());
+        throw new CreateRentProcessingException(verificationResult.getErrorMessage());
       }
     }
 
@@ -98,7 +95,7 @@ public class RentService {
     for (var processor : deleteRentProcessors) {
       VerificationResult verificationResult = processor.processDelete(processData);
       if (!verificationResult.isValid()) {
-        throw new RentProcessingException(verificationResult.getErrorMessage());
+        throw new DeleteRentProcessingException(verificationResult.getErrorMessage());
       }
     }
 
@@ -133,11 +130,10 @@ public class RentService {
     rentRepository.save(rent);
   }
 
-  public ByteArrayInputStream getPhotoForRent(UUID rentId) {
+  public byte[] getPhotoForRent(UUID rentId) {
     if (rentRepository.existsById(rentId)) {
       try {
-        byte[] photoBytes = photoRepository.getPhotoForRent(rentId);
-        return new ByteArrayInputStream(photoBytes);
+        return photoRepository.findPhoto(PhotoType.RENT_CONFIRMATION, rentId);
       } catch (IOException e) {
         throw new ServerErrorException("Unexpected IO error while saving photo", e);
       }
@@ -146,14 +142,14 @@ public class RentService {
     }
   }
 
-  public void confirmRentFinish(UUID rentId, PinPhotoConfirmationRequest request) {
+  public void confirmRentFinish(UUID rentId, byte[] photoBytes) {
     Optional<Rent> rentOpt = rentRepository.findById(rentId);
     Rent rent = rentOpt.orElseThrow(EntityNotFoundException::new);
 
     verifyConfirmRentFinish(rent).throwIfInvalid();
 
     try {
-      photoRepository.save(rentId, request.photoBytes());
+      photoRepository.save(PhotoType.RENT_CONFIRMATION, rentId, photoBytes);
     } catch (IOException | NoSuchAlgorithmException | UnsupportedOperationException e) {
       throw new ServerErrorException("Unexpected IO error while saving photo", e);
     }
@@ -243,7 +239,7 @@ public class RentService {
     }
 
     if (rent.getItem().getType().isPhotoRequiredOnFinish()
-        && !photoRepository.existsPhotoForRent(rent.getId())) {
+        && !photoRepository.existsPhoto(PhotoType.RENT_CONFIRMATION, rent.getId())) {
       error =
           "The rent cannot be finished, because it required a photo confirmation that has not been receiver";
     }
@@ -261,7 +257,7 @@ public class RentService {
       error = "This rent has finished already";
     } else if (!rent.getItem().getType().isPhotoRequiredOnFinish()) {
       error = "This rent does not require photo confirmation";
-    } else if (photoRepository.existsPhotoForRent(rent.getRenter().getId())) {
+    } else if (photoRepository.existsPhoto(PhotoType.RENT_CONFIRMATION, rent.getRenter().getId())) {
       error = "A photo confirmation for this rent has already been uploaded";
     }
 

@@ -1,25 +1,32 @@
 package com.mipt.hsse.hssetechbackend.rent.services;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.AdditionalMatchers.aryEq;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.*;
+import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoAlreadyExistsException;
+import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepository;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,15 +36,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class ItemServiceTest extends DatabaseSuite {
+  private final ItemType itemType = new ItemType(BigDecimal.ZERO, "Item type name", 60, false);
   @Autowired private ItemService itemService;
-
   @Autowired private JpaItemTypeRepository itemTypeRepository;
   @Autowired private JpaItemRepository itemRepository;
   @Autowired private JpaUserRepository userRepository;
   @Autowired private JpaHumanUserPassportRepository humanUserPassportRepository;
   @Autowired private JpaRentRepository rentRepository;
-
-  private final ItemType itemType = new ItemType(BigDecimal.ZERO, "Item type name", 60, false);
+  @MockBean private PhotoRepository photoRepository;
 
   @BeforeEach
   void save() {
@@ -64,12 +70,48 @@ class ItemServiceTest extends DatabaseSuite {
   }
 
   @Test
+  void testSetItemThumbnailPhoto() throws Exception {
+    byte[] photoBytes = new byte[]{1, 2, 3};
+    Item item = new Item("test name", itemType);
+    UUID uuid = itemRepository.save(item).getId();
+
+    itemService.saveItemPhoto(uuid, photoBytes);
+
+    verify(photoRepository).save(eq(PhotoRepository.PhotoType.ITEM_THUMBNAIL), eq(uuid), aryEq(photoBytes));
+  }
+
+  @Test
+  void testSetItemPhotoThumbnailAlreadyExisting() throws Exception {
+    byte[] photoBytes = new byte[]{1, 2, 3};
+    Item item = new Item("test name", itemType);
+    UUID uuid = itemRepository.save(item).getId();
+
+    doThrow(PhotoAlreadyExistsException.class).when(photoRepository).save(any(), any(), any());
+
+    assertThrows(PhotoAlreadyExistsException.class, () -> itemService.saveItemPhoto(uuid, photoBytes));
+  }
+
+  @Test
+  void testGetItemThumbnailPhoto() throws Exception {
+    byte[] photoBytes = new byte[]{1, 2, 3};
+
+    when(photoRepository.findPhoto(any(), any())).thenReturn(photoBytes);
+
+    Item item = new Item("test name", itemType);
+    UUID uuid = itemRepository.save(item).getId();
+    byte[] retrievedBytes = itemService.getItemPhoto(uuid);
+
+    assertArrayEquals(photoBytes, retrievedBytes);
+  }
+
+  @Test
   void getFutureRents() {
     final String displayName = "Display name";
 
     User user = new User("user");
 
-    HumanUserPassport humanUserPassport = new HumanUserPassport(123L, "firstName", "lastName", "test@gmail.com", user);
+    HumanUserPassport humanUserPassport =
+        new HumanUserPassport(123L, "firstName", "lastName", "test@gmail.com", user);
     humanUserPassport = humanUserPassportRepository.save(humanUserPassport);
 
     Item item = new Item(displayName, itemType);
@@ -78,32 +120,32 @@ class ItemServiceTest extends DatabaseSuite {
     Item needlessItem = new Item("Dummy item", itemType);
     needlessItem = itemRepository.save(needlessItem);
 
-    Rent rentBeforeNow = new Rent(
-        Instant.now().minus(5, ChronoUnit.DAYS),
-        Instant.now().minus(4, ChronoUnit.DAYS),
-        humanUserPassport,
-        item);
+    Rent rentBeforeNow =
+        new Rent(
+            Instant.now().minus(5, ChronoUnit.DAYS),
+            Instant.now().minus(4, ChronoUnit.DAYS),
+            humanUserPassport,
+            item);
     rentRepository.save(rentBeforeNow);
 
-    Rent rentBeginningNow = new Rent(
-        Instant.now(),
-        Instant.now().plus(1, ChronoUnit.DAYS),
-        humanUserPassport,
-        item);
+    Rent rentBeginningNow =
+        new Rent(Instant.now(), Instant.now().plus(1, ChronoUnit.DAYS), humanUserPassport, item);
     rentRepository.save(rentBeginningNow);
 
-    Rent rentAfterNow = new Rent(
-        Instant.now().plus(5, ChronoUnit.DAYS),
-        Instant.now().plus(6, ChronoUnit.DAYS),
-        humanUserPassport,
-        item);
+    Rent rentAfterNow =
+        new Rent(
+            Instant.now().plus(5, ChronoUnit.DAYS),
+            Instant.now().plus(6, ChronoUnit.DAYS),
+            humanUserPassport,
+            item);
     rentRepository.save(rentAfterNow);
 
-    Rent rentOfAnotherItem = new Rent(
-        Instant.now().plus(7, ChronoUnit.DAYS),
-        Instant.now().plus(8, ChronoUnit.DAYS),
-        humanUserPassport,
-        needlessItem);
+    Rent rentOfAnotherItem =
+        new Rent(
+            Instant.now().plus(7, ChronoUnit.DAYS),
+            Instant.now().plus(8, ChronoUnit.DAYS),
+            humanUserPassport,
+            needlessItem);
     rentRepository.save(rentOfAnotherItem);
 
     List<Rent> futureRentsOfItem = itemService.getFutureRentsOfItem(item.getId());
@@ -116,7 +158,7 @@ class ItemServiceTest extends DatabaseSuite {
     userRepository.deleteAll();
     itemRepository.deleteAll();
   }
-  
+
   @Test
   void testFailCreateItemOfAbsentType() {
     final String itemName = "Particular item name";
@@ -147,7 +189,8 @@ class ItemServiceTest extends DatabaseSuite {
     // Update item
     UpdateItemRequest updateItemRequest = new UpdateItemRequest("newDisplayName");
     assertThrows(
-        EntityNotFoundException.class, () -> itemService.updateItem(UUID.randomUUID(), updateItemRequest));
+        EntityNotFoundException.class,
+        () -> itemService.updateItem(UUID.randomUUID(), updateItemRequest));
   }
 
   @Test
@@ -165,7 +208,7 @@ class ItemServiceTest extends DatabaseSuite {
   }
 
   @Test
-  void testDeleteItem() {
+  void testDeleteItem() throws IOException {
     final String itemName = "Particular item name";
 
     var createItemRequest = new CreateItemRequest(itemName, itemType.getId());
@@ -174,5 +217,20 @@ class ItemServiceTest extends DatabaseSuite {
     itemService.deleteItem(item.getId());
 
     assertTrue(itemRepository.findById(item.getId()).isEmpty());
+  }
+
+  @Test
+  void testDeleteImageOnDeleteItem() throws IOException, NoSuchAlgorithmException {
+    var createItemRequest = new CreateItemRequest("item name", itemType.getId());
+    UUID uuid = itemService.createItem(createItemRequest).getId();
+
+    // Pin photo
+    byte[] photo = new byte[] {1, 2, 3};
+    itemService.saveItemPhoto(uuid, photo);
+    verify(photoRepository).save(eq(PhotoRepository.PhotoType.ITEM_THUMBNAIL), eq(uuid), aryEq(photo));
+
+    // Delete item; expected to also delete photo
+    itemService.deleteItem(uuid);
+    verify(photoRepository).deletePhoto(eq(PhotoRepository.PhotoType.ITEM_THUMBNAIL), eq(uuid));
   }
 }

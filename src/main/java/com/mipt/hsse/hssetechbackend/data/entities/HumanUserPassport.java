@@ -1,7 +1,9 @@
 package com.mipt.hsse.hssetechbackend.data.entities;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,7 +19,8 @@ import java.util.UUID;
 @Getter
 @Entity
 @Table(name = "human_user_passport")
-public class HumanUserPassport implements UserDetails {
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class HumanUserPassport {
   @Id
   @Column(name = "original_id", nullable = false)
   private UUID id;
