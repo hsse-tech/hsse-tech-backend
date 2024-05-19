@@ -1,5 +1,6 @@
 package com.mipt.hsse.hssetechbackend.data.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.Collection;
 import java.util.List;
@@ -71,31 +72,37 @@ public class HumanUserPassport implements UserDetails {
   }
 
   @Override
+  @JsonIgnore
   public String getPassword() {
     return null;
   }
 
   @Override
+  @JsonIgnore
   public String getUsername() {
     return String.valueOf(yandexId);
   }
 
   @Override
+  @JsonIgnore
   public boolean isAccountNonExpired() {
     return true;
   }
 
   @Override
+  @JsonIgnore
   public boolean isAccountNonLocked() {
     return getIsBanned();
   }
 
   @Override
+  @JsonIgnore
   public boolean isCredentialsNonExpired() {
     return true;
   }
 
   @Override
+  @JsonIgnore
   public boolean isEnabled() {
     return true;
   }

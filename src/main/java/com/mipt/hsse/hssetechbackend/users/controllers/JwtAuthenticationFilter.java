@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
@@ -24,11 +25,17 @@ import java.util.Arrays;
 @Component
 @RequiredArgsConstructor
 @Order(1)
+@Import({UserService.class,JwtService.class})
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     //    public static final String BEARER_PREFIX = "Bearer ";
     public static final String HEADER_NAME = "Authorization";
-    private final JwtService jwtService;
     private final UserService userService;
+    private final JwtService jwtService/* = new JwtService()*/;
+
+//    public JwtAuthenticationFilter(UserService userService) {
+//        this.userService = userService;
+//        this.jwtService = new JwtService();
+//    }
 
     @Override
     protected void doFilterInternal(

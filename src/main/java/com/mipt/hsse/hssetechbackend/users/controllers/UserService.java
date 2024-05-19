@@ -6,12 +6,20 @@ import com.mipt.hsse.hssetechbackend.data.entities.User;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaRoleRepository;
 import lombok.RequiredArgsConstructor;
+//import org.springframework.boot.autoconfigure.domain.EntityScan;
+//import org.springframework.context.annotation.ComponentScan;
+//import org.springframework.context.annotation.Import;
+//import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+//@EnableJpaRepositories("com.mipt.hsse.hssetechbackend.data.repositories")
+//@ComponentScan({"com.mipt.hsse.hssetechbackend"})
+//@EntityScan(basePackages = "com.mipt.hsse.hssetechbackend")
+//@EnableJpaRepositories(basePackages = "com.mipt.hsse.hssetechbackend")
 public class UserService {
     private final JpaHumanUserPassportRepository repository;
     private final JpaRoleRepository roles;
