@@ -1,16 +1,13 @@
 package com.mipt.hsse.hssetechbackend.data.entities;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 /**
  * Представляет сущность человек, зашедшего под Yandex ID
@@ -19,8 +16,7 @@ import java.util.UUID;
 @Getter
 @Entity
 @Table(name = "human_user_passport")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class HumanUserPassport {
+public class HumanUserPassport implements UserDetails {
   @Id
   @Column(name = "original_id", nullable = false)
   private UUID id;
