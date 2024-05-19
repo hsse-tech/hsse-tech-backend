@@ -4,12 +4,6 @@ import com.mipt.hsse.hssetechbackend.data.entities.HumanUserPassport;
 import com.mipt.hsse.hssetechbackend.data.entities.Rent;
 import com.mipt.hsse.hssetechbackend.data.entities.Wallet;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-
-import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,7 +11,7 @@ public class HumanUserPassportResponse {
 
     public UUID id;
 
-    public String yandexId;
+    public Long yandexId;
 
     public String firstName;
 

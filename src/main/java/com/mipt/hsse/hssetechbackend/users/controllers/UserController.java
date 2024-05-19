@@ -1,30 +1,21 @@
 package com.mipt.hsse.hssetechbackend.users.controllers;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mipt.hsse.hssetechbackend.data.entities.HumanUserPassport;
-import com.mipt.hsse.hssetechbackend.data.entities.Role;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaUserRepository;
-import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
-import com.mipt.hsse.hssetechbackend.users.controllers.requests.YandexToken;
 import com.mipt.hsse.hssetechbackend.users.controllers.responses.HumanUserPassportResponse;
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.data.domain.Example;
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.*;
+import java.net.http.HttpClient;
+import java.util.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import com.mipt.hsse.hssetechbackend.data.entities.User;
-
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.util.*;
-import java.net.http.*;
 
 @RestController
 //@RequestMapping("/api/users")
@@ -122,7 +113,7 @@ public class UserController {
     @GetMapping("/api/users/profile")
     HumanUserPassportResponse GetSelf() {
         var id =
-                ((HumanUserPassport) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getYandexId();
+                ((HumanUserPassport) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
         if (!jpaHumanUserPassportRepository.existsByYandexId(id)) {
             return null;
         }
