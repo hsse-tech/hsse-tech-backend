@@ -113,7 +113,7 @@ public class UserController {
     @GetMapping("/api/users/profile")
     HumanUserPassportResponse GetSelf() {
         var id =
-                ((HumanUserPassport) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+                ((HumanUserPassport) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getYandexId();
         if (!jpaHumanUserPassportRepository.existsByYandexId(id)) {
             return null;
         }
