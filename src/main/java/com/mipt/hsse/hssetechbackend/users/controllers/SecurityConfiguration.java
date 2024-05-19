@@ -3,6 +3,8 @@ package com.mipt.hsse.hssetechbackend.users.controllers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -55,18 +57,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(request -> {
 //                            request.anyRequest().permitAll();
                             // Можно указать конкретный путь, * - 1 уровень вложенности, ** - любое количество уровней вложенности
-                            request.requestMatchers("/api/users/register",//todo manage
-                                            // permissions
-                                            "/api/users/auth", "/free",
-                                            "/anyone","/yandex_oauth_callback","/yandex_oauth_callbackSecond").permitAll()
-                                    .requestMatchers("/swagger-ui/**", "/swagger" +
-                                                    "-resources/*", "/v3/api-docs/**",
-                                            "/auth", "/register",
-                                            "/useronly","/api/users/profile").hasRole(
-                                            "USER")
-                                    .requestMatchers("/endpoint", "/admin/**",
-                                            "api/users/**", "/adminonly","/api/users/profile").hasRole(
-                                            "ADMIN");
+                            request.requestMatchers("/**").permitAll();
                         }
                 )
 //                .authorizeRequests()
@@ -91,6 +82,12 @@ public class SecurityConfiguration {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+    @Bean
+    static RoleHierarchy roleHierarchy() {
+        RoleHierarchyImpl hierarchy = new RoleHierarchyImpl();
+        hierarchy.setHierarchy("ROLE_ADMIN > ROLE_USER");
+        return hierarchy;
     }
 
     @Bean

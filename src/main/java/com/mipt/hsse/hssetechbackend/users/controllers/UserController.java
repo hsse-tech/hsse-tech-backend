@@ -9,12 +9,15 @@ import com.mipt.hsse.hssetechbackend.data.repositories.JpaUserRepository;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.users.controllers.requests.YandexToken;
 import com.mipt.hsse.hssetechbackend.users.controllers.responses.HumanUserPassportResponse;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.data.domain.Example;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -51,20 +54,8 @@ public class UserController {
 
     @GetMapping("/yandex_oauth_callback")
     public String redirectYandex() {
-        return """
-                <html><head>
-                    <title>redirect</title>
-                                
-                    <meta charset="utf-8">
-                    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1">\s
-                </head>
-                                
-                <body class="vsc-initialized">
-                <script>
-                    window.location.href = window.location.href.split('#')[0]+"Second?"+window.location.href.split('#')[1];
-                </script>
-                </body></html>
+        return """ 
+                <html><script>window.location.href = window.location.href.split('#')[0]+"Second?"+window.location.href.split('#')[1];</script></html>
                 """;
     }
 
@@ -88,11 +79,14 @@ public class UserController {
         return ResponseEntity.ok().body(HttpStatus.MOVED_PERMANENTLY);
     }
 
+
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/adminonly")
     String admo() {
         return "u are admin";
     }
 
+    @PreAuthorize("hasRole('USER')")
     @GetMapping("/useronly")
     String usro() {
         return "u are user";
@@ -110,6 +104,7 @@ public class UserController {
         return "u are anyone";
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/api/users/{idS}")
     HumanUserPassportResponse GetUser(@PathVariable String idS) {
         var id = UUID.fromString(idS);
@@ -119,6 +114,7 @@ public class UserController {
         return new HumanUserPassportResponse(jpaHumanUserPassportRepository.findHumanUserPassportById(id));
     }
 
+    @PreAuthorize("hasRole('USER')")
     @GetMapping("/api/users/profile")
     HumanUserPassportResponse GetSelf() {
         var id =
@@ -129,6 +125,8 @@ public class UserController {
         return new HumanUserPassportResponse(jpaHumanUserPassportRepository.findHumanUserPassportByYandexId(id).get());
     }
 
+
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/api/admin/{idS}/ban")
     void BanUser(@PathVariable String idS) {
         var id = UUID.fromString(idS);
@@ -142,6 +140,7 @@ public class UserController {
     }
 
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/api/admin/{idS}/unban")
     void UnbanUser(@PathVariable String idS) {
         var id = UUID.fromString(idS);
@@ -156,6 +155,8 @@ public class UserController {
 
     }
 
+
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/api/admin/{idS}")
     void DeleteUser(@PathVariable String idS) {
         var id = UUID.fromString(idS);
