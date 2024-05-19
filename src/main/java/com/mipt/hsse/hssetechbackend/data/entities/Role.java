@@ -4,24 +4,52 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
 
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "role")
-public class Role {
-  @Id
-  @Setter(AccessLevel.NONE)
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "id", nullable = false)
-  private Integer id;
+public class Role implements GrantedAuthority {
+    @Id
+    @Setter(AccessLevel.NONE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
+    private Integer id;
 
-  @Column(name = "name", nullable = false, length = Integer.MAX_VALUE)
-  private String name;
+    @Column(name = "name", nullable = false, length = Integer.MAX_VALUE)
+    private String name;
 
-  @ManyToMany(mappedBy = "roles")
-  private Set<User> users = new LinkedHashSet<>();
+    @ManyToMany(mappedBy = "roles")
+    private Set<User> users = new LinkedHashSet<>();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Role role = (Role) o;
+        return Objects.equals(name, role.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    public Role(String name) {
+        this.name = name;
+    }
+
+    public Role() {
+
+    }
+
+    @Override
+    public String getAuthority() {
+        return getName();
+    }
 }

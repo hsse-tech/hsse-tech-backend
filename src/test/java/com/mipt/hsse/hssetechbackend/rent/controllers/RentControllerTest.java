@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.AdditionalMatchers.aryEq;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -12,6 +13,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.mipt.hsse.hssetechbackend.apierrorhandling.ApiError;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
+import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepository;
+import com.mipt.hsse.hssetechbackend.data.repositories.JpaRoleRepository;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateRentRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateRentRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.RentDTO;
@@ -22,6 +25,9 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+
+import com.mipt.hsse.hssetechbackend.users.controllers.SecurityConfiguration;
+import org.junit.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,10 +36,28 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.*;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 @WebMvcTest(RentController.class)
-@Import(ObjectMapper.class)
+@Import({SecurityConfiguration.class,ObjectMapper.class})
 class RentControllerTest {
+  @MockBean
+  private JpaHumanUserPassportRepository jpaHumanUserPassportRepository;
+  @MockBean
+  private JpaRoleRepository jpaRoleRepository;
+
+  @Autowired
+  private WebApplicationContext webApplicationContext;
+
+  @Before
+  public void setup() {
+    this.mockMvc =
+            MockMvcBuilders
+                    .webAppContextSetup(this.webApplicationContext)
+                    .apply(springSecurity())
+                    .build();
+  }
   private static final String BASE_MAPPING = "/api/renting/rent";
   private final ItemType itemType = new ItemType(BigDecimal.ZERO, "Item type name", 120, false);
   private final Item item = new Item("Item name", itemType);
