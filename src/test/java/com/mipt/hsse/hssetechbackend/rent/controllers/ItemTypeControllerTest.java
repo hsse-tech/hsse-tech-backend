@@ -3,15 +3,12 @@ package com.mipt.hsse.hssetechbackend.rent.controllers;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
-import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepository;
-import com.mipt.hsse.hssetechbackend.data.repositories.JpaRoleRepository;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemTypeRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemTypeRequest;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
@@ -19,9 +16,6 @@ import com.mipt.hsse.hssetechbackend.rent.services.ItemTypeService;
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
-
-import com.mipt.hsse.hssetechbackend.users.controllers.SecurityConfiguration;
-import org.junit.Before;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -30,32 +24,14 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.*;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 @WebMvcTest(ItemTypeController.class)
-@Import({SecurityConfiguration.class,ObjectMapper.class})
+@Import(ObjectMapper.class)
 class ItemTypeControllerTest {
   private static final String BASE_MAPPING = "/api/renting/item-type";
   @Autowired MockMvc mockMvc;
   @Autowired ObjectMapper objectMapper;
   @MockBean private ItemTypeService itemTypeService;
-  @MockBean
-  private JpaHumanUserPassportRepository jpaHumanUserPassportRepository;
-  @MockBean
-  private JpaRoleRepository jpaRoleRepository;
-
-  @Autowired
-  private WebApplicationContext webApplicationContext;
-
-  @Before
-  public void setup() {
-    this.mockMvc =
-            MockMvcBuilders
-                    .webAppContextSetup(this.webApplicationContext)
-                    .apply(springSecurity())
-                    .build();
-  }
 
   @Test
   void testCreateItemTypeEndpoint() throws Exception {

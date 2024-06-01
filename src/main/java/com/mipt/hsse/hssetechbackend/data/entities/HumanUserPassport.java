@@ -1,14 +1,13 @@
 package com.mipt.hsse.hssetechbackend.data.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import java.util.Collection;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.util.List;
 import java.util.UUID;
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 /**
  * Представляет сущность человек, зашедшего под Yandex ID
@@ -17,7 +16,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Getter
 @Entity
 @Table(name = "human_user_passport")
-public class HumanUserPassport implements UserDetails {
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class HumanUserPassport {
   @Id
   @Column(name = "original_id", nullable = false)
   private UUID id;
@@ -28,7 +28,7 @@ public class HumanUserPassport implements UserDetails {
   private User user;
 
   @Column(name = "yandex_id", nullable = false)
-  private long yandexId;
+  private Long yandexId;
 
   @Column(name = "first_name", nullable = false, length = Integer.MAX_VALUE)
   private String firstName;
@@ -48,62 +48,11 @@ public class HumanUserPassport implements UserDetails {
   @OneToOne(mappedBy = "owner")
   private Wallet wallet;
 
-  public HumanUserPassport(String yandexId, String firstName, String lastName,
-                           String email, User user) {
-    this(Long.parseLong(yandexId), firstName, lastName, email, user);
-  }
-
-  public HumanUserPassport(Long yandexId, String firstName, String lastName,
-                           String email, User user) {
+  public HumanUserPassport(Long yandexId, String firstName, String lastName, String email, User user) {
     this.yandexId = yandexId;
     this.firstName = firstName;
     this.lastName = lastName;
     this.email = email;
     this.user = user;
-  }
-
-  public HumanUserPassport() {
-
-  }
-
-  @Override
-  public Collection<? extends GrantedAuthority> getAuthorities() {
-    return getUser().getRoles();
-  }
-
-  @Override
-  @JsonIgnore
-  public String getPassword() {
-    return null;
-  }
-
-  @Override
-  @JsonIgnore
-  public String getUsername() {
-    return String.valueOf(yandexId);
-  }
-
-  @Override
-  @JsonIgnore
-  public boolean isAccountNonExpired() {
-    return true;
-  }
-
-  @Override
-  @JsonIgnore
-  public boolean isAccountNonLocked() {
-    return getIsBanned();
-  }
-
-  @Override
-  @JsonIgnore
-  public boolean isCredentialsNonExpired() {
-    return true;
-  }
-
-  @Override
-  @JsonIgnore
-  public boolean isEnabled() {
-    return true;
   }
 }
