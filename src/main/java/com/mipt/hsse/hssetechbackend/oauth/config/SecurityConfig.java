@@ -1,5 +1,6 @@
 package com.mipt.hsse.hssetechbackend.oauth.config;
 
+import com.mipt.hsse.hssetechbackend.oauth.MiptOAuth2UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,9 +24,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    @Value("${OAUTH_SUCCESS_URL}") String successUrl,
-                                                   @Value("${OAUTH_FAILURE_URL}") String failureUrl) throws Exception {
+                                                   @Value("${OAUTH_FAILURE_URL}") String failureUrl,
+                                                   MiptOAuth2UserService miptUserService) throws Exception {
         return http.authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
                 .oauth2Login(oauth -> oauth
+                        .userInfoEndpoint(endpoint -> endpoint.userService(miptUserService))
                         .defaultSuccessUrl(successUrl, true)
                         .failureUrl(failureUrl))
                 .build();
