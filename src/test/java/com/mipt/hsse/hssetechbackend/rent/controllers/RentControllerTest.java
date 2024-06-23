@@ -12,6 +12,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.mipt.hsse.hssetechbackend.apierrorhandling.ApiError;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
+import com.mipt.hsse.hssetechbackend.oauth.MiptOAuth2UserService;
+import com.mipt.hsse.hssetechbackend.oauth.config.SecurityConfig;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateRentRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateRentRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.RentDTO;
@@ -29,12 +31,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.*;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 @WebMvcTest(RentController.class)
-@Import(ObjectMapper.class)
+@Import({ObjectMapper.class, SecurityConfig.class, MiptOAuth2UserService.class})
 class RentControllerTest {
   private static final String BASE_MAPPING = "/api/renting/rent";
   private final ItemType itemType = new ItemType(BigDecimal.ZERO, "Item type name", 120, false);
@@ -43,20 +44,17 @@ class RentControllerTest {
   private final HumanUserPassport userPassport =
       new HumanUserPassport(123L, "Name", "Surname", "email@gmail.com", user);
 
-  MockMvc mockMvc;
-
-  @Autowired WebApplicationContext webApplicationContext;
+  @Autowired MockMvc mockMvc;
   @Autowired ObjectMapper objectMapper;
   @MockBean private RentService rentService;
 
   @BeforeEach
   void setup() {
     objectMapper.registerModule(new JavaTimeModule());
-    mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
-            .build();
   }
 
   @Test
+  @WithMockUser
   void testCreateRentEndpoint() throws Exception {
     Instant start = Instant.now().plus(1, ChronoUnit.HOURS);
     Instant end = Instant.now().plus(2, ChronoUnit.HOURS);
@@ -83,6 +81,7 @@ class RentControllerTest {
   }
 
   @Test
+  @WithMockUser
   void testBadRequestOnCreateRentFailed() throws Exception {
     final String errorText = "Error text";
     when(rentService.createRent(any())).thenThrow(new CreateRentProcessingException(errorText));
@@ -103,6 +102,7 @@ class RentControllerTest {
   }
 
   @Test
+  @WithMockUser
   void getRentEndpoint() throws Exception {
     Rent rent = new Rent(Instant.now(), Instant.now(), userPassport, item);
     when(rentService.findById(any())).thenReturn(rent);
@@ -123,6 +123,7 @@ class RentControllerTest {
   }
 
   @Test
+  @WithMockUser
   void testDeleteRentEndpoint() throws Exception {
     UUID uuid = UUID.randomUUID();
     mockMvc.perform(delete(BASE_MAPPING + "/{rent_id}", uuid));
@@ -131,6 +132,7 @@ class RentControllerTest {
   }
 
   @Test
+  @WithMockUser
   void testUpdateRentEndpoint() throws Exception {
     UUID uuid = UUID.randomUUID();
 
@@ -148,6 +150,7 @@ class RentControllerTest {
   }
 
   @Test
+  @WithMockUser
   void testBadRequestOnUpdateFailed() throws Exception {
     String errorText = "Error text";
     doThrow(new VerificationFailedException(errorText)).when(rentService).updateRent(any(), any());
@@ -172,6 +175,7 @@ class RentControllerTest {
   }
 
   @Test
+  @WithMockUser
   void testPinPhotoConfirmationEndpoint() throws Exception {
     UUID uuid = UUID.randomUUID();
     byte[] photoBytes = new byte[] {1, 2, 3, 4};
@@ -185,6 +189,7 @@ class RentControllerTest {
   }
 
   @Test
+  @WithMockUser
   void testGetPhotoConfirmationEndpoint() throws Exception {
     UUID uuid = UUID.randomUUID();
     byte[] photoBytes = new byte[] {0, 1, 2, 3};
@@ -202,6 +207,7 @@ class RentControllerTest {
   }
 
   @Test
+  @WithMockUser
   void testStartRentEndpoint() throws Exception {
     UUID uuid = UUID.randomUUID();
     mockMvc.perform(post(BASE_MAPPING + "/{rentId}/begin", uuid)).andExpect(status().isOk());
@@ -209,6 +215,7 @@ class RentControllerTest {
   }
 
   @Test
+  @WithMockUser
   void testFailStartRentEndpoint() throws Exception {
     String errorText = "Error text";
     doThrow(new VerificationFailedException(errorText)).when(rentService).startRent(any());
@@ -230,6 +237,7 @@ class RentControllerTest {
   }
 
   @Test
+  @WithMockUser
   void testEndRentEndpoint() throws Exception {
     UUID uuid = UUID.randomUUID();
     mockMvc.perform(post(BASE_MAPPING + "/{rentId}/end", uuid)).andExpect(status().isOk());
@@ -238,6 +246,7 @@ class RentControllerTest {
   }
 
   @Test
+  @WithMockUser
   void testFailEndRentEndpoint() throws Exception {
     String errorText = "Error text";
     doThrow(new VerificationFailedException(errorText)).when(rentService).endRent(any());

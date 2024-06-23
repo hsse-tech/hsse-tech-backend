@@ -12,6 +12,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoNotFoundException;
+import com.mipt.hsse.hssetechbackend.oauth.MiptOAuth2UserService;
+import com.mipt.hsse.hssetechbackend.oauth.config.SecurityConfig;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetItemResponse;
@@ -30,28 +32,26 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.*;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 @WebMvcTest(ItemController.class)
-@Import(ObjectMapper.class)
+@Import({ObjectMapper.class, SecurityConfig.class, MiptOAuth2UserService.class})
 class ItemControllerTest {
   private static final String BASE_MAPPING = "/api/renting/item";
   private final ItemType itemType = new ItemType(BigDecimal.ZERO, "Item type name", 60, false);
-  MockMvc mockMvc;
-  @Autowired WebApplicationContext webApplicationContext;
+  @Autowired  MockMvc mockMvc;
   @Autowired ObjectMapper objectMapper;
   @MockBean private ItemService itemService;
 
   @BeforeEach
   void setup() {
     objectMapper.registerModule(new JavaTimeModule());
-    mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
   }
 
   @Test
+  @WithMockUser
   void testCreateItemEndpoint() throws Exception {
     final String displayName = "Item name";
 
@@ -78,6 +78,7 @@ class ItemControllerTest {
   }
 
   @Test
+  @WithMockUser
   void testCreateItemEndpointNonExistingItemType() throws Exception {
     when(itemService.createItem(any())).thenThrow(EntityNotFoundException.class);
 
@@ -91,6 +92,7 @@ class ItemControllerTest {
   }
 
   @Test
+  @WithMockUser
   void pinThumbnailPhotoToItem() throws Exception {
     byte[] photoBytes = new byte[] {1, 2, 3};
 
@@ -105,6 +107,7 @@ class ItemControllerTest {
   }
 
   @Test
+  @WithMockUser
   void getItemThumbnailPhoto() throws Exception {
     byte[] photoBytes = new byte[] {1, 2, 3};
 
@@ -113,6 +116,7 @@ class ItemControllerTest {
     UUID uuid = UUID.randomUUID();
     var mvcResult = mockMvc.perform(get(BASE_MAPPING + "/" + uuid + "/photo"))
         .andDo(print())
+            .andExpect(status().isOk())
             .andReturn().getResponse().getContentAsByteArray();
 
     verify(itemService).getItemPhoto(eq(uuid));
@@ -120,6 +124,7 @@ class ItemControllerTest {
   }
 
   @Test
+  @WithMockUser
   void testBadRequestOnGetNonExistingPhoto() throws Exception {
     when(itemService.getItemPhoto(any())).thenThrow(PhotoNotFoundException.class);
 
@@ -128,6 +133,7 @@ class ItemControllerTest {
   }
 
   @Test
+  @WithMockUser
   void testDeleteItemEndpoint() throws Exception {
     UUID uuid = UUID.randomUUID();
 
@@ -140,6 +146,7 @@ class ItemControllerTest {
   }
 
   @Test
+  @WithMockUser
   void testGetItemEndpoint() throws Exception {
     final String displayName = "displayName";
     Item item = new Item(displayName, itemType);
@@ -164,6 +171,7 @@ class ItemControllerTest {
   }
 
   @Test
+  @WithMockUser
   void testGetItemWithFutureRents() throws Exception {
     final String displayName = "Display name";
     User user = new User("user");
@@ -197,6 +205,7 @@ class ItemControllerTest {
   }
 
   @Test
+  @WithMockUser
   void testGetItemEndpointAbsentItem() throws Exception {
     when(itemService.getItem(any())).thenReturn(Optional.empty());
 
@@ -207,6 +216,7 @@ class ItemControllerTest {
   }
 
   @Test
+  @WithMockUser
   void testUpdateItemEndpoint() throws Exception {
     final String displayName = "displayName";
 
@@ -230,6 +240,7 @@ class ItemControllerTest {
   }
 
   @Test
+  @WithMockUser
   void testUpdateNonExistingItem() throws Exception {
     doThrow(EntityNotFoundException.class).when(itemService).updateItem(any(), any());
 
@@ -246,6 +257,7 @@ class ItemControllerTest {
   }
 
   @Test
+  @WithMockUser
   void testCreateQrCodeForItemBooking() throws Exception {
     var initBytes = new byte[] {0, 1, 2, 3};
     when(itemService.getQrCodeForItem(any(), anyInt(), anyInt())).thenReturn(initBytes);
@@ -264,6 +276,7 @@ class ItemControllerTest {
   }
 
   @Test
+  @WithMockUser
   void testProvideAccessToItemEndpoint() throws Exception {
     UUID itemId = UUID.randomUUID();
 
@@ -278,6 +291,7 @@ class ItemControllerTest {
   }
 
   @Test
+  @WithMockUser
   void testProvideAccessToItemIfDenied() throws Exception {
     UUID itemId = UUID.randomUUID();
 

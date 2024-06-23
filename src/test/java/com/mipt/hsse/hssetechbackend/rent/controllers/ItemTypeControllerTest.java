@@ -9,6 +9,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
+import com.mipt.hsse.hssetechbackend.oauth.MiptOAuth2UserService;
+import com.mipt.hsse.hssetechbackend.oauth.config.SecurityConfig;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemTypeRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemTypeRequest;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
@@ -17,34 +19,26 @@ import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.*;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 @WebMvcTest(ItemTypeController.class)
-@Import(ObjectMapper.class)
+@Import({ObjectMapper.class, SecurityConfig.class, MiptOAuth2UserService.class})
 class ItemTypeControllerTest {
   private static final String BASE_MAPPING = "/api/renting/item-type";
-  MockMvc mockMvc;
+  @Autowired MockMvc mockMvc;
   @Autowired ObjectMapper objectMapper;
   @MockBean private ItemTypeService itemTypeService;
 
-  @Autowired private WebApplicationContext webApplicationContext;
-
-  @BeforeEach
-  public void setup() {
-    mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-  }
-
   @Test
+  @WithMockUser
   void testCreateItemTypeEndpoint() throws Exception {
     final BigDecimal cost = BigDecimal.valueOf(100);
     final String displayName = "displayName";
@@ -78,6 +72,7 @@ class ItemTypeControllerTest {
   }
 
   @Test
+  @WithMockUser
   void testCreateItemTypeEndpointOnInvalidReturnBadRequest() throws Exception {
     when(itemTypeService.createItemType(any())).thenReturn(null);
 
@@ -92,6 +87,7 @@ class ItemTypeControllerTest {
   }
 
   @Test
+  @WithMockUser
   void testGetItemTypeEndpoint() throws Exception {
     ItemType itemType = new ItemType(BigDecimal.ZERO, "testName", 60, false);
 
@@ -114,6 +110,7 @@ class ItemTypeControllerTest {
   }
 
   @Test
+  @WithMockUser
   void testGetItemTypeEndpointOnGetNonExistReturnBadRequest() throws Exception {
     when(itemTypeService.getItemType(any())).thenReturn(Optional.empty());
 
@@ -124,6 +121,7 @@ class ItemTypeControllerTest {
   }
 
   @Test
+  @WithMockUser
   void testUpdateItemTypeEndpoint() throws Exception {
     final BigDecimal cost = BigDecimal.valueOf(100);
     final String displayName = "displayName";
@@ -152,6 +150,7 @@ class ItemTypeControllerTest {
   }
 
   @Test
+  @WithMockUser
   void testUpdateItemTypeEndpointOnUpdateNonExistReturnBadRequest() throws Exception {
     doThrow(EntityNotFoundException.class).when(itemTypeService).updateItemType(any(), any());
 
@@ -169,6 +168,7 @@ class ItemTypeControllerTest {
   }
 
   @Test
+  @WithMockUser
   void testDeleteItemTypeEndpoint() throws Exception {
     doNothing().when(itemTypeService).deleteItemType(any());
 

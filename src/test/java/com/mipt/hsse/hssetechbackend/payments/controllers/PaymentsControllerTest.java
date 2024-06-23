@@ -7,6 +7,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
+import com.mipt.hsse.hssetechbackend.oauth.MiptOAuth2UserService;
+import com.mipt.hsse.hssetechbackend.oauth.config.SecurityConfig;
 import com.mipt.hsse.hssetechbackend.payments.controllers.requests.TopUpBalanceRequest;
 import com.mipt.hsse.hssetechbackend.payments.providers.TopUpBalanceProviderBase;
 import com.mipt.hsse.hssetechbackend.payments.providers.TopUpSession;
@@ -15,7 +17,6 @@ import com.mipt.hsse.hssetechbackend.payments.services.WalletServiceBase;
 import java.util.UUID;
 
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -24,11 +25,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.*;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 @WebMvcTest(PaymentsController.class)
-@Import(ObjectMapper.class)
+@Import({ObjectMapper.class, SecurityConfig.class, MiptOAuth2UserService.class})
 class PaymentsControllerTest {
   @MockBean
   private WalletServiceBase walletService;
@@ -41,18 +40,9 @@ class PaymentsControllerTest {
 
   @Autowired
   ObjectMapper objectMapper;
-  
-  @Autowired
-  private WebApplicationContext webApplicationContext;
-
-  @BeforeEach
-  public void setup() {
-    http = MockMvcBuilders.webAppContextSetup(webApplicationContext)
-            .build();
-  }
 
   @Test
-  //@WithMockUser("testAuthenticatedUser")
+  @WithMockUser
   public void testTopUpShouldBeSuccessful() throws Exception {
     when(walletService.getWalletByOwner(any())).thenReturn(new Wallet());
     when(topUpBalanceProviderBase.topUpBalance(any(), any())).thenReturn(new TopUpSession(true, "https://payment-session.com"));
