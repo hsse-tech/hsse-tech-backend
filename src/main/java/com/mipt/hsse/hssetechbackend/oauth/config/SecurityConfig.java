@@ -14,7 +14,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    MiptOAuth2UserService miptUserService) throws Exception {
-        return http.authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+        return http.authorizeHttpRequests(auth ->
+                        auth.requestMatchers("**").hasAuthority("MIPT_USER"))
                 .oauth2Login(oauth -> oauth
                         .userInfoEndpoint(endpoint -> endpoint.userService(miptUserService))
                         .defaultSuccessUrl("/home", true))

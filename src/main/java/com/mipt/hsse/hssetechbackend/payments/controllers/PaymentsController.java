@@ -8,7 +8,6 @@ import com.mipt.hsse.hssetechbackend.payments.services.WalletServiceBase;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +16,6 @@ import java.math.BigDecimal;
 
 @Controller
 @RequestMapping("/api/payment")
-@PreAuthorize("false")
 public class PaymentsController {
   private final TopUpBalanceProviderBase topUpBalanceProvider;
   private final WalletServiceBase walletService;
@@ -28,7 +26,6 @@ public class PaymentsController {
   }
 
   @PostMapping("top-up-balance")
-  @PreAuthorize("false")
   public void topUpBalance(@RequestBody TopUpBalanceRequest topUpBalanceRequest, HttpServletResponse response) throws IOException {
     var wallet = walletService.getWalletByOwner(topUpBalanceRequest.userId());
 
