@@ -16,6 +16,8 @@ import com.mipt.hsse.hssetechbackend.rent.services.ItemTypeService;
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -24,14 +26,23 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.*;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 @WebMvcTest(ItemTypeController.class)
 @Import(ObjectMapper.class)
 class ItemTypeControllerTest {
   private static final String BASE_MAPPING = "/api/renting/item-type";
-  @Autowired MockMvc mockMvc;
+  MockMvc mockMvc;
   @Autowired ObjectMapper objectMapper;
   @MockBean private ItemTypeService itemTypeService;
+
+  @Autowired private WebApplicationContext webApplicationContext;
+
+  @BeforeEach
+  public void setup() {
+    mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+  }
 
   @Test
   void testCreateItemTypeEndpoint() throws Exception {

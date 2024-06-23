@@ -32,19 +32,23 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.*;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 @WebMvcTest(ItemController.class)
 @Import(ObjectMapper.class)
 class ItemControllerTest {
   private static final String BASE_MAPPING = "/api/renting/item";
   private final ItemType itemType = new ItemType(BigDecimal.ZERO, "Item type name", 60, false);
-  @Autowired MockMvc mockMvc;
+  MockMvc mockMvc;
+  @Autowired WebApplicationContext webApplicationContext;
   @Autowired ObjectMapper objectMapper;
   @MockBean private ItemService itemService;
 
   @BeforeEach
-  void setupObjectMapper() {
+  void setup() {
     objectMapper.registerModule(new JavaTimeModule());
+    mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
   }
 
   @Test

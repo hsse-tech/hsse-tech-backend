@@ -30,6 +30,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.*;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 @WebMvcTest(RentController.class)
 @Import(ObjectMapper.class)
@@ -40,13 +42,18 @@ class RentControllerTest {
   private final User user = new User("human");
   private final HumanUserPassport userPassport =
       new HumanUserPassport(123L, "Name", "Surname", "email@gmail.com", user);
-  @Autowired MockMvc mockMvc;
+
+  MockMvc mockMvc;
+
+  @Autowired WebApplicationContext webApplicationContext;
   @Autowired ObjectMapper objectMapper;
   @MockBean private RentService rentService;
 
   @BeforeEach
-  void setupObjectMapper() {
+  void setup() {
     objectMapper.registerModule(new JavaTimeModule());
+    mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
+            .build();
   }
 
   @Test
