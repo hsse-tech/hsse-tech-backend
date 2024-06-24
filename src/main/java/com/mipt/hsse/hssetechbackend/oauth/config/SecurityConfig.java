@@ -1,6 +1,6 @@
 package com.mipt.hsse.hssetechbackend.oauth.config;
 
-import com.mipt.hsse.hssetechbackend.oauth.MiptOAuth2UserService;
+import com.mipt.hsse.hssetechbackend.oauth.services.MiptOAuth2UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -12,13 +12,12 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 public class SecurityConfig {
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http,
-                                                   MiptOAuth2UserService miptUserService) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, MiptOAuth2UserService userService) throws Exception {
         return http.authorizeHttpRequests(auth ->
                         auth.requestMatchers("**").hasAuthority("MIPT_USER"))
                 .oauth2Login(oauth -> oauth
-                        .userInfoEndpoint(endpoint -> endpoint.userService(miptUserService))
-                        .defaultSuccessUrl("/home", true))
+                        .defaultSuccessUrl("/home", true)
+                        .userInfoEndpoint(config -> config.userService(userService)))
                 .csrf(AbstractHttpConfigurer::disable)
                 .build();
     }

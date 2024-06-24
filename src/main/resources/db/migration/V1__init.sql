@@ -80,9 +80,9 @@ CREATE TABLE role
     name TEXT NOT NULL UNIQUE
 );
 
-CREATE TABLE user_role
+CREATE TABLE passport_role
 (
-    user_id UUID REFERENCES "user" (id),
+    user_id UUID REFERENCES "human_user_passport" (original_id),
     role_id SERIAL REFERENCES role (id),
     CONSTRAINT pk PRIMARY KEY (user_id, role_id)
 );

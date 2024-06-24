@@ -1,8 +1,6 @@
 package com.mipt.hsse.hssetechbackend.data.entities;
 
 import jakarta.persistence.*;
-import java.util.LinkedHashSet;
-import java.util.Set;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -26,12 +24,6 @@ public class User {
 
   @Column(name = "user_type", nullable = false, length = Integer.MAX_VALUE)
   private String userType;
-
-  @ManyToMany
-  @JoinTable(name = "user_role",
-          joinColumns = @JoinColumn(name = "user_id"),
-          inverseJoinColumns = @JoinColumn(name = "role_id"))
-  private Set<Role> roles = new LinkedHashSet<>();
 
   public User(String userType) {
     this.userType = userType;

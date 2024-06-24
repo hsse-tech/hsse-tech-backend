@@ -2,13 +2,15 @@ package com.mipt.hsse.hssetechbackend.payments.controllers;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oauth2Login;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
-import com.mipt.hsse.hssetechbackend.oauth.MiptOAuth2UserService;
 import com.mipt.hsse.hssetechbackend.oauth.config.SecurityConfig;
+import com.mipt.hsse.hssetechbackend.oauth.services.MiptOAuth2UserService;
+import com.mipt.hsse.hssetechbackend.oauth.services.UserPassportServiceBase;
 import com.mipt.hsse.hssetechbackend.payments.controllers.requests.TopUpBalanceRequest;
 import com.mipt.hsse.hssetechbackend.payments.providers.TopUpBalanceProviderBase;
 import com.mipt.hsse.hssetechbackend.payments.providers.TopUpSession;
@@ -23,6 +25,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.*;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -39,7 +42,10 @@ class PaymentsControllerTest {
   private MockMvc http;
 
   @Autowired
-  ObjectMapper objectMapper;
+  private ObjectMapper objectMapper;
+
+  @MockBean
+  private UserPassportServiceBase passportService;
 
   @Test
   @WithMockUser
@@ -52,7 +58,8 @@ class PaymentsControllerTest {
     http.perform(
             post("/api/payment/top-up-balance")
                 .content(reqJson)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(oauth2Login().authorities(new SimpleGrantedAuthority("MIPT_USER"))))
         .andExpect(status().is3xxRedirection());
   }
 
@@ -64,7 +71,10 @@ class PaymentsControllerTest {
 
     var reqJson = objectMapper.writeValueAsString(new TopUpBalanceRequest(UUID.randomUUID(), 100));
 
-    http.perform(post("/api/payment/top-up-balance").content(reqJson).contentType(MediaType.APPLICATION_JSON))
+    http.perform(post("/api/payment/top-up-balance")
+                    .content(reqJson)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .with(oauth2Login().authorities(new SimpleGrantedAuthority("MIPT_USER"))))
             .andExpect(status().isBadRequest());
   }
 
@@ -76,7 +86,10 @@ class PaymentsControllerTest {
 
     var reqJson = objectMapper.writeValueAsString(new TopUpBalanceRequest(UUID.randomUUID(), 100));
 
-    http.perform(post("/api/payment/top-up-balance").content(reqJson).contentType(MediaType.APPLICATION_JSON))
+    http.perform(post("/api/payment/top-up-balance")
+                    .content(reqJson)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .with(oauth2Login().authorities(new SimpleGrantedAuthority("MIPT_USER"))))
             .andExpect(status().isBadRequest());
   }
 }

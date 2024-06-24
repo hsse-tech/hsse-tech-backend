@@ -6,7 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -47,6 +49,12 @@ public class HumanUserPassport {
 
   @OneToOne(mappedBy = "owner")
   private Wallet wallet;
+
+  @ManyToMany
+  @JoinTable(name = "passport_role",
+          joinColumns = @JoinColumn(name = "user_id"),
+          inverseJoinColumns = @JoinColumn(name = "role_id"))
+  private Set<Role> roles = new LinkedHashSet<>();
 
   public HumanUserPassport(Long yandexId, String firstName, String lastName, String email, User user) {
     this.yandexId = yandexId;
