@@ -59,7 +59,7 @@ class PaymentsControllerTest {
             post("/api/payment/top-up-balance")
                 .content(reqJson)
                 .contentType(MediaType.APPLICATION_JSON)
-                .with(oauth2Login().authorities(new SimpleGrantedAuthority("MIPT_USER"))))
+                .with(oauth2Login().authorities(new SimpleGrantedAuthority("ROLE_MIPT_USER"))))
         .andExpect(status().is3xxRedirection());
   }
 
@@ -74,7 +74,7 @@ class PaymentsControllerTest {
     http.perform(post("/api/payment/top-up-balance")
                     .content(reqJson)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .with(oauth2Login().authorities(new SimpleGrantedAuthority("MIPT_USER"))))
+                    .with(oauth2Login().authorities(new SimpleGrantedAuthority("ROLE_MIPT_USER"))))
             .andExpect(status().isBadRequest());
   }
 
@@ -89,7 +89,7 @@ class PaymentsControllerTest {
     http.perform(post("/api/payment/top-up-balance")
                     .content(reqJson)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .with(oauth2Login().authorities(new SimpleGrantedAuthority("MIPT_USER"))))
+                    .with(oauth2Login().authorities(new SimpleGrantedAuthority("ROLE_MIPT_USER"))))
             .andExpect(status().isBadRequest());
   }
 }

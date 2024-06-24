@@ -69,7 +69,9 @@ class ItemTypeControllerTest {
             .perform(post(BASE_MAPPING)
                       .content(requestStr)
                       .contentType(MediaType.APPLICATION_JSON)
-                      .with(oauth2Login().authorities(new SimpleGrantedAuthority("MIPT_USER"))))
+                      .with(oauth2Login().authorities(
+                              new SimpleGrantedAuthority("ROLE_MIPT_USER"),
+                              new SimpleGrantedAuthority("ROLE_ADMIN"))))
             .andDo(print())
             .andExpect(status().isCreated())
             .andReturn();
@@ -99,7 +101,7 @@ class ItemTypeControllerTest {
         .perform(post(BASE_MAPPING)
                   .content(requestStr)
                   .contentType(MediaType.APPLICATION_JSON)
-                  .with(oauth2Login().authorities(new SimpleGrantedAuthority("MIPT_USER"))))
+                  .with(oauth2Login().authorities(new SimpleGrantedAuthority("ROLE_MIPT_USER"))))
         .andDo(print())
         .andExpect(status().isBadRequest());
   }
@@ -114,7 +116,7 @@ class ItemTypeControllerTest {
     MvcResult mvcResult =
         mockMvc
             .perform(get(BASE_MAPPING + "/{itemTypeId}", UUID.randomUUID().toString())
-                      .with(oauth2Login().authorities(new SimpleGrantedAuthority("MIPT_USER"))))
+                      .with(oauth2Login().authorities(new SimpleGrantedAuthority("ROLE_MIPT_USER"))))
             .andDo(print())
             .andExpect(status().isOk())
             .andReturn();
@@ -135,7 +137,7 @@ class ItemTypeControllerTest {
 
     mockMvc
         .perform(get(BASE_MAPPING + "/{itemId}", UUID.randomUUID().toString())
-                  .with(oauth2Login().authorities(new SimpleGrantedAuthority("MIPT_USER"))))
+                  .with(oauth2Login().authorities(new SimpleGrantedAuthority("ROLE_MIPT_USER"))))
         .andDo(print())
         .andExpect(status().isBadRequest());
   }
@@ -163,7 +165,9 @@ class ItemTypeControllerTest {
             patch(BASE_MAPPING + "/{id}", uuid.toString())
                 .content(requestStr)
                 .contentType(MediaType.APPLICATION_JSON)
-                .with(oauth2Login().authorities(new SimpleGrantedAuthority("MIPT_USER"))))
+                .with(oauth2Login().authorities(
+                        new SimpleGrantedAuthority("ROLE_MIPT_USER"),
+                        new SimpleGrantedAuthority("ROLE_ADMIN"))))
         .andDo(print())
         .andExpect(status().isNoContent());
 
@@ -184,7 +188,9 @@ class ItemTypeControllerTest {
             patch(BASE_MAPPING + "/{id}", UUID.randomUUID().toString())
                 .content(requestStr)
                 .contentType(MediaType.APPLICATION_JSON)
-                .with(oauth2Login().authorities(new SimpleGrantedAuthority("MIPT_USER"))))
+                .with(oauth2Login().authorities(
+                        new SimpleGrantedAuthority("ROLE_MIPT_USER"),
+                        new SimpleGrantedAuthority("ROLE_ADMIN"))))
         .andDo(print())
         .andExpect(status().isBadRequest());
   }
@@ -198,7 +204,9 @@ class ItemTypeControllerTest {
 
     mockMvc
         .perform(delete(BASE_MAPPING + "/{itemTypeId}", uuid.toString())
-                  .with(oauth2Login().authorities(new SimpleGrantedAuthority("MIPT_USER"))))
+                  .with(oauth2Login().authorities(
+                          new SimpleGrantedAuthority("ROLE_MIPT_USER"),
+                          new SimpleGrantedAuthority("ROLE_ADMIN"))))
         .andDo(print())
         .andExpect(status().isOk());
 
