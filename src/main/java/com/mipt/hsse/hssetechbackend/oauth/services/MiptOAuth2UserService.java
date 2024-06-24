@@ -37,7 +37,7 @@ public class MiptOAuth2UserService implements OAuth2UserService<OAuth2UserReques
                 throw new OAuth2AuthenticationException("Invalid user profile (not \"@phystech.edu\" email suffix)");
             }
 
-            var passport = passportService.findByYandexId(yandexId);
+            var passport = passportService.findOrCreateByYandexId(yandexId);
             var authorities = passport.getRoles()
                     .stream()
                     .map(role -> new SimpleGrantedAuthority(role.getName()))

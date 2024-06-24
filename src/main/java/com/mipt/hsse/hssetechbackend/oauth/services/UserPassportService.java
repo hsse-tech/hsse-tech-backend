@@ -9,12 +9,11 @@ public class UserPassportService implements UserPassportServiceBase {
     private final JpaHumanUserPassportRepository passportRepository;
 
     public UserPassportService(JpaHumanUserPassportRepository passportRepository) {
-
         this.passportRepository = passportRepository;
     }
 
     @Override
-    public HumanUserPassport findByYandexId(Long yandexId) {
+    public HumanUserPassport findOrCreateByYandexId(Long yandexId) {
         return passportRepository.findByYandexId(yandexId);
     }
 }
