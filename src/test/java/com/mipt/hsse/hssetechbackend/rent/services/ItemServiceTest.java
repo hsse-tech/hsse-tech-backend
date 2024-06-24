@@ -40,7 +40,6 @@ class ItemServiceTest extends DatabaseSuite {
   @Autowired private ItemService itemService;
   @Autowired private JpaItemTypeRepository itemTypeRepository;
   @Autowired private JpaItemRepository itemRepository;
-  @Autowired private JpaUserRepository userRepository;
   @Autowired private JpaHumanUserPassportRepository humanUserPassportRepository;
   @Autowired private JpaRentRepository rentRepository;
   @MockBean private PhotoRepository photoRepository;
@@ -108,10 +107,8 @@ class ItemServiceTest extends DatabaseSuite {
   void getFutureRents() {
     final String displayName = "Display name";
 
-    User user = new User("user");
-
     HumanUserPassport humanUserPassport =
-        new HumanUserPassport(123L, "firstName", "lastName", "test@gmail.com", user);
+        new HumanUserPassport(123L, "firstName", "lastName", "test@gmail.com");
     humanUserPassport = humanUserPassportRepository.save(humanUserPassport);
 
     Item item = new Item(displayName, itemType);
@@ -151,11 +148,10 @@ class ItemServiceTest extends DatabaseSuite {
     List<Rent> futureRentsOfItem = itemService.getFutureRentsOfItem(item.getId());
     assertEquals(1, futureRentsOfItem.size());
 
-    Rent retrievedRent = futureRentsOfItem.get(0);
+    Rent retrievedRent = futureRentsOfItem.getFirst();
     assertEquals(rentAfterNow.getId(), retrievedRent.getId());
 
     rentRepository.deleteAll();
-    userRepository.deleteAll();
     itemRepository.deleteAll();
   }
 

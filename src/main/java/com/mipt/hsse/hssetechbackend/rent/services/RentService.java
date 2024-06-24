@@ -63,7 +63,7 @@ public class RentService {
     HumanUserPassport renter =
         userRepository
             .findById(request.userId())
-            .orElseThrow(() -> new EntityNotFoundException(User.class, request.userId()));
+            .orElseThrow(() -> new EntityNotFoundException(HumanUserPassport.class, request.userId()));
 
     Rent rent = new Rent(request.startTime(), request.endTime(), renter, item);
 
@@ -174,7 +174,7 @@ public class RentService {
             rent.getItem(), request.newStartTime(), request.newEndTime());
     if (getIntersectingRents.size() > 1
         || getIntersectingRents.size() == 1
-            && getIntersectingRents.get(0).getId() != rent.getId()) {
+            && getIntersectingRents.getFirst().getId() != rent.getId()) {
       throw new VerificationFailedException(
           "The new time bounds intersect with already existing rent(-s) of the same item");
     }

@@ -31,9 +31,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 class TinkoffTopUpAcquiringEventsListenerTest extends DatabaseSuite {
   @Autowired
-  private JpaUserRepository userRepository;
-
-  @Autowired
   private JpaWalletRepository walletRepository;
 
   @Autowired

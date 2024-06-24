@@ -43,9 +43,8 @@ class RentControllerTest {
   private static final String BASE_MAPPING = "/api/renting/rent";
   private final ItemType itemType = new ItemType(BigDecimal.ZERO, "Item type name", 120, false);
   private final Item item = new Item("Item name", itemType);
-  private final User user = new User("human");
   private final HumanUserPassport userPassport =
-      new HumanUserPassport(123L, "Name", "Surname", "email@gmail.com", user);
+      new HumanUserPassport(123L, "Name", "Surname", "email@gmail.com");
 
   @Autowired
   private MockMvc mockMvc;

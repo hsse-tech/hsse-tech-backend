@@ -22,12 +22,8 @@ import java.util.UUID;
 public class HumanUserPassport {
   @Id
   @Column(name = "original_id", nullable = false)
+  @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
-
-  @MapsId
-  @OneToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "original_id", nullable = false)
-  private User user;
 
   @Column(name = "yandex_id", nullable = false)
   private Long yandexId;
@@ -56,11 +52,10 @@ public class HumanUserPassport {
           inverseJoinColumns = @JoinColumn(name = "role_id"))
   private Set<Role> roles = new LinkedHashSet<>();
 
-  public HumanUserPassport(Long yandexId, String firstName, String lastName, String email, User user) {
+  public HumanUserPassport(Long yandexId, String firstName, String lastName, String email) {
     this.yandexId = yandexId;
     this.firstName = firstName;
     this.lastName = lastName;
     this.email = email;
-    this.user = user;
   }
 }

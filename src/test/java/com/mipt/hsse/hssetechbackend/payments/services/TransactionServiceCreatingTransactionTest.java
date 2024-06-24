@@ -34,9 +34,6 @@ import static com.mipt.hsse.hssetechbackend.BigDecimalHelper.*;
 @Import({TransactionService.class, WalletService.class})
 public class TransactionServiceCreatingTransactionTest extends DatabaseSuite {
   @Autowired
-  private JpaUserRepository userRepository;
-
-  @Autowired
   private JpaWalletRepository walletRepository;
 
   @Autowired

@@ -30,9 +30,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @Import({TransactionService.class, WalletService.class})
 public class TransactionCommitFailTests extends DatabaseSuite {
   @Autowired
-  private JpaUserRepository userRepository;
-
-  @Autowired
   private JpaWalletRepository walletRepository;
 
   @Autowired

@@ -214,9 +214,8 @@ class ItemControllerTest {
   @WithMockUser
   void testGetItemWithFutureRents() throws Exception {
     final String displayName = "Display name";
-    User user = new User("user");
     HumanUserPassport humanUserPassport =
-        new HumanUserPassport(123L, "testName", "testLastName", "test@gmail.com", user);
+        new HumanUserPassport(123L, "testName", "testLastName", "test@gmail.com");
     Item item = new Item(displayName, itemType);
 
     Rent rent =

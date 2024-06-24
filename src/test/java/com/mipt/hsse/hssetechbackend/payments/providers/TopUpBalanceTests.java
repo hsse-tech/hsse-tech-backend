@@ -39,9 +39,6 @@ public class TopUpBalanceTests extends DatabaseSuite {
   private AcquiringSessionInitializer acquiringSessionInitializer;
 
   @Autowired
-  private JpaUserRepository userRepository;
-
-  @Autowired
   private JpaWalletRepository walletRepository;
 
   @Autowired

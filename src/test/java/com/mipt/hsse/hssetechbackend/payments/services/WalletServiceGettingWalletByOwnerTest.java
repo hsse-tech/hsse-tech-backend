@@ -29,9 +29,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @Import(WalletService.class)
 public class WalletServiceGettingWalletByOwnerTest extends DatabaseSuite {
   @Autowired
-  private JpaUserRepository userRepository;
-
-  @Autowired
   private JpaWalletRepository walletRepository;
 
   @Autowired

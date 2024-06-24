@@ -29,9 +29,6 @@ import static com.mipt.hsse.hssetechbackend.BigDecimalHelper.*;
 @Import({PaymentCreateRentProcessor.class, TransactionService.class, WalletService.class})
 public class PaymentCreatingRentTests extends DatabaseSuite {
   @Autowired
-  private JpaUserRepository userRepository;
-
-  @Autowired
   private JpaHumanUserPassportRepository humanUserPassportRepository;
 
   @Autowired

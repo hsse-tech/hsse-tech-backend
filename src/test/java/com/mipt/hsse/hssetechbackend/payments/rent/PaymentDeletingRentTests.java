@@ -28,9 +28,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @Import({PaymentDeleteRentProcessor.class, TransactionService.class, WalletService.class})
 public class PaymentDeletingRentTests extends DatabaseSuite {
   @Autowired
-  private JpaUserRepository userRepository;
-
-  @Autowired
   private JpaHumanUserPassportRepository humanUserPassportRepository;
 
   @Autowired

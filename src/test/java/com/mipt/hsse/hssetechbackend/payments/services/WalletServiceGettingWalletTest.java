@@ -30,9 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Import(WalletService.class)
 public class WalletServiceGettingWalletTest extends DatabaseSuite {
   @Autowired
-  private JpaUserRepository userRepository;
-
-  @Autowired
   private JpaWalletRepository walletRepository;
 
   @Autowired

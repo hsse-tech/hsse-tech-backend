@@ -23,16 +23,10 @@ CREATE TABLE item
     type_id      UUID NOT NULL REFERENCES item_type (id) ON DELETE CASCADE
 );
 
-CREATE TABLE "user"
-(
-    id        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_type TEXT NOT NULL
-);
-
 CREATE TABLE human_user_passport
 (
     yandex_id   BIGINT  NOT NULL UNIQUE,
-    original_id UUID PRIMARY KEY REFERENCES "user" (id) ON DELETE CASCADE,
+    original_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     first_name  TEXT    NOT NULL,
     last_name   TEXT    NOT NULL,
     email       email   NOT NULL,
@@ -41,7 +35,7 @@ CREATE TABLE human_user_passport
 
 CREATE TABLE lock_passport
 (
-    original_id UUID PRIMARY KEY REFERENCES "user" (id),
+    original_id UUID PRIMARY KEY,
     item_id     UUID NULL REFERENCES item (id) UNIQUE
 );
 

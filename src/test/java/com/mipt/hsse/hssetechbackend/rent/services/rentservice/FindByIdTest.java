@@ -36,22 +36,19 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class FindByIdTest extends DatabaseSuite {
-  private final User user = new User("test");
-  private final HumanUserPassport userPassport =
-      new HumanUserPassport(123L, "Test", "User", "test@phystech.edu", user);
+  private final HumanUserPassport user =
+      new HumanUserPassport(123L, "Test", "User", "test@phystech.edu");
   private final ItemType itemType = new ItemType(BigDecimal.ZERO, "TestItemType", 60, false);
   private final Item item = new Item("TestItem", itemType);
   @Autowired private JpaItemRepository itemRepository;
   @Autowired private JpaItemTypeRepository itemTypeRepository;
-  @Autowired private JpaUserRepository userRepository;
   @Autowired private JpaHumanUserPassportRepository humanUserPassportRepository;
   @MockBean private JpaRentRepository rentRepository;
   @Autowired private RentService rentService;
 
   @BeforeEach
   void save() {
-    humanUserPassportRepository.save(userPassport);
-    userRepository.save(user);
+    humanUserPassportRepository.save(user);
     itemTypeRepository.save(itemType);
     itemRepository.save(item);
   }
@@ -60,13 +57,12 @@ class FindByIdTest extends DatabaseSuite {
   public void clear() {
     itemTypeRepository.deleteAll();
     itemRepository.deleteAll();
-    userRepository.deleteAll();
     humanUserPassportRepository.deleteAll();
   }
 
   @Test
   void findById() {
-    Rent rent = new Rent(Instant.now(), Instant.now().plus(1, ChronoUnit.DAYS), userPassport, item);
+    Rent rent = new Rent(Instant.now(), Instant.now().plus(1, ChronoUnit.DAYS), user, item);
     when(rentRepository.findById(any())).thenReturn(Optional.of(rent));
 
     Rent receivedRent = rentService.findById(UUID.randomUUID());
