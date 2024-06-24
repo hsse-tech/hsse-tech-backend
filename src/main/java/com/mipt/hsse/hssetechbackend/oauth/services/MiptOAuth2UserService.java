@@ -14,7 +14,7 @@ import java.util.Objects;
 
 @Service
 public class MiptOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
-    private static final String LOGIN_ATTR = "login";
+    private static final String EMAIL_ATTR = "default_email";
     private static final String NAME_ATTR = "id";
 
     private final DefaultOAuth2UserService defaultOAuth2UserService = new DefaultOAuth2UserService();
@@ -27,17 +27,15 @@ public class MiptOAuth2UserService implements OAuth2UserService<OAuth2UserReques
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         var loaded = defaultOAuth2UserService.loadUser(userRequest);
-        var yandexIdObj = loaded.getName();
 
         try {
-            var yandexId = Long.parseLong(yandexIdObj);
-            var yandexLogin = Objects.requireNonNull(loaded.getAttribute(LOGIN_ATTR)).toString();
+            var yandexEmail = Objects.requireNonNull(loaded.getAttribute(EMAIL_ATTR)).toString();
 
-            if (!PhystechDomainValidator.isValid(yandexLogin)) {
+            if (!PhystechDomainValidator.isValid(yandexEmail)) {
                 throw new OAuth2AuthenticationException("Invalid user profile (not \"@phystech.edu\" email suffix)");
             }
 
-            var passport = passportService.findOrCreateByYandexId(yandexId);
+            var passport = passportService.findOrCreateByYandexId(loaded);
             var authorities = passport.getRoles()
                     .stream()
                     .map(role -> new SimpleGrantedAuthority(role.getName()))
