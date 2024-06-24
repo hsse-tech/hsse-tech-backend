@@ -4,7 +4,6 @@ import com.mipt.hsse.hssetechbackend.DatabaseSuite;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaTransactionRepository;
-import com.mipt.hsse.hssetechbackend.data.repositories.JpaUserRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaWalletRepository;
 import com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.events.TinkoffTopUpAcquiringEventsListener;
 import com.mipt.hsse.hssetechbackend.payments.services.TransactionService;
@@ -46,22 +45,15 @@ class TinkoffTopUpAcquiringEventsListenerTest extends DatabaseSuite {
 
   @BeforeEach
   public void setUp() {
-    var testUser = new User("test");
-    var testUserPassport = new HumanUserPassport(123L, "Test", "User", "test@phystech.edu", testUser);
-    testWallet = new Wallet();
-    testWallet.setBalance(BigDecimal.valueOf(100.00));
-
-    testWallet.setOwner(testUserPassport);
-    testUserPassport.setUser(testUser);
-
+    var testUserPassport = new HumanUserPassport(123L, "Test", "User", "test@phystech.edu");
     passportRepository.save(testUserPassport);
-    userRepository.save(testUser);
+    testWallet = walletRepository.findByOwnerId(testUserPassport.getId());
+    testWallet.setBalance(BigDecimal.valueOf(100));
     walletRepository.save(testWallet);
   }
 
   @AfterEach
   public void clear() {
-    userRepository.deleteAll();
     walletRepository.deleteAll();
     passportRepository.deleteAll();
     transactionRepository.deleteAll();
@@ -98,8 +90,8 @@ class TinkoffTopUpAcquiringEventsListenerTest extends DatabaseSuite {
     assertFalse(transactionRepository.findAll().isEmpty());
     assertFalse(walletRepository.findAll().isEmpty());
 
-    var targetTransaction = transactionRepository.findAll().get(0);
-    var targetWallet = walletRepository.findAll().get(0);
+    var targetTransaction = transactionRepository.findAll().getFirst();
+    var targetWallet = walletRepository.findAll().getFirst();
 
     assertEquals(testTransaction.getId().toString(), targetTransaction.getId().toString());
     assertEquals(expectedTransactionStatus, targetTransaction.getStatus());

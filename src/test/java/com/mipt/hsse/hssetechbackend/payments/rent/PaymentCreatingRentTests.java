@@ -51,25 +51,22 @@ public class PaymentCreatingRentTests extends DatabaseSuite {
 
   @BeforeEach
   public void setUp() {
-    testRenter = new HumanUserPassport(123L, "Ivan", "Ivanov", "phystech@phystech.edu", new User("user"));
+    testRenter = new HumanUserPassport(123L, "Ivan", "Ivanov", "phystech@phystech.edu");
     var testItemType = new ItemType(BigDecimal.valueOf(100), "Молоток", null, false);
     testItem = new Item("Молоток с оранжевой рукоятью", testItemType);
-    Wallet testWallet = new Wallet();
-
-    testWallet.setOwner(testRenter);
-    testWallet.setBalance(BigDecimal.valueOf(150));
 
     humanUserPassportRepository.save(testRenter);
-    walletRepository.save(testWallet);
     itemTypeRepository.save(testItemType);
     itemRepository.save(testItem);
 
+    var testWallet = walletRepository.findByOwnerId(testRenter.getId());
+    testWallet.setBalance(BigDecimal.valueOf(150));
     testRenter.setWallet(testWallet);
+    walletRepository.save(testWallet);
   }
 
   @AfterEach
   public void clear() {
-    userRepository.deleteAll();
     humanUserPassportRepository.deleteAll();
     itemRepository.deleteAll();
     itemTypeRepository.deleteAll();
@@ -85,10 +82,10 @@ public class PaymentCreatingRentTests extends DatabaseSuite {
 
     assertEquals(1, transactionRepository.count());
 
-    var transaction = transactionRepository.findAll().get(0);
+    var transaction = transactionRepository.findAll().getFirst();
 
     assertTrue(result.isValid());
-    assertEquals(BigDecimal.ZERO, walletRepository.findAll().get(0).getBalance());
+    assertEquals(BigDecimal.ZERO, walletRepository.findAll().getFirst().getBalance());
     assertEquals(0, transaction.getAmount().compareTo(BigDecimal.valueOf(150.00)));
     assertEquals("Оплата аренды", transaction.getName());
     assertEquals("Аренда \"Молоток с оранжевой рукоятью\"", transaction.getDescription());
@@ -102,7 +99,7 @@ public class PaymentCreatingRentTests extends DatabaseSuite {
     var result = paymentRentProc.processCreate(processData);
 
     assertEquals(0, transactionRepository.count());
-    assertEquals(0, walletRepository.findAll().get(0).getBalance().compareTo(BigDecimal.valueOf(150)));
+    assertEquals(0, walletRepository.findAll().getFirst().getBalance().compareTo(BigDecimal.valueOf(150)));
     assertFalse(result.isValid());
   }
 
@@ -116,7 +113,7 @@ public class PaymentCreatingRentTests extends DatabaseSuite {
     var result = paymentRentProc.processCreate(processData);
 
     assertEquals(0, transactionRepository.count());
-    assertEquals(0, walletRepository.findAll().get(0).getBalance().compareTo(BigDecimal.valueOf(150)));
+    assertEquals(0, walletRepository.findAll().getFirst().getBalance().compareTo(BigDecimal.valueOf(150)));
     assertFalse(result.isValid());
   }
 }

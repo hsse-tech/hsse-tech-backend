@@ -50,25 +50,24 @@ public class PaymentDeletingRentTests extends DatabaseSuite {
 
   @BeforeEach
   public void setUp() {
-    testRenter = new HumanUserPassport(123L, "Ivan", "Ivanov", "phystech@phystech.edu", new User("user"));
+    testRenter = new HumanUserPassport(123L, "Ivan", "Ivanov", "phystech@phystech.edu");
     var testItemType = new ItemType(BigDecimal.valueOf(100), "Молоток", null, false);
     testItem = new Item("Молоток с оранжевой рукоятью", testItemType);
-    Wallet testWallet = new Wallet();
 
-    testWallet.setOwner(testRenter);
-    testWallet.setBalance(BigDecimal.valueOf(150));
 
     humanUserPassportRepository.save(testRenter);
-    walletRepository.save(testWallet);
     itemTypeRepository.save(testItemType);
     itemRepository.save(testItem);
 
+    humanUserPassportRepository.save(testRenter);
+    var testWallet = walletRepository.findByOwnerId(testRenter.getId());
     testRenter.setWallet(testWallet);
+    testWallet.setBalance(BigDecimal.valueOf(150));
+    walletRepository.save(testWallet);
   }
 
   @AfterEach
   public void clear() {
-    userRepository.deleteAll();
     humanUserPassportRepository.deleteAll();
     itemRepository.deleteAll();
     itemTypeRepository.deleteAll();
@@ -85,10 +84,10 @@ public class PaymentDeletingRentTests extends DatabaseSuite {
 
     assertEquals(1, transactionRepository.count());
 
-    var transaction = transactionRepository.findAll().get(0);
+    var transaction = transactionRepository.findAll().getFirst();
 
     assertTrue(result.isValid());
-    assertEquals(300, walletRepository.findAll().get(0).getBalance());
+    assertEquals(300, walletRepository.findAll().getFirst().getBalance());
     assertEquals("Возврат средств за аренду вещи \"Молоток с оранжевой рукоятью\"", transaction.getName());
     assertEquals(ClientTransactionStatus.SUCCESS, transaction.getStatus());
   }

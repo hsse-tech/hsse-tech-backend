@@ -80,3 +80,16 @@ CREATE TABLE passport_role
     role_id SERIAL REFERENCES role (id),
     CONSTRAINT pk PRIMARY KEY (user_id, role_id)
 );
+
+CREATE FUNCTION create_wallet() RETURNS TRIGGER
+AS $$
+    BEGIN
+        INSERT INTO wallet (id, owner_yandex_id, balance) VALUES (gen_random_uuid(), NEW.yandex_id, 0);
+        RETURN NEW;
+        END;
+    $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER on_user_created_wallet_create
+    AFTER INSERT ON human_user_passport
+    FOR EACH ROW
+    EXECUTE FUNCTION create_wallet();

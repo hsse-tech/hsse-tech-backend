@@ -2,10 +2,8 @@ package com.mipt.hsse.hssetechbackend.payments.services;
 
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
 import com.mipt.hsse.hssetechbackend.data.entities.HumanUserPassport;
-import com.mipt.hsse.hssetechbackend.data.entities.User;
 import com.mipt.hsse.hssetechbackend.data.entities.Wallet;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepository;
-import com.mipt.hsse.hssetechbackend.data.repositories.JpaUserRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaWalletRepository;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import org.junit.jupiter.api.AfterEach;
@@ -42,23 +40,16 @@ public class WalletServiceGettingWalletByOwnerTest extends DatabaseSuite {
 
   @BeforeEach
   public void setUp() {
-    var testUser = new User("test");
-    testUserPassport = new HumanUserPassport(123L, "Test", "User", "test@phystech.edu", testUser);
-    testWallet = new Wallet();
-
-    testWallet.setOwner(testUserPassport);
-    testWallet.setBalance(BigDecimal.ZERO);
-    testUserPassport.setUser(testUser);
-
+    testUserPassport = new HumanUserPassport(123L, "Test", "User", "test@phystech.edu");
     passportRepository.save(testUserPassport);
-    userRepository.save(testUser);
+    testWallet = walletRepository.findByOwnerId(testUserPassport.getId());
+    testWallet.setBalance(BigDecimal.valueOf(100));
     walletRepository.save(testWallet);
   }
 
   @AfterEach
   public void clear() {
     passportRepository.deleteAll();
-    userRepository.deleteAll();
     walletRepository.deleteAll();
   }
 
