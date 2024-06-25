@@ -36,6 +36,11 @@ public class MiptOAuth2UserService implements OAuth2UserService<OAuth2UserReques
             }
 
             var passport = passportService.findOrCreateByYandexId(loaded);
+
+            if (passport.getIsBanned()) {
+                throw new OAuth2AuthenticationException("User banned");
+            }
+
             var authorities = passport.getRoles()
                     .stream()
                     .map(role -> new SimpleGrantedAuthority(role.getName()))
