@@ -1,6 +1,7 @@
 package com.mipt.hsse.hssetechbackend.users.administation;
 
 import com.mipt.hsse.hssetechbackend.data.entities.HumanUserPassport;
+import com.mipt.hsse.hssetechbackend.data.entities.Role;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepository;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import org.springframework.stereotype.Service;
@@ -20,12 +21,16 @@ public class UserService implements UserServiceBase {
     public void banUser(UUID userId) {
         var user = passportRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
 
+        if (isUserAdmin(user)) return;
+
         user.setIsBanned(true);
     }
 
     @Override
     public void unbanUser(UUID userId) {
         var user = passportRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
+
+        if (isUserAdmin(user)) return;
 
         user.setIsBanned(false);
     }
@@ -38,5 +43,15 @@ public class UserService implements UserServiceBase {
     @Override
     public HumanUserPassport getUserById(UUID userId) {
         return passportRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
+    }
+
+    private boolean isUserAdmin(HumanUserPassport user) {
+        for (Role role : user.getRoles()) {
+            if (role.getName().equals("ROLE_ADMIN")) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
