@@ -2,12 +2,15 @@ package com.mipt.hsse.hssetechbackend.payments.controllers;
 
 import com.mipt.hsse.hssetechbackend.apierrorhandling.ApiError;
 import com.mipt.hsse.hssetechbackend.apierrorhandling.RestExceptionHandler;
+import com.mipt.hsse.hssetechbackend.oauth.services.OAuth2UserHelper;
 import com.mipt.hsse.hssetechbackend.payments.controllers.requests.TopUpBalanceRequest;
 import com.mipt.hsse.hssetechbackend.payments.providers.TopUpBalanceProviderBase;
 import com.mipt.hsse.hssetechbackend.payments.services.WalletServiceBase;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,8 +29,11 @@ public class PaymentsController {
   }
 
   @PostMapping("top-up-balance")
-  public void topUpBalance(@RequestBody TopUpBalanceRequest topUpBalanceRequest, HttpServletResponse response) throws IOException {
-    var wallet = walletService.getWalletByOwner(topUpBalanceRequest.userId());
+  public void topUpBalance(
+          @AuthenticationPrincipal OAuth2User user,
+          @RequestBody TopUpBalanceRequest topUpBalanceRequest,
+          HttpServletResponse response) throws IOException {
+    var wallet = walletService.getWalletByOwner(OAuth2UserHelper.getUserId(user));
 
     var result = topUpBalanceProvider.topUpBalance(wallet.getId(), BigDecimal.valueOf(topUpBalanceRequest.amount()));
 
