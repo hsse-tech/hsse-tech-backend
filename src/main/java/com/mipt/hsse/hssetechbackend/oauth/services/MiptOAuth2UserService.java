@@ -36,6 +36,8 @@ public class MiptOAuth2UserService implements OAuth2UserService<OAuth2UserReques
             }
 
             var passport = passportService.findOrCreateByYandexId(loaded);
+            var attrs = loaded.getAttributes();
+            attrs.put(OAuth2UserHelper.INNER_ID_ATTR, passport.getId());
 
             if (passport.getIsBanned()) {
                 throw new OAuth2AuthenticationException("User banned");
@@ -46,7 +48,7 @@ public class MiptOAuth2UserService implements OAuth2UserService<OAuth2UserReques
                     .map(role -> new SimpleGrantedAuthority(role.getName()))
                     .toList();
 
-            return new DefaultOAuth2User(authorities, loaded.getAttributes(), NAME_ATTR);
+            return new DefaultOAuth2User(authorities, attrs, NAME_ATTR);
         } catch (NullPointerException | NumberFormatException e) {
             throw new OAuth2AuthenticationException("Invalid user profile");
         }
