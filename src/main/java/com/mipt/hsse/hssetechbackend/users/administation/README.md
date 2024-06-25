@@ -10,7 +10,7 @@
 Когда мы в первый раз запустим приложение, в консоль будет выведен ключ доступа:
 
 ```
-[INFO] Super administrator not found. Activation key: 8755d631-0186-42ef-a82f-63501453808b
+[WARN] Super administrator not found. Activation key: 8755d631-0186-42ef-a82f-63501453808b
 ```
 
 После пользователь может на сайте активировать этот ключ. Пользователю автоматически выдадутся ADMIN и SUPER_ADMIN роли.
