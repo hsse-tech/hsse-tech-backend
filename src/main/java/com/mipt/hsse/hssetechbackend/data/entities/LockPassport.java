@@ -18,11 +18,6 @@ public class LockPassport {
   @Column(name = "original_id", nullable = false)
   private UUID id;
 
-  @MapsId
-  @OneToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "original_id", nullable = false)
-  private User user;
-
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "item_id")
   private Item item;

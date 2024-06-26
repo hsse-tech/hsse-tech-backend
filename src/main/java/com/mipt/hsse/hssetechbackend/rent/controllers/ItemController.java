@@ -25,6 +25,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,6 +42,7 @@ public class ItemController {
   }
 
   @PostMapping
+  @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<Item> createItem(@Valid @RequestBody CreateItemRequest request) {
     Item createdItem = itemService.createItem(request);
     return new ResponseEntity<>(createdItem, HttpStatus.CREATED);
@@ -48,6 +50,7 @@ public class ItemController {
 
   @PostMapping(value = "/{item_id}/photo", consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @ResponseStatus(HttpStatus.OK)
+  @PreAuthorize("hasRole('ADMIN')")
   public void pinItemThumbnailPhoto(
       @PathVariable("item_id") UUID itemId, HttpServletRequest photoServletRequest)
       throws IOException {
@@ -64,6 +67,7 @@ public class ItemController {
 
   @PatchMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
+  @PreAuthorize("hasRole('ADMIN')")
   public void updateItem(
       @PathVariable("id") UUID itemId, @Valid @RequestBody UpdateItemRequest request) {
       itemService.updateItem(itemId, request);
@@ -119,6 +123,7 @@ public class ItemController {
     itemService.provideAccessToItem(itemId);
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @DeleteMapping("/{itemId}")
   public void deleteItem(@PathVariable("itemId") UUID itemId) throws IOException {
     itemService.deleteItem(itemId);

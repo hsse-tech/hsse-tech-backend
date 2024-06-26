@@ -4,7 +4,6 @@ import com.mipt.hsse.hssetechbackend.DatabaseSuite;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaTransactionRepository;
-import com.mipt.hsse.hssetechbackend.data.repositories.JpaUserRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaWalletRepository;
 import com.mipt.hsse.hssetechbackend.payments.exceptions.TransactionManipulationException;
 import com.mipt.hsse.hssetechbackend.payments.exceptions.WalletUpdatingException;
@@ -30,9 +29,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @Import({TransactionService.class, WalletService.class})
 public class TransactionCommitFailTests extends DatabaseSuite {
   @Autowired
-  private JpaUserRepository userRepository;
-
-  @Autowired
   private JpaWalletRepository walletRepository;
 
   @Autowired
@@ -48,23 +44,17 @@ public class TransactionCommitFailTests extends DatabaseSuite {
 
   @BeforeEach
   public void setUp() {
-    var testUser = new User("test");
-    var testUserPassport = new HumanUserPassport(123L, "Test", "User", "test@phystech.edu", testUser);
-    testWallet = new Wallet();
-    testWallet.setBalance(BigDecimal.valueOf(100.00));
-
-    testWallet.setOwner(testUserPassport);
-    testUserPassport.setUser(testUser);
+    var testUserPassport = new HumanUserPassport(123L, "Test", "User", "test@phystech.edu");
 
     passportRepository.save(testUserPassport);
-    userRepository.save(testUser);
+    testWallet = walletRepository.findByOwnerId(testUserPassport.getId());
+    testWallet.setBalance(BigDecimal.valueOf(100));
     walletRepository.save(testWallet);
   }
 
   @AfterEach
   public void clear() {
     passportRepository.deleteAll();
-    userRepository.deleteAll();
     walletRepository.deleteAll();
   }
 
@@ -75,8 +65,8 @@ public class TransactionCommitFailTests extends DatabaseSuite {
     transactionRepository.save(testTransaction);
 
     transactionService.commitTransaction(testTransaction.getId());
-    assertEquals(50, walletRepository.findAll().get(0).getBalance());
-    assertEquals(ClientTransactionStatus.SUCCESS, transactionRepository.findAll().get(0).getStatus());
+    assertEquals(50, walletRepository.findAll().getFirst().getBalance());
+    assertEquals(ClientTransactionStatus.SUCCESS, transactionRepository.findAll().getFirst().getStatus());
   }
 
   @Test
@@ -87,7 +77,7 @@ public class TransactionCommitFailTests extends DatabaseSuite {
 
     assertThrows(WalletUpdatingException.class,
             () -> transactionService.commitTransaction(testTransaction.getId()));
-    assertEquals(ClientTransactionStatus.IN_PROCESS, transactionRepository.findAll().get(0).getStatus());
+    assertEquals(ClientTransactionStatus.IN_PROCESS, transactionRepository.findAll().getFirst().getStatus());
   }
 
   @Test
@@ -120,7 +110,7 @@ public class TransactionCommitFailTests extends DatabaseSuite {
     transactionRepository.save(testTransaction);
 
     transactionService.failTransaction(testTransaction.getId());
-    assertEquals(ClientTransactionStatus.FAILED, transactionRepository.findAll().get(0).getStatus());
+    assertEquals(ClientTransactionStatus.FAILED, transactionRepository.findAll().getFirst().getStatus());
   }
 
   @Test

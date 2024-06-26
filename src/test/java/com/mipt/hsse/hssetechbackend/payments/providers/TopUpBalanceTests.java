@@ -3,11 +3,9 @@ package com.mipt.hsse.hssetechbackend.payments.providers;
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
 import com.mipt.hsse.hssetechbackend.data.entities.ClientTransactionStatus;
 import com.mipt.hsse.hssetechbackend.data.entities.HumanUserPassport;
-import com.mipt.hsse.hssetechbackend.data.entities.User;
 import com.mipt.hsse.hssetechbackend.data.entities.Wallet;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaTransactionRepository;
-import com.mipt.hsse.hssetechbackend.data.repositories.JpaUserRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaWalletRepository;
 import com.mipt.hsse.hssetechbackend.payments.services.TransactionService;
 import com.mipt.hsse.hssetechbackend.payments.services.WalletService;
@@ -39,9 +37,6 @@ public class TopUpBalanceTests extends DatabaseSuite {
   private AcquiringSessionInitializer acquiringSessionInitializer;
 
   @Autowired
-  private JpaUserRepository userRepository;
-
-  @Autowired
   private JpaWalletRepository walletRepository;
 
   @Autowired
@@ -57,22 +52,15 @@ public class TopUpBalanceTests extends DatabaseSuite {
 
   @BeforeEach
   public void setUp() {
-    var testUser = new User("test");
-    var testUserPassport = new HumanUserPassport(123L, "Test", "User", "test@phystech.edu", testUser);
-    testWallet = new Wallet();
-    testWallet.setBalance(BigDecimal.valueOf(100.00));
-
-    testWallet.setOwner(testUserPassport);
-    testUserPassport.setUser(testUser);
-
+    var testUserPassport = new HumanUserPassport(123L, "Test", "User", "test@phystech.edu");
     passportRepository.save(testUserPassport);
-    userRepository.save(testUser);
+    testWallet = walletRepository.findByOwnerId(testUserPassport.getId());
+    testWallet.setBalance(BigDecimal.valueOf(100));
     walletRepository.save(testWallet);
   }
 
   @AfterEach
   public void clear() {
-    userRepository.deleteAll();
     passportRepository.deleteAll();
     walletRepository.deleteAll();
     transactionRepository.deleteAll();
@@ -92,8 +80,8 @@ public class TopUpBalanceTests extends DatabaseSuite {
     assertFalse(transactionRepository.findAll().isEmpty());
     assertFalse(walletRepository.findAll().isEmpty());
 
-    var targetTransaction = transactionRepository.findAll().get(0);
-    var targetWallet = walletRepository.findAll().get(0);
+    var targetTransaction = transactionRepository.findAll().getFirst();
+    var targetWallet = walletRepository.findAll().getFirst();
 
     assertEquals(-100, targetTransaction.getAmount());
     assertEquals(ClientTransactionStatus.IN_PROCESS, targetTransaction.getStatus());
@@ -116,8 +104,8 @@ public class TopUpBalanceTests extends DatabaseSuite {
     assertFalse(transactionRepository.findAll().isEmpty());
     assertFalse(walletRepository.findAll().isEmpty());
 
-    var targetTransaction = transactionRepository.findAll().get(0);
-    var targetWallet = walletRepository.findAll().get(0);
+    var targetTransaction = transactionRepository.findAll().getFirst();
+    var targetWallet = walletRepository.findAll().getFirst();
 
     assertEquals(-100, targetTransaction.getAmount());
     assertEquals(ClientTransactionStatus.FAILED, targetTransaction.getStatus());

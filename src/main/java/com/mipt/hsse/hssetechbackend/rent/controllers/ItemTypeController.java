@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +27,7 @@ public class ItemTypeController {
   }
 
   @PostMapping
+  @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<ItemType> createItemType(
       @Valid @RequestBody CreateItemTypeRequest request) {
     ItemType itemType = itemTypeService.createItemType(request);
@@ -33,6 +35,7 @@ public class ItemTypeController {
   }
 
   @PatchMapping("/{id}")
+  @PreAuthorize("hasRole('ADMIN')")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void updateItemType(
       @PathVariable("id") UUID itemTypeId, @Valid @RequestBody UpdateItemTypeRequest request) {
@@ -40,6 +43,7 @@ public class ItemTypeController {
   }
 
   @DeleteMapping("/{id}")
+  @PreAuthorize("hasRole('ADMIN')")
   @ResponseStatus(HttpStatus.OK)
   public void deleteItemType(@PathVariable("id") UUID itemTypeId) {
     itemTypeService.deleteItemType(itemTypeId);
