@@ -65,8 +65,8 @@ class EndRentTest extends DatabaseSuite {
     Instant startTime = Instant.now().minus(1, ChronoUnit.MINUTES);
     Instant endTime = Instant.now().plus(50, ChronoUnit.MINUTES);
     CreateRentRequest createRentRequest =
-        new CreateRentRequest(user.getId(), item.getId(), startTime, endTime);
-    UUID rentId = rentService.createRent(createRentRequest).getId();
+        new CreateRentRequest(item.getId(), startTime, endTime);
+    UUID rentId = rentService.createRent(user.getId(), createRentRequest).getId();
 
     // Start rent
     rentService.startRent(rentId);
@@ -92,8 +92,8 @@ class EndRentTest extends DatabaseSuite {
     Instant startTime = Instant.now().minus(1, ChronoUnit.MINUTES);
     Instant endTime = Instant.now().plus(50, ChronoUnit.MINUTES);
     CreateRentRequest createRentRequest =
-        new CreateRentRequest(user.getId(), item.getId(), startTime, endTime);
-    UUID rentId = rentService.createRent(createRentRequest).getId();
+        new CreateRentRequest(item.getId(), startTime, endTime);
+    UUID rentId = rentService.createRent(user.getId(), createRentRequest).getId();
 
     // Start rent
     rentService.startRent(rentId);
@@ -109,8 +109,8 @@ class EndRentTest extends DatabaseSuite {
     Instant startTime = Instant.now().minus(5, ChronoUnit.MINUTES);
     Instant endTime = Instant.now().plus(30, ChronoUnit.MINUTES);
     CreateRentRequest createRentRequest =
-        new CreateRentRequest(user.getId(), item.getId(), startTime, endTime);
-    UUID rentId = rentService.createRent(createRentRequest).getId();
+        new CreateRentRequest(item.getId(), startTime, endTime);
+    UUID rentId = rentService.createRent(user.getId(), createRentRequest).getId();
 
     // Start rent
     assertThrows(VerificationFailedException.class, () -> rentService.endRent(rentId));
@@ -127,8 +127,8 @@ class EndRentTest extends DatabaseSuite {
     Instant startTime = Instant.now().minus(3, ChronoUnit.MINUTES);
     Instant endTime = Instant.now().plus(50, ChronoUnit.MINUTES);
     CreateRentRequest createRentRequest =
-        new CreateRentRequest(user.getId(), itemWithPhoto.getId(), startTime, endTime);
-    UUID rentId = rentService.createRent(createRentRequest).getId();
+        new CreateRentRequest(itemWithPhoto.getId(), startTime, endTime);
+    UUID rentId = rentService.createRent(user.getId(), createRentRequest).getId();
 
     rentService.startRent(rentId);
 
