@@ -33,7 +33,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 @WebMvcTest(ItemTypeController.class)
-@Import({ObjectMapper.class, SecurityConfig.class, MiptOAuth2UserService.class})
+@Import({SecurityConfig.class, MiptOAuth2UserService.class})
 class ItemTypeControllerTest {
   private static final String BASE_MAPPING = "/api/renting/item-type";
 
