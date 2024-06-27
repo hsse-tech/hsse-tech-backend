@@ -21,4 +21,7 @@ public class LockPassport {
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "item_id")
   private Item item;
+
+  @Column(name = "is_open", nullable = false)
+  private boolean isOpen;
 }

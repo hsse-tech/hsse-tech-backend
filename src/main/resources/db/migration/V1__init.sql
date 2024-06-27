@@ -36,7 +36,8 @@ CREATE TABLE human_user_passport
 CREATE TABLE lock_passport
 (
     original_id UUID PRIMARY KEY,
-    item_id     UUID NULL REFERENCES item (id) UNIQUE
+    item_id     UUID    NULL REFERENCES item (id) UNIQUE,
+    is_open     BOOLEAN NOT NULL
 );
 
 CREATE TABLE rent
