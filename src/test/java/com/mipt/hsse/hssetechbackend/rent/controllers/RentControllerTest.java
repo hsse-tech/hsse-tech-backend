@@ -15,6 +15,7 @@ import com.mipt.hsse.hssetechbackend.apierrorhandling.ApiError;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.oauth.config.SecurityConfig;
 import com.mipt.hsse.hssetechbackend.oauth.services.MiptOAuth2UserService;
+import com.mipt.hsse.hssetechbackend.oauth.services.OAuth2UserHelper;
 import com.mipt.hsse.hssetechbackend.oauth.services.UserPassportServiceBase;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateRentRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateRentRequest;
@@ -26,6 +27,8 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +37,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.*;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -45,6 +50,9 @@ class RentControllerTest {
   private final Item item = new Item("Item name", itemType);
   private final HumanUserPassport userPassport =
       new HumanUserPassport(123L, "Name", "Surname", "email@gmail.com");
+
+  private static UUID testUserUuid;
+  private static OAuth2User commonUserPrincipal;
 
   @Autowired
   private MockMvc mockMvc;
@@ -58,21 +66,35 @@ class RentControllerTest {
   @MockBean
   private UserPassportServiceBase passportService;
 
+  @BeforeAll
+  static void setupTestUser() {
+    testUserUuid = UUID.randomUUID();
+
+    Map<String, Object> attributes = new HashMap<>();
+    attributes.put("sub", "1234567890");
+    attributes.put(OAuth2UserHelper.INNER_ID_ATTR, testUserUuid);
+
+    commonUserPrincipal = new DefaultOAuth2User(
+        Collections.singletonList(new SimpleGrantedAuthority("ROLE_MIPT_USER")),
+        attributes,
+        "sub");
+  }
+
   @BeforeEach
   void setup() {
     objectMapper.registerModule(new JavaTimeModule());
   }
 
   @Test
-  @WithMockUser
+  @WithMockUser()
   void testCreateRentEndpoint() throws Exception {
     Instant start = Instant.now().plus(1, ChronoUnit.HOURS);
     Instant end = Instant.now().plus(2, ChronoUnit.HOURS);
 
-    when(rentService.createRent(any())).thenReturn(new Rent(start, end, userPassport, item));
+    when(rentService.createRent(any(), any())).thenReturn(new Rent(start, end, userPassport, item));
 
     CreateRentRequest createRentRequest =
-        new CreateRentRequest(UUID.randomUUID(), UUID.randomUUID(), start, end);
+        new CreateRentRequest(UUID.randomUUID(), start, end);
     String requestStr = objectMapper.writeValueAsString(createRentRequest);
 
     var mvcResult =
@@ -80,7 +102,7 @@ class RentControllerTest {
             .perform(post(BASE_MAPPING)
                       .content(requestStr)
                       .contentType(MediaType.APPLICATION_JSON)
-                      .with(oauth2Login().authorities(new SimpleGrantedAuthority("ROLE_MIPT_USER"))))
+                      .with(oauth2Login().oauth2User(commonUserPrincipal)))
             .andDo(print())
             .andExpect(status().isCreated())
             .andReturn()
@@ -88,7 +110,7 @@ class RentControllerTest {
             .getContentAsString();
     Rent responseRent = objectMapper.readValue(mvcResult, Rent.class);
 
-    verify(rentService).createRent(createRentRequest);
+    verify(rentService).createRent(testUserUuid, createRentRequest);
 
     assertNotNull(responseRent);
   }
@@ -97,10 +119,10 @@ class RentControllerTest {
   @WithMockUser
   void testBadRequestOnCreateRentFailed() throws Exception {
     final String errorText = "Error text";
-    when(rentService.createRent(any())).thenThrow(new CreateRentProcessingException(errorText));
+    when(rentService.createRent(any(), any())).thenThrow(new CreateRentProcessingException(errorText));
 
     CreateRentRequest createRentRequest =
-        new CreateRentRequest(UUID.randomUUID(), UUID.randomUUID(), Instant.now(), Instant.now());
+        new CreateRentRequest(UUID.randomUUID(), Instant.now(), Instant.now());
     String requestStr = objectMapper.writeValueAsString(createRentRequest);
 
     var mvcResult =
@@ -108,7 +130,7 @@ class RentControllerTest {
             .perform(post(BASE_MAPPING)
                       .content(requestStr)
                       .contentType(MediaType.APPLICATION_JSON)
-                      .with(oauth2Login().authorities(new SimpleGrantedAuthority("ROLE_MIPT_USER"))))
+                      .with(oauth2Login().oauth2User(commonUserPrincipal)))
             .andExpect(status().isBadRequest())
             .andReturn()
             .getResponse()
@@ -126,7 +148,7 @@ class RentControllerTest {
     var mvcResult =
         mockMvc
             .perform(get(BASE_MAPPING + "/{rent_id}", UUID.randomUUID())
-                      .with(oauth2Login().authorities(new SimpleGrantedAuthority("ROLE_MIPT_USER"))))
+                .with(oauth2Login().oauth2User(commonUserPrincipal)))
             .andDo(print())
             .andExpect(status().isOk())
             .andReturn()
@@ -144,7 +166,7 @@ class RentControllerTest {
   void testDeleteRentEndpoint() throws Exception {
     UUID uuid = UUID.randomUUID();
     mockMvc.perform(delete(BASE_MAPPING + "/{rent_id}", uuid)
-              .with(oauth2Login().authorities(new SimpleGrantedAuthority("ROLE_MIPT_USER"))));
+        .with(oauth2Login().oauth2User(commonUserPrincipal)));
 
     verify(rentService).deleteRent(uuid);
   }
@@ -163,7 +185,7 @@ class RentControllerTest {
         patch(BASE_MAPPING + "/{id}", uuid)
             .content(requestStr)
             .contentType(MediaType.APPLICATION_JSON)
-            .with(oauth2Login().authorities(new SimpleGrantedAuthority("ROLE_MIPT_USER"))));
+            .with(oauth2Login().oauth2User(commonUserPrincipal)));
 
     verify(rentService).updateRent(uuid, updateRequest);
   }
@@ -184,7 +206,7 @@ class RentControllerTest {
                 patch(BASE_MAPPING + "/{id}", uuid)
                     .content(requestStr)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .with(oauth2Login().authorities(new SimpleGrantedAuthority("ROLE_MIPT_USER"))))
+                    .with(oauth2Login().oauth2User(commonUserPrincipal)))
             .andExpect(status().isBadRequest())
             .andReturn()
             .getResponse()
@@ -204,7 +226,7 @@ class RentControllerTest {
         post(BASE_MAPPING + "/{rentId}/confirm", uuid)
             .content(photoBytes)
             .contentType(MediaType.APPLICATION_OCTET_STREAM_VALUE)
-            .with(oauth2Login().authorities(new SimpleGrantedAuthority("ROLE_MIPT_USER"))));
+            .with(oauth2Login().oauth2User(commonUserPrincipal)));
 
     verify(rentService).confirmRentFinish(eq(uuid), aryEq(photoBytes));
   }
@@ -219,7 +241,7 @@ class RentControllerTest {
     byte[] responseBytes =
         mockMvc
             .perform(get(BASE_MAPPING + "/{rentId}/confirm", uuid)
-                      .with(oauth2Login().authorities(new SimpleGrantedAuthority("ROLE_MIPT_USER"))))
+                .with(oauth2Login().oauth2User(commonUserPrincipal)))
             .andReturn()
             .getResponse()
             .getContentAsByteArray();
@@ -233,7 +255,7 @@ class RentControllerTest {
   void testStartRentEndpoint() throws Exception {
     UUID uuid = UUID.randomUUID();
     mockMvc.perform(post(BASE_MAPPING + "/{rentId}/begin", uuid)
-            .with(oauth2Login().authorities(new SimpleGrantedAuthority("ROLE_MIPT_USER"))))
+            .with(oauth2Login().oauth2User(commonUserPrincipal)))
         .andExpect(status().isOk());
     verify(rentService).startRent(uuid);
   }
@@ -249,7 +271,7 @@ class RentControllerTest {
     var mvcResult =
         mockMvc
             .perform(post(BASE_MAPPING + "/{rentId}/begin", uuid)
-                        .with(oauth2Login().authorities(new SimpleGrantedAuthority("ROLE_MIPT_USER"))))
+                .with(oauth2Login().oauth2User(commonUserPrincipal)))
             .andExpect(status().isBadRequest())
             .andReturn()
             .getResponse()
@@ -266,7 +288,7 @@ class RentControllerTest {
   void testEndRentEndpoint() throws Exception {
     UUID uuid = UUID.randomUUID();
     mockMvc.perform(post(BASE_MAPPING + "/{rentId}/end", uuid)
-            .with(oauth2Login().authorities(new SimpleGrantedAuthority("ROLE_MIPT_USER"))))
+            .with(oauth2Login().oauth2User(commonUserPrincipal)))
         .andExpect(status().isOk());
 
     verify(rentService).endRent(uuid);
@@ -282,7 +304,7 @@ class RentControllerTest {
     var mvcResult =
         mockMvc
             .perform(post(BASE_MAPPING + "/{rentId}/end", uuid)
-                        .with(oauth2Login().authorities(new SimpleGrantedAuthority("ROLE_MIPT_USER"))))
+                .with(oauth2Login().oauth2User(commonUserPrincipal)))
             .andExpect(status().isBadRequest())
             .andReturn()
             .getResponse()

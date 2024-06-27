@@ -3,6 +3,7 @@ package com.mipt.hsse.hssetechbackend.rent.controllers;
 import com.mipt.hsse.hssetechbackend.apierrorhandling.ApiError;
 import com.mipt.hsse.hssetechbackend.apierrorhandling.RestExceptionHandler;
 import com.mipt.hsse.hssetechbackend.data.entities.Rent;
+import com.mipt.hsse.hssetechbackend.oauth.services.OAuth2UserHelper;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.*;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.RentDTO;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.*;
@@ -17,6 +18,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,8 +34,11 @@ public class RentController {
   }
 
   @PostMapping
-  public ResponseEntity<Rent> createRent(@Valid @RequestBody CreateRentRequest request) {
-    Rent rent = rentService.createRent(request);
+  public ResponseEntity<Rent> createRent(
+      @AuthenticationPrincipal OAuth2User user,
+      @Valid @RequestBody CreateRentRequest createRequest) {
+    UUID userId = OAuth2UserHelper.getUserId(user);
+    Rent rent = rentService.createRent(userId, createRequest);
     return new ResponseEntity<>(rent, HttpStatus.CREATED);
   }
 
