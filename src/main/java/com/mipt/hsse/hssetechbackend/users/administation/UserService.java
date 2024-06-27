@@ -19,7 +19,8 @@ public class UserService implements UserServiceBase {
 
     @Override
     public void banUser(UUID userId) {
-        var user = passportRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
+        var user = passportRepository.findById(userId)
+                .orElseThrow(() -> EntityNotFoundException.userNotFound(userId));
 
         if (isUserAdmin(user)) return;
 
@@ -28,7 +29,8 @@ public class UserService implements UserServiceBase {
 
     @Override
     public void unbanUser(UUID userId) {
-        var user = passportRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
+        var user = passportRepository.findById(userId)
+                .orElseThrow(() -> EntityNotFoundException.userNotFound(userId));
 
         if (isUserAdmin(user)) return;
 
@@ -42,7 +44,8 @@ public class UserService implements UserServiceBase {
 
     @Override
     public HumanUserPassport getUserById(UUID userId) {
-        return passportRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
+        return passportRepository.findById(userId)
+                .orElseThrow(() -> EntityNotFoundException.userNotFound(userId));
     }
 
     private boolean isUserAdmin(HumanUserPassport user) {

@@ -100,7 +100,7 @@ public class RolesService implements RolesServiceBase {
         passportRepository
             .findById(userId)
             .orElseThrow(
-                () -> new EntityNotFoundException("User with id " + userId + " does not exist"));
+                () -> EntityNotFoundException.userNotFound(userId));
 
     if (targetUser.getRoles().contains(superAdminRole)) {
       return;
@@ -119,7 +119,7 @@ public class RolesService implements RolesServiceBase {
         passportRepository
             .findById(userId)
             .orElseThrow(
-                () -> new EntityNotFoundException("User with id " + userId + " does not exist"));
+                () -> EntityNotFoundException.userNotFound(userId));
 
     if (targetUser.getRoles().contains(superAdminRole)) {
       return;
