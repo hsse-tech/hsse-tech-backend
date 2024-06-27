@@ -38,7 +38,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(RentController.class)
-@Import({ObjectMapper.class, SecurityConfig.class, MiptOAuth2UserService.class})
+@Import({SecurityConfig.class, MiptOAuth2UserService.class})
 class RentControllerTest {
   private static final String BASE_MAPPING = "/api/renting/rent";
   private final ItemType itemType = new ItemType(BigDecimal.ZERO, "Item type name", 120, false);

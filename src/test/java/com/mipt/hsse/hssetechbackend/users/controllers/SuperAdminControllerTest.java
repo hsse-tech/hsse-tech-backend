@@ -29,7 +29,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(SuperAdminController.class)
-@Import({ObjectMapper.class, SecurityConfig.class, MiptOAuth2UserService.class})
+@Import({SecurityConfig.class, MiptOAuth2UserService.class})
 class SuperAdminControllerTest {
   @Autowired private MockMvc mockMvc;
 
