@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.web.servlet.tags.form.SelectTag;
 
 public interface JpaRentRepository extends JpaRepository<Rent, UUID> {
   @Query(
@@ -19,4 +20,7 @@ public interface JpaRentRepository extends JpaRepository<Rent, UUID> {
 
   @Query("select r from Rent r where r.item = :item and r.plannedStart > current_timestamp")
   List<Rent> findAllFutureRentsOfItem(Item item);
+
+  @Query("select r from Rent r where r.item = :item and r.plannedStart < current_timestamp and current_timestamp < r.plannedEnd")
+  Rent getCurrentRentOfItem(Item item);
 }

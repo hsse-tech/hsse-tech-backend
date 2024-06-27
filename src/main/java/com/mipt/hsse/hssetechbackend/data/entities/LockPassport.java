@@ -1,15 +1,16 @@
 package com.mipt.hsse.hssetechbackend.data.entities;
 
 import jakarta.persistence.*;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.UUID;
 
 @Getter
 @Setter
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "lock_passport")
 public class LockPassport {
   @Id
@@ -24,4 +25,13 @@ public class LockPassport {
 
   @Column(name = "is_open", nullable = false)
   private boolean isOpen;
+
+  public LockPassport(Item item, boolean isOpen) {
+    this.item = item;
+    this.isOpen = isOpen;
+  }
+
+  public LockPassport(Item item) {
+    this(item, false);
+  }
 }

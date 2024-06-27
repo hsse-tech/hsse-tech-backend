@@ -8,6 +8,7 @@ import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoNotF
 import com.mipt.hsse.hssetechbackend.lock.controllers.requests.CreateLockRequest;
 import com.mipt.hsse.hssetechbackend.lock.controllers.requests.UpdateLockRequest;
 import com.mipt.hsse.hssetechbackend.lock.controllers.responses.CreateLockResponse;
+import com.mipt.hsse.hssetechbackend.lock.exceptions.ItemAlreadyHasLockException;
 import com.mipt.hsse.hssetechbackend.lock.services.LockService;
 import com.mipt.hsse.hssetechbackend.lock.services.LockServiceBase;
 import com.mipt.hsse.hssetechbackend.oauth.services.OAuth2UserHelper;
@@ -52,9 +53,13 @@ public class LockController {
 
   @PatchMapping("{lock_id}")
   @PreAuthorize("hasRole('ADMIN')")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void updateItemUnderLock(@PathVariable("lock_id") UUID lockId, @Valid @RequestBody UpdateLockRequest request) {
-    lockService.updateItemUnderLock(lockId, request.itemId());
+  public ResponseEntity<Void> updateItemUnderLock(@PathVariable("lock_id") UUID lockId, @Valid @RequestBody UpdateLockRequest request) {
+    try {
+      lockService.updateItemUnderLock(lockId, request.itemId());
+      return ResponseEntity.noContent().build();
+    } catch (ItemAlreadyHasLockException e) {
+      return ResponseEntity.badRequest().build();
+    }
   }
 
   @PostMapping("{id}/open")

@@ -2,6 +2,7 @@ package com.mipt.hsse.hssetechbackend.lock.services;
 
 import com.mipt.hsse.hssetechbackend.data.entities.LockPassport;
 import com.mipt.hsse.hssetechbackend.lock.controllers.requests.CreateLockRequest;
+import com.mipt.hsse.hssetechbackend.lock.exceptions.ItemAlreadyHasLockException;
 
 import java.util.UUID;
 
@@ -11,7 +12,7 @@ public interface LockServiceBase {
 
   void deleteLock(UUID id);
 
-  void updateItemUnderLock(UUID lockId, UUID uuid);
+  void updateItemUnderLock(UUID lockId, UUID uuid) throws ItemAlreadyHasLockException;
 
   boolean canUserOpenLock(UUID userId, UUID lockId);
 
