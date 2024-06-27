@@ -4,7 +4,7 @@ import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemTypeRepository;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemTypeRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemTypeRequest;
-import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
+import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;

@@ -4,7 +4,7 @@ import com.mipt.hsse.hssetechbackend.data.entities.HumanUserPassport;
 import com.mipt.hsse.hssetechbackend.data.entities.Role;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaRoleRepository;
-import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
+import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;

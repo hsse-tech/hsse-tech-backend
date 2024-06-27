@@ -11,7 +11,7 @@ import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetItemResponse;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetShortRentResponse;
-import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
+import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.rent.services.ItemService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -129,7 +129,7 @@ public class ItemController {
     itemService.deleteItem(itemId);
   }
 
-  @ExceptionHandler({EntityNotFoundException.class, PhotoAlreadyExistsException.class, PhotoNotFoundException.class})
+  @ExceptionHandler({PhotoAlreadyExistsException.class, PhotoNotFoundException.class})
   public ResponseEntity<ApiError> exceptionHandler(
       Exception ex) {
     ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, ex.getMessage());

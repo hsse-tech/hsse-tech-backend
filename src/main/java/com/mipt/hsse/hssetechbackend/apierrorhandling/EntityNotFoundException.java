@@ -1,6 +1,8 @@
-package com.mipt.hsse.hssetechbackend.rent.exceptions;
+package com.mipt.hsse.hssetechbackend.apierrorhandling;
 
 import com.mipt.hsse.hssetechbackend.data.entities.HumanUserPassport;
+import com.mipt.hsse.hssetechbackend.data.entities.Transaction;
+import com.mipt.hsse.hssetechbackend.data.entities.Wallet;
 
 import java.util.UUID;
 
@@ -22,5 +24,13 @@ public class EntityNotFoundException extends RuntimeException {
 
   public static EntityNotFoundException userNotFound(UUID id) {
     return new EntityNotFoundException(HumanUserPassport.class, id);
+  }
+
+  public static EntityNotFoundException transactionNotFound(UUID id) {
+    return new EntityNotFoundException(Transaction.class, id);
+  }
+
+  public static EntityNotFoundException walletNotFound(UUID id) {
+    return new EntityNotFoundException(Wallet.class, id);
   }
 }

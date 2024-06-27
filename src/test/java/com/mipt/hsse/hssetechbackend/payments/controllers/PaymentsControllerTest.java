@@ -17,7 +17,7 @@ import com.mipt.hsse.hssetechbackend.payments.providers.TopUpBalanceProviderBase
 import com.mipt.hsse.hssetechbackend.payments.providers.TopUpSession;
 import com.mipt.hsse.hssetechbackend.payments.services.WalletServiceBase;
 
-import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
+import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
