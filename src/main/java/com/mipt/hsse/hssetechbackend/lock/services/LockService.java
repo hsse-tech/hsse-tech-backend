@@ -76,7 +76,7 @@ public class LockService implements LockServiceBase {
 
     // Admin can open any locks
     Role adminRole = roleRepository.findByName("ADMIN");
-    if (user.getRoles().contains(adminRole)) {
+    if (user.hasRole(adminRole)) {
       return true;
     }
 
@@ -84,11 +84,12 @@ public class LockService implements LockServiceBase {
         lockRepository
             .findById(lockId)
             .orElseThrow(() -> new EntityNotFoundException(Lock.class, lockId));
-    Item itemUnderLock = lock.getItem();
-    Rent currentRentOfItem = rentRepository.getCurrentRentOfItem(itemUnderLock);
+    UUID itemUnderLockId = lock.getItem().getId();
+    Item itemUnderLock = itemRepository.findById(itemUnderLockId).orElseThrow();
+    Rent currentRentOfItem = rentRepository.getCurrentRentOfItem(itemUnderLock.getId());
 
     // A user can open a lock if the item under the lock is rented by them
-    return currentRentOfItem.getRenter().getId() == user.getId();
+    return currentRentOfItem != null && currentRentOfItem.getRenter().getId().equals(user.getId());
   }
 
   @Override

@@ -3,29 +3,22 @@ package com.mipt.hsse.hssetechbackend.lock.controllers;
 import com.mipt.hsse.hssetechbackend.apierrorhandling.ApiError;
 import com.mipt.hsse.hssetechbackend.apierrorhandling.RestExceptionHandler;
 import com.mipt.hsse.hssetechbackend.data.entities.LockPassport;
-import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoAlreadyExistsException;
-import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoNotFoundException;
 import com.mipt.hsse.hssetechbackend.lock.controllers.requests.CreateLockRequest;
 import com.mipt.hsse.hssetechbackend.lock.controllers.requests.UpdateLockRequest;
 import com.mipt.hsse.hssetechbackend.lock.controllers.responses.CreateLockResponse;
 import com.mipt.hsse.hssetechbackend.lock.exceptions.ItemAlreadyHasLockException;
-import com.mipt.hsse.hssetechbackend.lock.services.LockService;
 import com.mipt.hsse.hssetechbackend.lock.services.LockServiceBase;
 import com.mipt.hsse.hssetechbackend.oauth.services.OAuth2UserHelper;
-import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import jakarta.validation.Valid;
-import org.apache.coyote.Response;
+import java.util.UUID;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.UUID;
 
 @Controller
 @RequestMapping("/api/locks")

@@ -58,4 +58,8 @@ public class HumanUserPassport {
     this.lastName = lastName;
     this.email = email;
   }
+
+  public boolean hasRole(Role role) {
+    return roles.stream().anyMatch(r -> r.getId().equals(role.getId()));
+  }
 }

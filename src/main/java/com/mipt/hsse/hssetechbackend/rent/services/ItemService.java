@@ -79,8 +79,7 @@ public class ItemService {
   }
 
   public List<Rent> getFutureRentsOfItem(UUID itemId) {
-    return rentRepository.findAllFutureRentsOfItem(
-        getItem(itemId).orElseThrow(EntityNotFoundException::new));
+    return rentRepository.findAllFutureRentsOfItem(itemId);
   }
 
   public boolean existsById(UUID itemId) {

@@ -14,7 +14,6 @@ import lombok.Setter;
 @Table(name = "lock_passport")
 public class LockPassport {
   @Id
-  @Setter(AccessLevel.NONE)
   @GeneratedValue(strategy = GenerationType.UUID)
   @Column(name = "original_id", nullable = false)
   private UUID id;

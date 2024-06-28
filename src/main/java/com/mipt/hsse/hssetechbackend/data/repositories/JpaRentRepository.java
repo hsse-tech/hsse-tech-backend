@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.web.servlet.tags.form.SelectTag;
+import org.springframework.data.repository.query.Param;
 
 public interface JpaRentRepository extends JpaRepository<Rent, UUID> {
   @Query(
@@ -18,9 +18,15 @@ public interface JpaRentRepository extends JpaRepository<Rent, UUID> {
       "select r from Rent r where r.item = :item and not (r.plannedEnd <= :from or r.plannedStart >= :to)")
   List<Rent> getIntersectingRentsOfItem(Item item, Instant from, Instant to);
 
-  @Query("select r from Rent r where r.item = :item and r.plannedStart > current_timestamp")
-  List<Rent> findAllFutureRentsOfItem(Item item);
+  // Функция "current_timestamp" в JPQL возвращает время на сервере, т.е. с учетом часового пояса, а мы работает в UTC
+  // Сам JPQL не имеет понятия о часовых поясах и работе с ними
+  // Поэтому здесь приходится использовать nativeQuery в писать на PostgreSQL
+  // Мне не нравится эта привязка к субд, но как сделать нормально я не знаю
+  // TODO: Есть идея хранить время в MSK; возможно, потом этим займусь
 
-  @Query("select r from Rent r where r.item = :item and r.plannedStart < current_timestamp and current_timestamp < r.plannedEnd")
-  Rent getCurrentRentOfItem(Item item);
+  @Query(value = "SELECT * FROM Rent r WHERE r.item_id = :itemId AND r.from > (NOW() AT TIME ZONE 'UTC')", nativeQuery = true)
+  List<Rent> findAllFutureRentsOfItem(@Param("itemId") UUID itemId);
+
+  @Query(value = "SELECT * FROM Rent r WHERE r.item_id = :itemId AND r.from < (NOW() AT TIME ZONE 'UTC') AND (NOW() AT TIME ZONE 'UTC') < r.to", nativeQuery = true)
+  Rent getCurrentRentOfItem(@Param("itemId") UUID itemId);
 }
