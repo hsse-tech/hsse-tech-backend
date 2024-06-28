@@ -2,8 +2,7 @@ package com.mipt.hsse.hssetechbackend.lock.services;
 
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.*;
-import com.mipt.hsse.hssetechbackend.lock.controllers.requests.CreateLockRequest;
-import com.mipt.hsse.hssetechbackend.lock.exceptions.ItemAlreadyHasLockException;
+import com.mipt.hsse.hssetechbackend.lock.exceptions.ItemToLockCouplingException;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import java.util.UUID;
 import java.util.concurrent.locks.Lock;
@@ -31,14 +30,8 @@ public class LockService implements LockServiceBase {
   }
 
   @Override
-  public LockPassport createLock(CreateLockRequest request) {
-    Item item =
-        itemRepository
-            .findById(request.itemId())
-            .orElseThrow(() -> new EntityNotFoundException(Item.class, request.itemId()));
-
-    LockPassport lock = new LockPassport(item, false);
-
+  public LockPassport createLock() {
+    LockPassport lock = new LockPassport();
     return lockRepository.save(lock);
   }
 
@@ -50,10 +43,7 @@ public class LockService implements LockServiceBase {
   }
 
   @Override
-  public void updateItemUnderLock(UUID lockId, UUID itemId) throws ItemAlreadyHasLockException {
-    if (!itemRepository.existsById(itemId)) throw new EntityNotFoundException(Item.class, itemId);
-    if (lockRepository.findByItemId(itemId) != null) throw new ItemAlreadyHasLockException();
-
+  public void addItemToLock(UUID lockId, UUID itemId) throws ItemToLockCouplingException {
     LockPassport lock =
         lockRepository
             .findById(lockId)
@@ -62,9 +52,36 @@ public class LockService implements LockServiceBase {
         itemRepository
             .findById(itemId)
             .orElseThrow(() -> new EntityNotFoundException(Item.class, itemId));
-    lock.setItem(item);
+
+    if (item.getLock() != null)
+      throw new ItemToLockCouplingException(
+          "Cannot add lock to this item because it already has a lock");
+
+    lock.addItem(item);
 
     lockRepository.save(lock);
+    itemRepository.save(item);
+  }
+
+  @Override
+  public void removeItemFromLock(UUID lockId, UUID itemId) throws ItemToLockCouplingException {
+    LockPassport lock =
+        lockRepository
+            .findById(lockId)
+            .orElseThrow(() -> new EntityNotFoundException(Lock.class, lockId));
+    Item item =
+        itemRepository
+            .findById(itemId)
+            .orElseThrow(() -> new EntityNotFoundException(Item.class, itemId));
+
+    if (!lock.doesLockItem(item))
+      throw new ItemToLockCouplingException(
+          "Cannot remove lock from this item because this item is not locked by this lock");
+
+    lock.removeItem(item);
+
+    lockRepository.save(lock);
+    itemRepository.save(item);
   }
 
   @Override
@@ -84,12 +101,17 @@ public class LockService implements LockServiceBase {
         lockRepository
             .findById(lockId)
             .orElseThrow(() -> new EntityNotFoundException(Lock.class, lockId));
-    UUID itemUnderLockId = lock.getItem().getId();
-    Item itemUnderLock = itemRepository.findById(itemUnderLockId).orElseThrow();
-    Rent currentRentOfItem = rentRepository.getCurrentRentOfItem(itemUnderLock.getId());
 
-    // A user can open a lock if the item under the lock is rented by them
-    return currentRentOfItem != null && currentRentOfItem.getRenter().getId().equals(user.getId());
+    // A user can open a lock if there is at least 1 iem under this lock, which is now rented by
+    // this user
+    for (var itemUnderLock : lock.getLockedItems()) {
+      Rent currentRentOfItem = rentRepository.getCurrentRentOfItem(itemUnderLock.getId());
+
+      if (currentRentOfItem != null && currentRentOfItem.getRenter().getId().equals(user.getId()))
+        return true;
+    }
+
+    return false;
   }
 
   @Override

@@ -3,14 +3,12 @@ package com.mipt.hsse.hssetechbackend.lock.controllers;
 import com.mipt.hsse.hssetechbackend.apierrorhandling.ApiError;
 import com.mipt.hsse.hssetechbackend.apierrorhandling.RestExceptionHandler;
 import com.mipt.hsse.hssetechbackend.data.entities.LockPassport;
-import com.mipt.hsse.hssetechbackend.lock.controllers.requests.CreateLockRequest;
-import com.mipt.hsse.hssetechbackend.lock.controllers.requests.UpdateLockRequest;
 import com.mipt.hsse.hssetechbackend.lock.controllers.responses.CreateLockResponse;
-import com.mipt.hsse.hssetechbackend.lock.exceptions.ItemAlreadyHasLockException;
+import com.mipt.hsse.hssetechbackend.lock.exceptions.ItemToLockCouplingException;
 import com.mipt.hsse.hssetechbackend.lock.services.LockServiceBase;
 import com.mipt.hsse.hssetechbackend.oauth.services.OAuth2UserHelper;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
-import jakarta.validation.Valid;
+
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,8 +29,8 @@ public class LockController {
 
   @PostMapping
   @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<CreateLockResponse> createLock(@Valid @RequestBody CreateLockRequest request) {
-    LockPassport lock = lockService.createLock(request);
+  public ResponseEntity<CreateLockResponse> createLock() {
+    LockPassport lock = lockService.createLock();
     CreateLockResponse response = new CreateLockResponse(lock.getId());
     return new ResponseEntity<>(response, HttpStatus.CREATED);
   }
@@ -44,13 +42,28 @@ public class LockController {
     lockService.deleteLock(id);
   }
 
-  @PatchMapping("{lock_id}")
+  @PatchMapping("{lock_id}/add_item/{item_id}")
   @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<Void> updateItemUnderLock(@PathVariable("lock_id") UUID lockId, @Valid @RequestBody UpdateLockRequest request) {
+  public ResponseEntity<Void> addItemToLock(
+      @PathVariable("lock_id") UUID lockId,
+      @PathVariable("item_id") UUID itemId) {
     try {
-      lockService.updateItemUnderLock(lockId, request.itemId());
+      lockService.addItemToLock(lockId, itemId);
       return ResponseEntity.noContent().build();
-    } catch (ItemAlreadyHasLockException e) {
+    } catch (ItemToLockCouplingException e) {
+      return ResponseEntity.badRequest().build();
+    }
+  }
+
+  @PatchMapping("{lock_id}/remove_item/{item_id}")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<Void> removeItemFromLock(
+      @PathVariable("lock_id") UUID lockId,
+      @PathVariable("item_id") UUID itemId) {
+    try {
+      lockService.removeItemFromLock(lockId, itemId);
+      return ResponseEntity.noContent().build();
+    } catch (ItemToLockCouplingException e) {
       return ResponseEntity.badRequest().build();
     }
   }

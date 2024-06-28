@@ -3,9 +3,7 @@ package com.mipt.hsse.hssetechbackend.lock.services;
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.*;
-import com.mipt.hsse.hssetechbackend.lock.controllers.requests.CreateLockRequest;
-import com.mipt.hsse.hssetechbackend.lock.exceptions.ItemAlreadyHasLockException;
-import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
+import com.mipt.hsse.hssetechbackend.lock.exceptions.ItemToLockCouplingException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -39,7 +36,6 @@ class LockServiceTest extends DatabaseSuite {
 
   private ItemType itemType;
   private Item item;
-  private UUID nonExistingItemUUID;
   private HumanUserPassport user;
 
   @BeforeEach
@@ -51,16 +47,12 @@ class LockServiceTest extends DatabaseSuite {
 
     user = new HumanUserPassport(123L, "FirstName", "LastName", "email@phystech.edu");
     userRepository.save(user);
-
-    do {
-    nonExistingItemUUID = UUID.randomUUID();
-    } while (nonExistingItemUUID == item.getId());
   }
 
   @AfterEach
   void tearDown() {
-    lockRepository.deleteAll();
     itemRepository.deleteAll();
+    lockRepository.deleteAll();
     itemTypeRepository.deleteAll();
     userRepository.deleteAll();
     rentRepository.deleteAll();
@@ -69,62 +61,70 @@ class LockServiceTest extends DatabaseSuite {
 
   @Test
   void testCreateLock() {
-    CreateLockRequest request = new CreateLockRequest(item.getId());
-    LockPassport createdLock = lockService.createLock(request);
+    LockPassport createdLock = lockService.createLock();
     LockPassport retrievedLock = lockRepository.findById(createdLock.getId()).orElseThrow();
 
     assertNotNull(createdLock);
     assertNotNull(retrievedLock);
-    assertEquals(item.getId(), createdLock.getItem().getId());
-    assertEquals(item.getId(), retrievedLock.getItem().getId());
     assertFalse(createdLock.isOpen());
     assertFalse(retrievedLock.isOpen());
   }
 
   @Test
-  void testFailCreateLockOfNotExistingItem() {
-    CreateLockRequest request = new CreateLockRequest(nonExistingItemUUID);
-    assertThrows(EntityNotFoundException.class, () -> lockService.createLock(request));
-  }
-
-  @Test
   void testDeleteLock() {
-    CreateLockRequest request = new CreateLockRequest(item.getId());
-    LockPassport lock = lockService.createLock(request);
-
+    LockPassport lock = lockService.createLock();
     lockService.deleteLock(lock.getId());
+
     assertFalse(lockRepository.existsById(lock.getId()));
   }
 
+
   @Test
-  void testUpdateItemUnderLock() throws ItemAlreadyHasLockException {
-    Item newItem = new Item("other item", itemType);
-    itemRepository.save(newItem);
-
-    LockPassport lock = lockService.createLock(new CreateLockRequest(item.getId()));
-
-    lockService.updateItemUnderLock(lock.getId(), newItem.getId());
+  void testAddItemToLock() throws ItemToLockCouplingException {
+    LockPassport lock = lockService.createLock();
+    lockService.addItemToLock(lock.getId(), item.getId());
 
     LockPassport updatedLock = lockRepository.findById(lock.getId()).orElseThrow();
-    assertEquals(newItem.getId(), updatedLock.getItem().getId());
+    Item updatedItem = itemRepository.findById(item.getId()).orElseThrow();
+
+    assertEquals(lock.getId(), updatedItem.getLock().getId());
+    assertTrue(updatedLock.doesLockItem(updatedItem));
   }
 
   @Test
-  void testUpdateItemUnderLockThrowsExceptionWhenItemAlreadyHasLock() {
-    LockPassport lock = lockService.createLock(new CreateLockRequest(item.getId()));
+  void testAddItemUnderLockThrowsExceptionWhenItemAlreadyHasLock() throws ItemToLockCouplingException {
+    LockPassport lock = lockService.createLock();
+    lockService.addItemToLock(lock.getId(), item.getId());
 
-    Item newItem = new Item("other item", itemType);
-    itemRepository.save(newItem);
-
-    LockPassport anotherLock = new LockPassport(newItem, false);
+    LockPassport anotherLock = new LockPassport();
     lockRepository.save(anotherLock);
 
-    assertThrows(ItemAlreadyHasLockException.class, () -> lockService.updateItemUnderLock(lock.getId(), newItem.getId()));
+    assertThrows(ItemToLockCouplingException.class, () -> lockService.addItemToLock(anotherLock.getId(), item.getId()));
   }
 
   @Test
-  void testCanOpenLockForAdmin() {
-    LockPassport lock = lockService.createLock(new CreateLockRequest(item.getId()));
+  void testRemoveItemFromLock() throws ItemToLockCouplingException {
+    LockPassport lock = lockService.createLock();
+    lockService.addItemToLock(lock.getId(), item.getId());
+    lockService.removeItemFromLock(lock.getId(), item.getId());
+
+    LockPassport updatedLock = lockRepository.findById(lock.getId()).orElseThrow();
+    Item updatedItem = itemRepository.findById(item.getId()).orElseThrow();
+
+    assertNull(updatedItem.getLock());
+    assertFalse(updatedLock.doesLockItem(updatedItem));
+  }
+
+  @Test
+  void testRemoveItemFromLockThrowsExceptionWhenItemNotLockedByThisLock() {
+    LockPassport lock = lockService.createLock();
+    assertThrows(ItemToLockCouplingException.class, () -> lockService.removeItemFromLock(lock.getId(), item.getId()));
+  }
+
+  @Test
+  void testCanOpenLockForAdmin() throws ItemToLockCouplingException {
+    LockPassport lock = lockService.createLock();
+    lockService.addItemToLock(lock.getId(), item.getId());
 
     Role adminRole = new Role("ADMIN");
     roleRepository.save(adminRole);
@@ -136,8 +136,9 @@ class LockServiceTest extends DatabaseSuite {
   }
 
   @Test
-  void testCanOpenLockForOwnRenter() {
-    LockPassport lock = lockService.createLock(new CreateLockRequest(item.getId()));
+  void testCanOpenLockForOwnRenter() throws ItemToLockCouplingException {
+    LockPassport lock = lockService.createLock();
+    lockService.addItemToLock(lock.getId(), item.getId());
 
     Rent rent = new Rent(Instant.now().minus(1, ChronoUnit.HOURS), Instant.now().plus(1, ChronoUnit.HOURS), user, item);
     rentRepository.save(rent);
@@ -147,8 +148,9 @@ class LockServiceTest extends DatabaseSuite {
   }
 
   @Test
-  void testCanOpenLockReturnFalseForWrongTime() {
-    LockPassport lock = lockService.createLock(new CreateLockRequest(item.getId()));
+  void testCanOpenLockReturnFalseForWrongTime() throws ItemToLockCouplingException {
+    LockPassport lock = lockService.createLock();
+    lockService.addItemToLock(lock.getId(), item.getId());
 
     Rent rent1 = new Rent(Instant.now().minus(2, ChronoUnit.HOURS), Instant.now().minus(1, ChronoUnit.HOURS), user, item);
     Rent rent2 = new Rent(Instant.now().plus(2, ChronoUnit.HOURS), Instant.now().plus(1, ChronoUnit.HOURS), user, item);
@@ -159,8 +161,9 @@ class LockServiceTest extends DatabaseSuite {
   }
 
   @Test
-  void testCanOpenLockReturnFalseForWrongUser() {
-    LockPassport lock = lockService.createLock(new CreateLockRequest(item.getId()));
+  void testCanOpenLockReturnFalseForWrongUser() throws ItemToLockCouplingException {
+    LockPassport lock = lockService.createLock();
+    lockService.addItemToLock(lock.getId(), item.getId());
 
     HumanUserPassport otherUser = new HumanUserPassport(456L, "name", "lastName", "otheremail@phystech.edu");
     userRepository.save(otherUser);
@@ -173,8 +176,10 @@ class LockServiceTest extends DatabaseSuite {
 
 
   @Test
-  void testOpenCloseLock() {
-    LockPassport lock = lockService.createLock(new CreateLockRequest(item.getId()));
+  void testOpenCloseLock() throws ItemToLockCouplingException {
+    LockPassport lock = lockService.createLock();
+    lockService.addItemToLock(lock.getId(), item.getId());
+
     assertFalse(lock.isOpen());
 
     lockService.openLock(lock.getId());

@@ -1,41 +1,36 @@
 package com.mipt.hsse.hssetechbackend.lock.controllers;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oauth2Login;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mipt.hsse.hssetechbackend.data.entities.Item;
 import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
 import com.mipt.hsse.hssetechbackend.data.entities.LockPassport;
-import com.mipt.hsse.hssetechbackend.lock.controllers.requests.CreateLockRequest;
-import com.mipt.hsse.hssetechbackend.lock.controllers.requests.UpdateLockRequest;
 import com.mipt.hsse.hssetechbackend.lock.controllers.responses.CreateLockResponse;
-import com.mipt.hsse.hssetechbackend.lock.exceptions.ItemAlreadyHasLockException;
+import com.mipt.hsse.hssetechbackend.lock.exceptions.ItemToLockCouplingException;
 import com.mipt.hsse.hssetechbackend.lock.services.LockServiceBase;
 import com.mipt.hsse.hssetechbackend.oauth.config.SecurityConfig;
 import com.mipt.hsse.hssetechbackend.oauth.services.MiptOAuth2UserService;
 import com.mipt.hsse.hssetechbackend.oauth.services.OAuth2UserHelper;
 import com.mipt.hsse.hssetechbackend.oauth.services.UserPassportServiceBase;
+import java.math.BigDecimal;
+import java.util.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.math.BigDecimal;
-import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oauth2Login;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(LockController.class)
 @Import({ObjectMapper.class, SecurityConfig.class, MiptOAuth2UserService.class})
@@ -61,18 +56,22 @@ class LockControllerTest {
     Map<String, Object> attributes = new HashMap<>();
     attributes.put("sub", "123");
     attributes.put(OAuth2UserHelper.INNER_ID_ATTR, commonUserId);
-    commonUserPrincipal = new DefaultOAuth2User(
-        Collections.singletonList(new SimpleGrantedAuthority("ROLE_MIPT_USER")),
-        attributes,
-        "sub");
+    commonUserPrincipal =
+        new DefaultOAuth2User(
+            Collections.singletonList(new SimpleGrantedAuthority("ROLE_MIPT_USER")),
+            attributes,
+            "sub");
 
     Map<String, Object> adminAttributes = new HashMap<>();
     adminAttributes.put("sub", "456");
     adminAttributes.put(OAuth2UserHelper.INNER_ID_ATTR, adminId);
-    adminPrincipal = new DefaultOAuth2User(
-        List.of(new SimpleGrantedAuthority("ROLE_MIPT_USER"), new SimpleGrantedAuthority("ROLE_ADMIN")),
-        adminAttributes,
-        "sub");
+    adminPrincipal =
+        new DefaultOAuth2User(
+            List.of(
+                new SimpleGrantedAuthority("ROLE_MIPT_USER"),
+                new SimpleGrantedAuthority("ROLE_ADMIN")),
+            adminAttributes,
+            "sub");
   }
 
   @Test
@@ -81,21 +80,15 @@ class LockControllerTest {
     Item item = new Item("name", new ItemType(BigDecimal.ZERO, "name", 100, false));
     item.setId(UUID.randomUUID());
     UUID lockId = UUID.randomUUID();
-    CreateLockRequest request = new CreateLockRequest(item.getId());
-    LockPassport lock = new LockPassport(item);
+    LockPassport lock = new LockPassport();
+    lock.addItem(item);
     lock.setId(lockId);
 
-    when(lockService.createLock(any())).thenReturn(lock);
-
-    String requestStr = objectMapper.writeValueAsString(request);
+    when(lockService.createLock()).thenReturn(lock);
 
     var mvcResponse =
         mockMvc
-            .perform(
-                post(BASE_MAPPING)
-                    .content(requestStr)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .with(oauth2Login().oauth2User(adminPrincipal)))
+            .perform(post(BASE_MAPPING).with(oauth2Login().oauth2User(adminPrincipal)))
             .andDo(print())
             .andExpect(status().isCreated())
             .andReturn()
@@ -103,7 +96,7 @@ class LockControllerTest {
             .getContentAsString();
     CreateLockResponse response = objectMapper.readValue(mvcResponse, CreateLockResponse.class);
 
-    verify(lockService).createLock(request);
+    verify(lockService).createLock();
 
     assertNotNull(response);
     assertEquals(lockId, response.id());
@@ -128,57 +121,93 @@ class LockControllerTest {
 
   @Test
   @WithMockUser
-  void testUpdateItemUnderLockEndpoint() throws Exception {
+  void testAddItemToLockEndpoint() throws Exception {
     UUID lockId = UUID.randomUUID();
     UUID itemId = UUID.randomUUID();
-    UpdateLockRequest request = new UpdateLockRequest(itemId);
 
-    doNothing().when(lockService).updateItemUnderLock(lockId, itemId);
-
-    String requestStr = objectMapper.writeValueAsString(request);
+    doNothing().when(lockService).addItemToLock(lockId, itemId);
 
     mockMvc
         .perform(
-            patch(BASE_MAPPING + "/{lock_id}", lockId.toString())
-                .content(requestStr)
-                .contentType(MediaType.APPLICATION_JSON)
+            patch(
+                    BASE_MAPPING + "/{lock_id}/add_item/{item_id}",
+                    lockId.toString(),
+                    itemId.toString())
                 .with(oauth2Login().oauth2User(adminPrincipal)))
         .andDo(print())
         .andExpect(status().isNoContent());
 
-    verify(lockService).updateItemUnderLock(lockId, itemId);
+    verify(lockService).addItemToLock(lockId, itemId);
   }
 
   @Test
   @WithMockUser
-  void testUpdateItemUnderLockEndpointItemAlreadyHasLock() throws Exception {
+  void testAddItemToLockEndpointItemAlreadyHasLock() throws Exception {
     UUID lockId = UUID.randomUUID();
     UUID itemId = UUID.randomUUID();
-    UpdateLockRequest request = new UpdateLockRequest(itemId);
 
-    doThrow(ItemAlreadyHasLockException.class)
-        .when(lockService)
-        .updateItemUnderLock(lockId, itemId);
-
-    String requestStr = objectMapper.writeValueAsString(request);
+    doThrow(ItemToLockCouplingException.class).when(lockService).addItemToLock(lockId, itemId);
 
     mockMvc
         .perform(
-            patch(BASE_MAPPING + "/{lock_id}", lockId.toString())
-                .content(requestStr)
-                .contentType(MediaType.APPLICATION_JSON)
+            patch(
+                    BASE_MAPPING + "/{lock_id}/add_item/{item_id}",
+                    lockId.toString(),
+                    itemId.toString())
                 .with(oauth2Login().oauth2User(adminPrincipal)))
         .andDo(print())
         .andExpect(status().isBadRequest());
 
-    verify(lockService).updateItemUnderLock(lockId, itemId);
+    verify(lockService).addItemToLock(lockId, itemId);
+  }
+
+  @Test
+  @WithMockUser
+  void testRemoveItemFromLockEndpoint() throws Exception {
+    UUID lockId = UUID.randomUUID();
+    UUID itemId = UUID.randomUUID();
+
+    doNothing().when(lockService).removeItemFromLock(lockId, itemId);
+
+    mockMvc
+        .perform(
+            patch(
+                    BASE_MAPPING + "/{lock_id}/remove_item/{item_id}",
+                    lockId.toString(),
+                    itemId.toString())
+                .with(oauth2Login().oauth2User(adminPrincipal)))
+        .andDo(print())
+        .andExpect(status().isNoContent());
+
+    verify(lockService).removeItemFromLock(lockId, itemId);
+  }
+
+  @Test
+  @WithMockUser
+  void testRemoveItemFromLockEndpointItemNotLockedByThisLock() throws Exception {
+    UUID lockId = UUID.randomUUID();
+    UUID itemId = UUID.randomUUID();
+
+    doThrow(ItemToLockCouplingException.class).when(lockService).removeItemFromLock(lockId, itemId);
+
+    mockMvc
+        .perform(
+            patch(
+                    BASE_MAPPING + "/{lock_id}/remove_item/{item_id}",
+                    lockId.toString(),
+                    itemId.toString())
+                .with(oauth2Login().oauth2User(adminPrincipal)))
+        .andDo(print())
+        .andExpect(status().isBadRequest());
+
+    verify(lockService).removeItemFromLock(lockId, itemId);
   }
 
   @Test
   @WithMockUser
   void testOpenLockEndpoint() throws Exception {
     UUID lockId = UUID.randomUUID();
-UUID userId = OAuth2UserHelper.getUserId(commonUserPrincipal);
+    UUID userId = OAuth2UserHelper.getUserId(commonUserPrincipal);
 
     when(lockService.canUserOpenLock(userId, lockId)).thenReturn(true);
     doNothing().when(lockService).openLock(lockId);

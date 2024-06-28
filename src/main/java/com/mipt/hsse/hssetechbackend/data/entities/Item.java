@@ -28,6 +28,10 @@ public class Item {
   @JoinColumn(name = "type_id", nullable = false)
   private ItemType type;
 
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "lock_id", nullable = true)
+  private LockPassport lock;
+
   public Item(String displayName, ItemType type) {
     this.displayName = displayName;
     this.type = type;
