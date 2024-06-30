@@ -1,9 +1,14 @@
 package com.mipt.hsse.hssetechbackend.lock.services;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.*;
 import com.mipt.hsse.hssetechbackend.lock.exceptions.ItemToLockCouplingException;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,12 +18,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @Import(LockService.class)
@@ -31,16 +30,14 @@ class LockServiceTest extends DatabaseSuite {
   @Autowired private JpaLockPassportRepository lockRepository;
   @Autowired private JpaHumanUserPassportRepository userRepository;
   @Autowired private JpaRentRepository rentRepository;
-  @Autowired
-  private JpaRoleRepository roleRepository;
+  @Autowired private JpaRoleRepository roleRepository;
 
-  private ItemType itemType;
   private Item item;
   private HumanUserPassport user;
 
   @BeforeEach
   void setUp() {
-    itemType = new ItemType(BigDecimal.ZERO, "name", 100, false);
+    ItemType itemType = new ItemType(BigDecimal.ZERO, "name", 100, false);
     itemTypeRepository.save(itemType);
     item = new Item("name", itemType);
     itemRepository.save(item);
@@ -78,7 +75,6 @@ class LockServiceTest extends DatabaseSuite {
     assertFalse(lockRepository.existsById(lock.getId()));
   }
 
-
   @Test
   void testAddItemToLock() throws ItemToLockCouplingException {
     LockPassport lock = lockService.createLock();
@@ -92,14 +88,17 @@ class LockServiceTest extends DatabaseSuite {
   }
 
   @Test
-  void testAddItemUnderLockThrowsExceptionWhenItemAlreadyHasLock() throws ItemToLockCouplingException {
+  void testAddItemUnderLockThrowsExceptionWhenItemAlreadyHasLock()
+      throws ItemToLockCouplingException {
     LockPassport lock = lockService.createLock();
     lockService.addItemToLock(lock.getId(), item.getId());
 
     LockPassport anotherLock = new LockPassport();
     lockRepository.save(anotherLock);
 
-    assertThrows(ItemToLockCouplingException.class, () -> lockService.addItemToLock(anotherLock.getId(), item.getId()));
+    assertThrows(
+        ItemToLockCouplingException.class,
+        () -> lockService.addItemToLock(anotherLock.getId(), item.getId()));
   }
 
   @Test
@@ -118,7 +117,9 @@ class LockServiceTest extends DatabaseSuite {
   @Test
   void testRemoveItemFromLockThrowsExceptionWhenItemNotLockedByThisLock() {
     LockPassport lock = lockService.createLock();
-    assertThrows(ItemToLockCouplingException.class, () -> lockService.removeItemFromLock(lock.getId(), item.getId()));
+    assertThrows(
+        ItemToLockCouplingException.class,
+        () -> lockService.removeItemFromLock(lock.getId(), item.getId()));
   }
 
   @Test
@@ -140,7 +141,12 @@ class LockServiceTest extends DatabaseSuite {
     LockPassport lock = lockService.createLock();
     lockService.addItemToLock(lock.getId(), item.getId());
 
-    Rent rent = new Rent(Instant.now().minus(1, ChronoUnit.HOURS), Instant.now().plus(1, ChronoUnit.HOURS), user, item);
+    Rent rent =
+        new Rent(
+            Instant.now().minus(1, ChronoUnit.HOURS),
+            Instant.now().plus(1, ChronoUnit.HOURS),
+            user,
+            item);
     rentRepository.save(rent);
 
     boolean canOpen = lockService.canUserOpenLock(user.getId(), lock.getId());
@@ -152,8 +158,18 @@ class LockServiceTest extends DatabaseSuite {
     LockPassport lock = lockService.createLock();
     lockService.addItemToLock(lock.getId(), item.getId());
 
-    Rent rent1 = new Rent(Instant.now().minus(2, ChronoUnit.HOURS), Instant.now().minus(1, ChronoUnit.HOURS), user, item);
-    Rent rent2 = new Rent(Instant.now().plus(2, ChronoUnit.HOURS), Instant.now().plus(1, ChronoUnit.HOURS), user, item);
+    Rent rent1 =
+        new Rent(
+            Instant.now().minus(2, ChronoUnit.HOURS),
+            Instant.now().minus(1, ChronoUnit.HOURS),
+            user,
+            item);
+    Rent rent2 =
+        new Rent(
+            Instant.now().plus(2, ChronoUnit.HOURS),
+            Instant.now().plus(1, ChronoUnit.HOURS),
+            user,
+            item);
     rentRepository.save(rent1);
     rentRepository.save(rent2);
 
@@ -165,15 +181,20 @@ class LockServiceTest extends DatabaseSuite {
     LockPassport lock = lockService.createLock();
     lockService.addItemToLock(lock.getId(), item.getId());
 
-    HumanUserPassport otherUser = new HumanUserPassport(456L, "name", "lastName", "otheremail@phystech.edu");
+    HumanUserPassport otherUser =
+        new HumanUserPassport(456L, "name", "lastName", "otheremail@phystech.edu");
     userRepository.save(otherUser);
-    Rent otherUsersRent = new Rent(Instant.now().minus(1, ChronoUnit.HOURS), Instant.now().plus(1, ChronoUnit.HOURS), otherUser, item);
+    Rent otherUsersRent =
+        new Rent(
+            Instant.now().minus(1, ChronoUnit.HOURS),
+            Instant.now().plus(1, ChronoUnit.HOURS),
+            otherUser,
+            item);
     rentRepository.save(otherUsersRent);
 
     // Return false, because the rent (even though it is going now) is owned by another user
     assertFalse(lockService.canUserOpenLock(user.getId(), lock.getId()));
   }
-
 
   @Test
   void testOpenCloseLock() throws ItemToLockCouplingException {

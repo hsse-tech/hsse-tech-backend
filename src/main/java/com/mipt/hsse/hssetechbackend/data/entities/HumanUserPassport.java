@@ -60,6 +60,10 @@ public class HumanUserPassport {
   }
 
   public boolean hasRole(Role role) {
-    return roles.stream().anyMatch(r -> r.getId().equals(role.getId()));
+    return hasRole(role.getName());
+  }
+
+  public boolean hasRole(String roleName) {
+    return roles.stream().anyMatch(r -> r.getName().equals(roleName));
   }
 }

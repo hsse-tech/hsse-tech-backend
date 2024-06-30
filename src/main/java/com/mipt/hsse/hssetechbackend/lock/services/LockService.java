@@ -7,6 +7,7 @@ import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
 import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class LockService implements LockServiceBase {
@@ -14,19 +15,16 @@ public class LockService implements LockServiceBase {
   private final JpaLockPassportRepository lockRepository;
   private final JpaHumanUserPassportRepository userRepository;
   private final JpaRentRepository rentRepository;
-  private final JpaRoleRepository roleRepository;
 
   public LockService(
       JpaItemRepository itemRepository,
       JpaLockPassportRepository lockRepository,
       JpaHumanUserPassportRepository userRepository,
-      JpaRentRepository rentRepository,
-      JpaRoleRepository roleRepository) {
+      JpaRentRepository rentRepository) {
     this.itemRepository = itemRepository;
     this.lockRepository = lockRepository;
     this.userRepository = userRepository;
     this.rentRepository = rentRepository;
-    this.roleRepository = roleRepository;
   }
 
   @Override
@@ -43,6 +41,7 @@ public class LockService implements LockServiceBase {
   }
 
   @Override
+  @Transactional
   public void addItemToLock(UUID lockId, UUID itemId) throws ItemToLockCouplingException {
     LockPassport lock =
         lockRepository
@@ -64,6 +63,7 @@ public class LockService implements LockServiceBase {
   }
 
   @Override
+  @Transactional
   public void removeItemFromLock(UUID lockId, UUID itemId) throws ItemToLockCouplingException {
     LockPassport lock =
         lockRepository
@@ -84,6 +84,10 @@ public class LockService implements LockServiceBase {
     itemRepository.save(item);
   }
 
+  /**
+   * A user can open a lock if the user is an ADMIN or if at least one item under this lock is now
+   * being rented by the user
+   */
   @Override
   public boolean canUserOpenLock(UUID userId, UUID lockId) {
     HumanUserPassport user =
@@ -91,9 +95,7 @@ public class LockService implements LockServiceBase {
             .findById(userId)
             .orElseThrow(() -> new EntityNotFoundException(HumanUserPassport.class, userId));
 
-    // Admin can open any locks
-    Role adminRole = roleRepository.findByName("ADMIN");
-    if (user.hasRole(adminRole)) {
+    if (user.hasRole("ADMIN")) {
       return true;
     }
 
@@ -102,8 +104,6 @@ public class LockService implements LockServiceBase {
             .findById(lockId)
             .orElseThrow(() -> new EntityNotFoundException(Lock.class, lockId));
 
-    // A user can open a lock if there is at least 1 iem under this lock, which is now rented by
-    // this user
     for (var itemUnderLock : lock.getLockedItems()) {
       Rent currentRentOfItem = rentRepository.getCurrentRentOfItem(itemUnderLock.getId());
 
@@ -116,7 +116,7 @@ public class LockService implements LockServiceBase {
 
   @Override
   public void openLock(UUID lockId) {
-    setLockOpened(lockId, true);
+    setLockStatus(lockId, true);
   }
 
   @Override
@@ -130,10 +130,10 @@ public class LockService implements LockServiceBase {
 
   @Override
   public void closeLock(UUID lockId) {
-    setLockOpened(lockId, false);
+    setLockStatus(lockId, false);
   }
 
-  private void setLockOpened(UUID lockId, boolean opened) {
+  private void setLockStatus(UUID lockId, boolean opened) {
     LockPassport lock =
         lockRepository
             .findById(lockId)

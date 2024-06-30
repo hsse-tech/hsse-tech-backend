@@ -9,11 +9,10 @@ import com.mipt.hsse.hssetechbackend.data.entities.LockPassport;
 import com.mipt.hsse.hssetechbackend.data.entities.Rent;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemTypeRepository;
-import com.mipt.hsse.hssetechbackend.data.repositories.JpaLockPassportRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaRentRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepository.PhotoType;
-import com.mipt.hsse.hssetechbackend.lock.services.LockService;
+import com.mipt.hsse.hssetechbackend.lock.services.LockServiceBase;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
@@ -35,14 +34,14 @@ public class ItemService {
   private final JpaItemTypeRepository itemTypeRepository;
   private final JpaRentRepository rentRepository;
   private final PhotoRepository photoRepository;
-  private final LockService lockService;
+  private final LockServiceBase lockService;
 
   public ItemService(
       JpaItemRepository itemRepository,
       JpaItemTypeRepository itemTypeRepository,
       JpaRentRepository rentRepository,
       PhotoRepository photoRepository,
- LockService lockService) {
+      LockServiceBase lockService) {
     this.itemRepository = itemRepository;
     this.itemTypeRepository = itemTypeRepository;
     this.rentRepository = rentRepository;

@@ -33,7 +33,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(LockController.class)
-@Import({ObjectMapper.class, SecurityConfig.class, MiptOAuth2UserService.class})
+@Import({SecurityConfig.class, MiptOAuth2UserService.class})
 class LockControllerTest {
   private static final String BASE_MAPPING = "/api/locks";
 
@@ -53,25 +53,19 @@ class LockControllerTest {
     UUID commonUserId = UUID.randomUUID();
     UUID adminId = UUID.randomUUID();
 
-    Map<String, Object> attributes = new HashMap<>();
-    attributes.put("sub", "123");
-    attributes.put(OAuth2UserHelper.INNER_ID_ATTR, commonUserId);
     commonUserPrincipal =
         new DefaultOAuth2User(
             Collections.singletonList(new SimpleGrantedAuthority("ROLE_MIPT_USER")),
-            attributes,
-            "sub");
+            Map.of(OAuth2UserHelper.INNER_ID_ATTR, commonUserId),
+            OAuth2UserHelper.INNER_ID_ATTR);
 
-    Map<String, Object> adminAttributes = new HashMap<>();
-    adminAttributes.put("sub", "456");
-    adminAttributes.put(OAuth2UserHelper.INNER_ID_ATTR, adminId);
     adminPrincipal =
         new DefaultOAuth2User(
             List.of(
                 new SimpleGrantedAuthority("ROLE_MIPT_USER"),
                 new SimpleGrantedAuthority("ROLE_ADMIN")),
-            adminAttributes,
-            "sub");
+            Map.of(OAuth2UserHelper.INNER_ID_ATTR, adminId),
+            OAuth2UserHelper.INNER_ID_ATTR);
   }
 
   @Test
@@ -241,7 +235,6 @@ class LockControllerTest {
   }
 
   @Test
-  @WithMockUser
   void testIsLockOpenEndpoint() throws Exception {
     UUID lockId = UUID.randomUUID();
 
@@ -251,8 +244,7 @@ class LockControllerTest {
     var mvcResult =
         mockMvc
             .perform(
-                get(BASE_MAPPING + "/{id}/is-open", lockId.toString())
-                    .with(oauth2Login().oauth2User(commonUserPrincipal)))
+                get(BASE_MAPPING + "/{id}/is-open", lockId.toString()))
             .andDo(print())
             .andExpect(status().isOk())
             .andReturn()
@@ -276,8 +268,7 @@ class LockControllerTest {
     var mvcResult =
         mockMvc
             .perform(
-                get(BASE_MAPPING + "/{id}/is-open", lockId.toString())
-                    .with(oauth2Login().oauth2User(commonUserPrincipal)))
+                get(BASE_MAPPING + "/{id}/is-open", lockId.toString()))
             .andDo(print())
             .andExpect(status().isOk())
             .andReturn()
