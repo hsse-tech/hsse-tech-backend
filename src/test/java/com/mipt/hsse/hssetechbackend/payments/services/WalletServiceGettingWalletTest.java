@@ -3,11 +3,11 @@ package com.mipt.hsse.hssetechbackend.payments.services;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
+import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.data.entities.HumanUserPassport;
 import com.mipt.hsse.hssetechbackend.data.entities.Wallet;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaWalletRepository;
-import com.mipt.hsse.hssetechbackend.payments.exceptions.WalletNotFoundException;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -63,6 +63,6 @@ public class WalletServiceGettingWalletTest extends DatabaseSuite {
 
   @Test
   public void testFindingNotExists() {
-    assertThrows(WalletNotFoundException.class, () -> walletService.getWallet(UUID.randomUUID()));
+    assertThrows(EntityNotFoundException.class, () -> walletService.getWallet(UUID.randomUUID()));
   }
 }

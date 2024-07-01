@@ -1,11 +1,11 @@
 package com.mipt.hsse.hssetechbackend.payments.services;
 
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
+import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.data.entities.HumanUserPassport;
 import com.mipt.hsse.hssetechbackend.data.entities.Wallet;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaWalletRepository;
-import com.mipt.hsse.hssetechbackend.payments.exceptions.WalletNotFoundException;
 import com.mipt.hsse.hssetechbackend.payments.exceptions.WalletUpdatingException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -70,6 +70,6 @@ public class WalletServiceSettingBalanceTest extends DatabaseSuite {
 
   @Test
   public void testChangingBalanceWalletNotFound() {
-    assertThrows(WalletNotFoundException.class, () -> walletService.changeWalletBalanceOn(UUID.randomUUID(), BigDecimal.ZERO));
+    assertThrows(EntityNotFoundException.class, () -> walletService.changeWalletBalanceOn(UUID.randomUUID(), BigDecimal.ZERO));
   }
 }

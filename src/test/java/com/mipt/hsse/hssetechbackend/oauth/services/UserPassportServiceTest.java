@@ -24,51 +24,52 @@ import static org.junit.jupiter.api.Assertions.*;
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @Import(UserPassportService.class)
 class UserPassportServiceTest extends DatabaseSuite {
-    @Autowired
-    private JpaHumanUserPassportRepository passportRepository;
+  @Autowired private JpaHumanUserPassportRepository passportRepository;
 
-    @Autowired
-    private UserPassportService passportService;
+  @Autowired private UserPassportService passportService;
 
-    @AfterEach
-    public void clear() {
-        passportRepository.deleteAll();
-    }
+  @AfterEach
+  public void clear() {
+    passportRepository.deleteAll();
+  }
 
-    @Test
-    public void testFindAlreadyExists() {
-        passportRepository.save(new HumanUserPassport(123L, "Денис", "Войтенко", "voitenko.da@phystech.edu"));
+  @Test
+  public void testFindAlreadyExists() {
+    passportRepository.save(
+        new HumanUserPassport(123L, "Денис", "Войтенко", "voitenko.da@phystech.edu"));
 
-        var targetPassport = passportService.findOrCreateByYandexId(
-                createUser(123L, "Денис", "Войтенко", "voitenko.da@phystech.edu"));
+    var targetPassport =
+        passportService.findOrCreateByYandexId(
+            createUser(123L, "Денис", "Войтенко", "voitenko.da@phystech.edu"));
 
-        assertNotNull(targetPassport);
-        assertTrue(passportRepository.existsById(targetPassport.getId()));
-    }
+    assertNotNull(targetPassport);
+    assertTrue(passportRepository.existsById(targetPassport.getId()));
+  }
 
-    @Test
-    public void testFindNotFoundShouldBeCreated() {
-        var targetPassport = passportService.findOrCreateByYandexId(
-                createUser(123L, "Денис", "Войтенко", "voitenko.da@phystech.edu"));
+  @Test
+  public void testFindNotFoundShouldBeCreated() {
+    var targetPassport =
+        passportService.findOrCreateByYandexId(
+            createUser(123L, "Денис", "Войтенко", "voitenko.da@phystech.edu"));
 
-        assertNotNull(targetPassport);
-        assertTrue(passportRepository.existsById(targetPassport.getId()));
+    assertNotNull(targetPassport);
+    assertTrue(passportRepository.existsById(targetPassport.getId()));
 
-        targetPassport = passportRepository.findByYandexId(123L);
+    targetPassport = passportRepository.findByYandexId(123L);
 
-        assertEquals("Денис", targetPassport.getFirstName());
-        assertEquals("Войтенко", targetPassport.getLastName());
-        assertEquals("voitenko.da@phystech.edu", targetPassport.getEmail());
-    }
+    assertEquals("Денис", targetPassport.getFirstName());
+    assertEquals("Войтенко", targetPassport.getLastName());
+    assertEquals("voitenko.da@phystech.edu", targetPassport.getEmail());
+  }
 
-    private OAuth2User createUser(Long yandexId, String firstName, String lastName, String email) {
-        var attrs = new HashMap<String, Object>();
+  private OAuth2User createUser(Long yandexId, String firstName, String lastName, String email) {
+    var attrs = new HashMap<String, Object>();
 
-        attrs.put("id", yandexId.toString());
-        attrs.put("default_email", email);
-        attrs.put("first_name", firstName);
-        attrs.put("last_name", lastName);
+    attrs.put("id", yandexId.toString());
+    attrs.put("default_email", email);
+    attrs.put("first_name", firstName);
+    attrs.put("last_name", lastName);
 
-        return new DefaultOAuth2User(new ArrayList<>(), attrs, "id");
-    }
+    return new DefaultOAuth2User(new ArrayList<>(), attrs, "id");
+  }
 }

@@ -1,6 +1,6 @@
 package com.mipt.hsse.hssetechbackend.rent.rentprocessing.deleterentprocessing;
 
-import com.mipt.hsse.hssetechbackend.auxiliary.VerificationResult;
+import com.mipt.hsse.hssetechbackend.utils.VerificationResult;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.RentProcessingException;
 
 /**

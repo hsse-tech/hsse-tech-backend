@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.mipt.hsse.hssetechbackend.RublesToKopeckConverter.convertToKopeck;
+import static com.mipt.hsse.hssetechbackend.utils.RublesToKopeckConverter.convertToKopeck;
 
 @Service
 public class TopUpBalanceProvider implements TopUpBalanceProviderBase {

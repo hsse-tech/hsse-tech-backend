@@ -1,6 +1,6 @@
 package com.mipt.hsse.hssetechbackend.payments.rent;
 
-import com.mipt.hsse.hssetechbackend.auxiliary.VerificationResult;
+import com.mipt.hsse.hssetechbackend.utils.VerificationResult;
 import com.mipt.hsse.hssetechbackend.payments.RentCostCalculator;
 import com.mipt.hsse.hssetechbackend.payments.exceptions.TransactionManipulationException;
 import com.mipt.hsse.hssetechbackend.payments.services.TransactionService;

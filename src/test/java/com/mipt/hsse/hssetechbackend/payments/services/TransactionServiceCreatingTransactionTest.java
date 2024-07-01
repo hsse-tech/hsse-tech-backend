@@ -3,12 +3,12 @@ package com.mipt.hsse.hssetechbackend.payments.services;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
+import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.data.entities.HumanUserPassport;
 import com.mipt.hsse.hssetechbackend.data.entities.Transaction;
 import com.mipt.hsse.hssetechbackend.data.entities.Wallet;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaWalletRepository;
-import com.mipt.hsse.hssetechbackend.payments.exceptions.WalletNotFoundException;
 import com.mipt.hsse.hssetechbackend.payments.services.dto.TransactionInfo;
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -71,7 +71,7 @@ public class TransactionServiceCreatingTransactionTest extends DatabaseSuite {
   @Test
   public void testTransactionCreationWalletNotFound() {
     var transactionInfo = new TransactionInfo(BigDecimal.valueOf(50.00), UUID.randomUUID(), "Гель для душа", Optional.of("О полмолив, мой нежный гель"));
-    assertThrows(WalletNotFoundException.class, () -> transactionService.createTransaction(transactionInfo));
+    assertThrows(EntityNotFoundException.class, () -> transactionService.createTransaction(transactionInfo));
     assertEquals(100, walletRepository.findAll().getFirst().getBalance());
   }
 
