@@ -1,4 +1,4 @@
-package com.mipt.hsse.hssetechbackend.auxiliary;
+package com.mipt.hsse.hssetechbackend.utils;
 
 import com.mipt.hsse.hssetechbackend.rent.exceptions.VerificationFailedException;
 import jakarta.validation.constraints.NotEmpty;

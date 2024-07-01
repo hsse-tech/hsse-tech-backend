@@ -1,7 +1,8 @@
 package com.mipt.hsse.hssetechbackend.payments.rent;
 
 import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
-import com.mipt.hsse.hssetechbackend.auxiliary.VerificationResult;
+import com.mipt.hsse.hssetechbackend.data.entities.Wallet;
+import com.mipt.hsse.hssetechbackend.utils.VerificationResult;
 import com.mipt.hsse.hssetechbackend.payments.RentCostCalculator;
 import com.mipt.hsse.hssetechbackend.payments.exceptions.TransactionManipulationException;
 import com.mipt.hsse.hssetechbackend.payments.exceptions.WalletUpdatingException;
@@ -44,7 +45,11 @@ public class PaymentCreateRentProcessor implements CreateRentProcessor {
     } catch (WalletUpdatingException e) {
       return VerificationResult.buildInvalid("Not enough money");
     } catch (EntityNotFoundException e) {
-      return VerificationResult.buildInvalid("Wallet not found");
+      if (e.getType().equals(Wallet.class)) {
+        return VerificationResult.buildInvalid("Wallet not found");
+      } else {
+        throw e;
+      }
     } catch (TransactionManipulationException e) {
       return VerificationResult.buildInvalid("Failed to commit transaction");
     }

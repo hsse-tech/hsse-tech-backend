@@ -1,5 +1,6 @@
 package com.mipt.hsse.hssetechbackend.payments.services;
 
+import com.mipt.hsse.hssetechbackend.data.entities.HumanUserPassport;
 import com.mipt.hsse.hssetechbackend.data.entities.Wallet;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaWalletRepository;
@@ -49,7 +50,7 @@ public class WalletService implements WalletServiceBase {
   @Override
   public Wallet getWalletByOwner(UUID ownerId) {
     return userRepository.findById(ownerId)
-            .orElseThrow(() -> new EntityNotFoundException("User not found"))
+            .orElseThrow(() -> new EntityNotFoundException("User not found", HumanUserPassport.class))
             .getWallet();
   }
 

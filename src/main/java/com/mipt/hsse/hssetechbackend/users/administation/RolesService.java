@@ -66,7 +66,7 @@ public class RolesService implements RolesServiceBase {
         passportRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
 
     if (!activationKeys.contains(activationKey)) {
-      throw new EntityNotFoundException("Activation Key not found");
+      throw new EntityNotFoundException("Activation Key not found", Object.class);
     }
 
     var targetRole = roleRepository.findByName(SUPER_ADMIN_ROLE_NAME);

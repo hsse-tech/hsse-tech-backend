@@ -1,6 +1,6 @@
 package com.mipt.hsse.hssetechbackend.rent.rentprocessing.createrentprocessing;
 
-import com.mipt.hsse.hssetechbackend.auxiliary.VerificationResult;
+import com.mipt.hsse.hssetechbackend.utils.VerificationResult;
 
 /**
  * Provides interface to perform any required actions before a rent is created, i.e. added to the

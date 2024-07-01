@@ -1,7 +1,7 @@
 package com.mipt.hsse.hssetechbackend.rent.services;
 
 import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
-import com.mipt.hsse.hssetechbackend.auxiliary.VerificationResult;
+import com.mipt.hsse.hssetechbackend.utils.VerificationResult;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemRepository;
