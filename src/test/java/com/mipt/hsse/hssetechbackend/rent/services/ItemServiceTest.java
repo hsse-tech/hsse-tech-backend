@@ -14,7 +14,7 @@ import com.mipt.hsse.hssetechbackend.lock.exceptions.ItemToLockCouplingException
 import com.mipt.hsse.hssetechbackend.lock.services.LockService;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
-import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
+import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;

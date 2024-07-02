@@ -1,11 +1,9 @@
 package com.mipt.hsse.hssetechbackend.rent.controllers;
 
-import com.mipt.hsse.hssetechbackend.apierrorhandling.ApiError;
-import com.mipt.hsse.hssetechbackend.apierrorhandling.RestExceptionHandler;
 import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemTypeRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemTypeRequest;
-import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
+import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.rent.services.ItemTypeService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -54,18 +52,11 @@ public class ItemTypeController {
     Optional<ItemType> itemType = itemTypeService.getItemType(itemTypeId);
 
     if (itemType.isPresent()) return new ResponseEntity<>(itemType.get(), HttpStatus.OK);
-    else throw new EntityNotFoundException();
+    else throw EntityNotFoundException.itemTypeNotFound(itemTypeId);
   }
 
   @GetMapping
   public List<ItemType> getAllItemTypes() {
     return itemTypeService.getAllItemTypes();
-  }
-
-  @ExceptionHandler(EntityNotFoundException.class)
-  public ResponseEntity<ApiError> entityNotFoundExceptionHandler(
-      EntityNotFoundException ex) {
-    ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, ex.getMessage());
-    return RestExceptionHandler.buildResponseEntity(apiError);
   }
 }

@@ -1,5 +1,6 @@
 package com.mipt.hsse.hssetechbackend.payments.services;
 
+import com.mipt.hsse.hssetechbackend.data.entities.HumanUserPassport;
 import com.mipt.hsse.hssetechbackend.data.entities.Wallet;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaWalletRepository;
@@ -8,9 +9,8 @@ import com.mipt.hsse.hssetechbackend.payments.exceptions.WalletCreationException
 import java.math.BigDecimal;
 import java.util.UUID;
 
-import com.mipt.hsse.hssetechbackend.payments.exceptions.WalletNotFoundException;
 import com.mipt.hsse.hssetechbackend.payments.exceptions.WalletUpdatingException;
-import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
+import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,13 +44,13 @@ public class WalletService implements WalletServiceBase {
   @Transactional(propagation = Propagation.REQUIRED)
   public Wallet getWallet(UUID id) {
     return walletRepository.findById(id)
-            .orElseThrow(WalletNotFoundException::new);
+            .orElseThrow(() -> EntityNotFoundException.walletNotFound(id));
   }
 
   @Override
   public Wallet getWalletByOwner(UUID ownerId) {
     return userRepository.findById(ownerId)
-            .orElseThrow(() -> new EntityNotFoundException("User not found"))
+            .orElseThrow(() -> new EntityNotFoundException("User not found", HumanUserPassport.class))
             .getWallet();
   }
 

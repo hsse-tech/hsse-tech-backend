@@ -15,7 +15,7 @@ import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepo
 import com.mipt.hsse.hssetechbackend.lock.services.LockServiceBase;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
-import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
+import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.rent.qrcodegeneration.QrCodeManager;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;

@@ -1,6 +1,6 @@
 package com.mipt.hsse.hssetechbackend.rent.rentprocessing.createrentprocessing;
 
-import com.mipt.hsse.hssetechbackend.auxiliary.VerificationResult;
+import com.mipt.hsse.hssetechbackend.utils.VerificationResult;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaRentRepository;
 import org.springframework.stereotype.Component;
 

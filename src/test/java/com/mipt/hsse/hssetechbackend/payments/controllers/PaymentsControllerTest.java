@@ -17,7 +17,7 @@ import com.mipt.hsse.hssetechbackend.payments.providers.TopUpBalanceProviderBase
 import com.mipt.hsse.hssetechbackend.payments.providers.TopUpSession;
 import com.mipt.hsse.hssetechbackend.payments.services.WalletServiceBase;
 
-import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
+import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -67,7 +67,7 @@ class PaymentsControllerTest {
   @Test
   @WithMockUser
   public void testTopUpShouldNotBeSuccessfulBecauseUserNotFound() throws Exception {
-    when(walletService.getWalletByOwner(any())).thenThrow(new EntityNotFoundException());
+    when(walletService.getWalletByOwner(any())).thenThrow(new EntityNotFoundException("Test", Object.class));
     when(topUpBalanceProviderBase.topUpBalance(any(), any())).thenReturn(new TopUpSession(true, "https://payment-session.com"));
 
     var reqJson = objectMapper.writeValueAsString(new TopUpBalanceRequest(100));

@@ -86,13 +86,6 @@ public class RentController {
     rentService.endRent(rentId);
   }
 
-
-  @ExceptionHandler(EntityNotFoundException.class)
-  protected ResponseEntity<ApiError> handleEntityNotFoundException(EntityNotFoundException ex) {
-    ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, ex.getMessage());
-    return RestExceptionHandler.buildResponseEntity(apiError);
-  }
-
   @ExceptionHandler(VerificationFailedException.class)
   protected ResponseEntity<ApiError> handleVerificationFailedException(
       VerificationFailedException ex) {

@@ -7,13 +7,11 @@ import com.mipt.hsse.hssetechbackend.data.entities.Item;
 import com.mipt.hsse.hssetechbackend.data.entities.Rent;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoAlreadyExistsException;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoNotFoundException;
-import com.mipt.hsse.hssetechbackend.lock.services.LockService;
-import com.mipt.hsse.hssetechbackend.lock.services.LockServiceBase;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetItemResponse;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetShortRentResponse;
-import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
+import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.rent.services.ItemService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -78,7 +76,7 @@ public class ItemController {
       @PathVariable("itemId") UUID itemId,
       @RequestParam(value = "loadRentInfo", defaultValue = "false") boolean loadRentInfo) {
     Optional<Item> itemOpt = itemService.getItem(itemId);
-    Item item = itemOpt.orElseThrow(EntityNotFoundException::new);
+    Item item = itemOpt.orElseThrow(() -> EntityNotFoundException.itemNotFound(itemId));
 
     GetItemResponse response;
     if (loadRentInfo) {
@@ -118,7 +116,7 @@ public class ItemController {
 
   @PostMapping("/{item_id}/try-open")
   public void provideAccessToItemIfAllowed(@PathVariable("item_id") UUID itemId) {
-    if (!itemService.existsById(itemId)) throw new EntityNotFoundException();
+    if (!itemService.existsById(itemId)) throw EntityNotFoundException.itemNotFound(itemId);
 
     itemService.provideAccessToItem(itemId);
   }
@@ -129,7 +127,7 @@ public class ItemController {
     itemService.deleteItem(itemId);
   }
 
-  @ExceptionHandler({EntityNotFoundException.class, PhotoAlreadyExistsException.class, PhotoNotFoundException.class})
+  @ExceptionHandler({PhotoAlreadyExistsException.class, PhotoNotFoundException.class})
   public ResponseEntity<ApiError> exceptionHandler(
       Exception ex) {
     ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, ex.getMessage());

@@ -15,7 +15,7 @@ import com.mipt.hsse.hssetechbackend.oauth.services.MiptOAuth2UserService;
 import com.mipt.hsse.hssetechbackend.oauth.services.UserPassportServiceBase;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemTypeRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemTypeRequest;
-import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
+import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.rent.services.ItemTypeService;
 import java.math.BigDecimal;
 import java.util.Optional;

@@ -4,7 +4,7 @@ import com.mipt.hsse.hssetechbackend.data.entities.HumanUserPassport;
 import com.mipt.hsse.hssetechbackend.data.entities.Role;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaRoleRepository;
-import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
+import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,10 +63,10 @@ public class RolesService implements RolesServiceBase {
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void activateSuperAdmin(UUID userId, String activationKey) {
     var targetPassport =
-        passportRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
+        passportRepository.findById(userId).orElseThrow(() -> EntityNotFoundException.userNotFound(userId));
 
     if (!activationKeys.contains(activationKey)) {
-      throw new EntityNotFoundException("Activation Key not found");
+      throw new EntityNotFoundException("Activation Key not found", Object.class);
     }
 
     var targetRole = roleRepository.findByName(SUPER_ADMIN_ROLE_NAME);
@@ -100,7 +100,7 @@ public class RolesService implements RolesServiceBase {
         passportRepository
             .findById(userId)
             .orElseThrow(
-                () -> new EntityNotFoundException("User with id " + userId + " does not exist"));
+                () -> EntityNotFoundException.userNotFound(userId));
 
     if (targetUser.getRoles().contains(superAdminRole)) {
       return;
@@ -119,7 +119,7 @@ public class RolesService implements RolesServiceBase {
         passportRepository
             .findById(userId)
             .orElseThrow(
-                () -> new EntityNotFoundException("User with id " + userId + " does not exist"));
+                () -> EntityNotFoundException.userNotFound(userId));
 
     if (targetUser.getRoles().contains(superAdminRole)) {
       return;
