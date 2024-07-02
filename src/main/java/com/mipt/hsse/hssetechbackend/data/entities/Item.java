@@ -14,7 +14,6 @@ import org.hibernate.annotations.OnDeleteAction;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Item {
   @Id
-  @Setter(AccessLevel.NONE)
   @GeneratedValue(strategy = GenerationType.UUID)
   @Column(name = "id", nullable = false)
   private UUID id;
@@ -28,6 +27,10 @@ public class Item {
   @OnDelete(action = OnDeleteAction.CASCADE)
   @JoinColumn(name = "type_id", nullable = false)
   private ItemType type;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "lock_id", nullable = true)
+  private LockPassport lock;
 
   public Item(String displayName, ItemType type) {
     this.displayName = displayName;

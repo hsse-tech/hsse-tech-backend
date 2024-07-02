@@ -16,8 +16,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, MiptOAuth2UserService userService) throws Exception {
         return http.authorizeHttpRequests(auth ->
-                        auth.anyRequest().hasAuthority("ROLE_MIPT_USER"))
-                .oauth2Login(oauth -> oauth
+                        auth
+                            .requestMatchers("/api/locks/{id}/is-open").permitAll()
+                            .anyRequest().hasAuthority("ROLE_MIPT_USER"))
+            .oauth2Login(oauth -> oauth
                         .defaultSuccessUrl("/home", true)
                         .userInfoEndpoint(config -> config.userService(userService)))
                 .csrf(AbstractHttpConfigurer::disable)

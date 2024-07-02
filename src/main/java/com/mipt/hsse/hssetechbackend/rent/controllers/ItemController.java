@@ -7,6 +7,8 @@ import com.mipt.hsse.hssetechbackend.data.entities.Item;
 import com.mipt.hsse.hssetechbackend.data.entities.Rent;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoAlreadyExistsException;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoNotFoundException;
+import com.mipt.hsse.hssetechbackend.lock.services.LockService;
+import com.mipt.hsse.hssetechbackend.lock.services.LockServiceBase;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetItemResponse;
@@ -34,8 +36,6 @@ import org.springframework.web.bind.annotation.*;
 public class ItemController {
   private final ItemService itemService;
 
-  // TODO: Lock service is not implemented yet
-  // private final LockService lockService;
 
   public ItemController(ItemService itemService) {
     this.itemService = itemService;

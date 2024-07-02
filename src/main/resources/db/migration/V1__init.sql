@@ -16,11 +16,18 @@ CREATE TABLE item_type
     is_photo_required_on_finish BOOLEAN          DEFAULT FALSE
 );
 
+CREATE TABLE lock_passport
+(
+    original_id UUID PRIMARY KEY,
+    is_open     BOOLEAN NOT NULL
+);
+
 CREATE TABLE item
 (
     id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     display_name TEXT NOT NULL,
-    type_id      UUID NOT NULL REFERENCES item_type (id) ON DELETE CASCADE
+    type_id      UUID NOT NULL REFERENCES item_type (id) ON DELETE CASCADE,
+    lock_id      uuid          REFERENCES lock_passport (original_id)
 );
 
 CREATE TABLE human_user_passport
@@ -31,12 +38,6 @@ CREATE TABLE human_user_passport
     last_name   TEXT    NOT NULL,
     email       email   NOT NULL,
     is_banned   BOOLEAN NOT NULL DEFAULT FALSE
-);
-
-CREATE TABLE lock_passport
-(
-    original_id UUID PRIMARY KEY,
-    item_id     UUID NULL REFERENCES item (id) UNIQUE
 );
 
 CREATE TABLE rent
