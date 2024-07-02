@@ -9,10 +9,7 @@ import java.util.UUID;
 
 @Getter
 public class EntityNotFoundException extends RuntimeException {
-  private Class<?> type;
-
-  public EntityNotFoundException() {
-  }
+  private final Class<?> type;
 
   public EntityNotFoundException(Exception cause, Class<?> type) {
     super(cause);
