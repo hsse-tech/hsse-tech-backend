@@ -111,7 +111,7 @@ public class RentService {
 
   public void startRent(UUID rentId) {
     Optional<Rent> rentOpt = rentRepository.findById(rentId);
-    Rent rent = rentOpt.orElseThrow(EntityNotFoundException::new);
+    Rent rent = rentOpt.orElseThrow(() -> EntityNotFoundException.rentNotFound(rentId));
 
     verifyRentStart(rent).throwIfInvalid();
 
@@ -122,7 +122,7 @@ public class RentService {
 
   public void endRent(UUID rentId) {
     Optional<Rent> rentOpt = rentRepository.findById(rentId);
-    Rent rent = rentOpt.orElseThrow(EntityNotFoundException::new);
+    Rent rent = rentOpt.orElseThrow(() -> EntityNotFoundException.rentNotFound(rentId));
 
     verifyRentEnd(rent).throwIfInvalid();
 
@@ -145,7 +145,7 @@ public class RentService {
 
   public void confirmRentFinish(UUID rentId, byte[] photoBytes) {
     Optional<Rent> rentOpt = rentRepository.findById(rentId);
-    Rent rent = rentOpt.orElseThrow(EntityNotFoundException::new);
+    Rent rent = rentOpt.orElseThrow(() -> EntityNotFoundException.rentNotFound(rentId));
 
     verifyConfirmRentFinish(rent).throwIfInvalid();
 
@@ -158,7 +158,7 @@ public class RentService {
 
   @Transactional
   public void updateRent(UUID rentId, UpdateRentRequest request) {
-    Rent rent = rentRepository.findById(rentId).orElseThrow(EntityNotFoundException::new);
+    Rent rent = rentRepository.findById(rentId).orElseThrow(() -> EntityNotFoundException.rentNotFound(rentId));
 
     if (rent.getPlannedStart().isBefore(Instant.now())) {
       throw new VerificationFailedException(

@@ -52,7 +52,7 @@ public class ItemTypeController {
     Optional<ItemType> itemType = itemTypeService.getItemType(itemTypeId);
 
     if (itemType.isPresent()) return new ResponseEntity<>(itemType.get(), HttpStatus.OK);
-    else throw new EntityNotFoundException();
+    else throw EntityNotFoundException.itemTypeNotFound(itemTypeId);
   }
 
   @GetMapping

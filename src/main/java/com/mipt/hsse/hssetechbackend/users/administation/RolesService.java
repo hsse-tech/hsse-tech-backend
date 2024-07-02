@@ -63,7 +63,7 @@ public class RolesService implements RolesServiceBase {
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void activateSuperAdmin(UUID userId, String activationKey) {
     var targetPassport =
-        passportRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
+        passportRepository.findById(userId).orElseThrow(() -> EntityNotFoundException.userNotFound(userId));
 
     if (!activationKeys.contains(activationKey)) {
       throw new EntityNotFoundException("Activation Key not found", Object.class);

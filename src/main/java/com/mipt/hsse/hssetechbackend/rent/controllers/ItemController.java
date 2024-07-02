@@ -7,8 +7,6 @@ import com.mipt.hsse.hssetechbackend.data.entities.Item;
 import com.mipt.hsse.hssetechbackend.data.entities.Rent;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoAlreadyExistsException;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoNotFoundException;
-import com.mipt.hsse.hssetechbackend.lock.services.LockService;
-import com.mipt.hsse.hssetechbackend.lock.services.LockServiceBase;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetItemResponse;
@@ -78,7 +76,7 @@ public class ItemController {
       @PathVariable("itemId") UUID itemId,
       @RequestParam(value = "loadRentInfo", defaultValue = "false") boolean loadRentInfo) {
     Optional<Item> itemOpt = itemService.getItem(itemId);
-    Item item = itemOpt.orElseThrow(EntityNotFoundException::new);
+    Item item = itemOpt.orElseThrow(() -> EntityNotFoundException.itemNotFound(itemId));
 
     GetItemResponse response;
     if (loadRentInfo) {
@@ -118,7 +116,7 @@ public class ItemController {
 
   @PostMapping("/{item_id}/try-open")
   public void provideAccessToItemIfAllowed(@PathVariable("item_id") UUID itemId) {
-    if (!itemService.existsById(itemId)) throw new EntityNotFoundException();
+    if (!itemService.existsById(itemId)) throw EntityNotFoundException.itemNotFound(itemId);
 
     itemService.provideAccessToItem(itemId);
   }

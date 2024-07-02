@@ -67,7 +67,7 @@ class PaymentsControllerTest {
   @Test
   @WithMockUser
   public void testTopUpShouldNotBeSuccessfulBecauseUserNotFound() throws Exception {
-    when(walletService.getWalletByOwner(any())).thenThrow(new EntityNotFoundException());
+    when(walletService.getWalletByOwner(any())).thenThrow(new EntityNotFoundException("Test", Object.class));
     when(topUpBalanceProviderBase.topUpBalance(any(), any())).thenReturn(new TopUpSession(true, "https://payment-session.com"));
 
     var reqJson = objectMapper.writeValueAsString(new TopUpBalanceRequest(100));

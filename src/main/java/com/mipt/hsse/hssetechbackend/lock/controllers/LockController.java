@@ -7,7 +7,7 @@ import com.mipt.hsse.hssetechbackend.lock.controllers.responses.CreateLockRespon
 import com.mipt.hsse.hssetechbackend.lock.exceptions.ItemToLockCouplingException;
 import com.mipt.hsse.hssetechbackend.lock.services.LockServiceBase;
 import com.mipt.hsse.hssetechbackend.oauth.services.OAuth2UserHelper;
-import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
+import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
