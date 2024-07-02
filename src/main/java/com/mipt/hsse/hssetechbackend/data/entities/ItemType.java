@@ -57,10 +57,6 @@ public class ItemType {
     this.isPhotoRequiredOnFinish = isPhotoRequiredOnFinish;
   }
 
-  public boolean isPhotoRequiredOnFinish() {
-    return isPhotoRequiredOnFinish;
-  }
-
   @JsonIgnore
   public boolean isPaymentRequired() {
     return cost.compareTo(BigDecimal.ZERO) > 0;

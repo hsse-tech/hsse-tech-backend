@@ -40,7 +40,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 @WebMvcTest(ItemController.class)
-@Import({ObjectMapper.class, SecurityConfig.class, MiptOAuth2UserService.class})
+@Import({SecurityConfig.class, MiptOAuth2UserService.class})
 class ItemControllerTest {
   private static final String BASE_MAPPING = "/api/renting/item";
   private final ItemType itemType = new ItemType(BigDecimal.ZERO, "Item type name", 60, false);

@@ -1,0 +1,829 @@
+openapi: 3.0.3
+info:
+  title: HSSE Tech API
+  description: Описание REST API сервиса "HSSE Tech"
+  version: 0.9.0
+servers:
+  - url: 'https'
+paths:
+  /api/payment/top-up-balance:
+    post:
+      summary: "POST api/payment/top-up-balance"
+      operationId: "topUpBalance"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TopUpBalanceRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+  /api/payment/status:
+    post:
+      summary: "POST api/payment/status"
+      operationId: "status"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TinkoffEventRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+  /api/payments/wallet:
+    get:
+      summary: "GET api/payments/wallet"
+      operationId: "getWalletInfo"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/WalletInfoResponse"
+  /api/renting/item:
+    post:
+      summary: "POST api/renting/item"
+      operationId: "createItem"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateItemRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Item"
+    get:
+      summary: "GET api/renting/item"
+      operationId: "getAllItems"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/GetItemResponse"
+  /api/renting/item/{item_id}/photo:
+    post:
+      summary: "POST api/renting/item/{item_id}/photo"
+      operationId: "pinItemThumbnailPhoto"
+      parameters:
+        - name: "item_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "OK"
+    get:
+      summary: "GET api/renting/item/{item_id}/photo"
+      operationId: "getItemThumbnailPhoto"
+      parameters:
+        - name: "item_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Resource"
+  /api/renting/item/{id}:
+    patch:
+      summary: "PATCH api/renting/item/{id}"
+      operationId: "updateItem"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateItemRequest"
+        required: true
+      responses:
+        "204":
+          description: "No Content"
+  /api/renting/item/{itemId}:
+    get:
+      summary: "GET api/renting/item/{itemId}"
+      operationId: "getItem"
+      parameters:
+        - name: "itemId"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+        - name: "loadRentInfo"
+          in: "query"
+          required: false
+          schema:
+            type: "boolean"
+            default: "false"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/GetItemResponse"
+    delete:
+      summary: "DELETE api/renting/item/{itemId}"
+      operationId: "deleteItem"
+      parameters:
+        - name: "itemId"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "OK"
+  /api/renting/item/{item_id}/qr:
+    get:
+      summary: "GET api/renting/item/{item_id}/qr"
+      operationId: "getItemBookingQRCode"
+      parameters:
+        - name: "item_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/octet-stream:
+              schema:
+                $ref: "#/components/schemas/Resource"
+  /api/renting/item/{item_id}/try-open:
+    post:
+      summary: "POST api/renting/item/{item_id}/try-open"
+      operationId: "provideAccessToItemIfAllowed"
+      parameters:
+        - name: "item_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "OK"
+  /api/renting/item-type:
+    post:
+      summary: "POST api/renting/item-type"
+      operationId: "createItemType"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateItemTypeRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ItemType"
+    get:
+      summary: "GET api/renting/item-type"
+      operationId: "getAllItemTypes"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/ItemType"
+  /api/renting/item-type/{id}:
+    patch:
+      summary: "PATCH api/renting/item-type/{id}"
+      operationId: "updateItemType"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateItemTypeRequest"
+        required: true
+      responses:
+        "204":
+          description: "No Content"
+    delete:
+      summary: "DELETE api/renting/item-type/{id}"
+      operationId: "deleteItemType"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "OK"
+    get:
+      summary: "GET api/renting/item-type/{id}"
+      operationId: "getItemType"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ItemType"
+  /api/renting/rent:
+    post:
+      summary: "POST api/renting/rent"
+      operationId: "createRent"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRentRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Rent"
+  /api/renting/rent/{rent_id}:
+    delete:
+      summary: "DELETE api/renting/rent/{rent_id}"
+      operationId: "deleteRent"
+      parameters:
+        - name: "rent_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "OK"
+    patch:
+      summary: "PATCH api/renting/rent/{rent_id}"
+      operationId: "updateRent"
+      parameters:
+        - name: "rent_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateRentRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+    get:
+      summary: "GET api/renting/rent/{rent_id}"
+      operationId: "getRent"
+      parameters:
+        - name: "rent_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/RentDTO"
+  /api/renting/rent/{rent_id}/confirm:
+    post:
+      summary: "POST api/renting/rent/{rent_id}/confirm"
+      operationId: "pinPhotoConfirmation"
+      parameters:
+        - name: "rent_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "OK"
+    get:
+      summary: "GET api/renting/rent/{rent_id}/confirm"
+      operationId: "getPhotoConfirmation"
+      parameters:
+        - name: "rent_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Resource"
+  /api/renting/rent/{rent_id}/begin:
+    post:
+      summary: "POST api/renting/rent/{rent_id}/begin"
+      operationId: "startRent"
+      parameters:
+        - name: "rent_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "OK"
+  /api/renting/rent/{rent_id}/end:
+    post:
+      summary: "POST api/renting/rent/{rent_id}/end"
+      operationId: "endRent"
+      parameters:
+        - name: "rent_id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "OK"
+  /api/admin/ban/{id}:
+    post:
+      summary: "POST api/admin/ban/{id}"
+      operationId: "ban"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "OK"
+  /api/admin/unban/{id}:
+    post:
+      summary: "POST api/admin/unban/{id}"
+      operationId: "unban"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "OK"
+  /api/admin/users:
+    get:
+      summary: "GET api/admin/users"
+      operationId: "listAllUsers"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/GetHumanUserResponse"
+  /api/admin/users/{id}:
+    get:
+      summary: "GET api/admin/users/{id}"
+      operationId: "getUserById"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/GetHumanUserResponse"
+  /api/sa/admins/{id}:
+    post:
+      summary: "POST api/sa/admins/{id}"
+      operationId: "setAdmin"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "OK"
+    delete:
+      summary: "DELETE api/sa/admins/{id}"
+      operationId: "removeAdmin"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "OK"
+  /api/sa/keygen:
+    post:
+      summary: "POST api/sa/keygen"
+      operationId: "keyGen"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/KeyGenResultResponse"
+  /api/users/me:
+    get:
+      summary: "GET api/users/me"
+      operationId: "getMe"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/GetHumanUserResponse"
+  /api/sa/activate-key:
+    post:
+      summary: "POST api/sa/activate-key"
+      operationId: "activateKey"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ActivateKeyRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+components:
+  schemas:
+    TopUpBalanceRequest:
+      type: "object"
+      properties:
+        amount:
+          type: "number"
+          format: "double"
+    TinkoffEventRequest:
+      type: "object"
+      properties:
+        Amount:
+          type: "integer"
+          format: "int32"
+        OrderId:
+          type: "string"
+        Success:
+          type: "boolean"
+        Status:
+          type: "string"
+    BigDecimal:
+      type: "object"
+      properties: { }
+    Instant:
+      type: "object"
+      properties: { }
+    TransactionInfoResponse:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+        amount:
+          $ref: "#/components/schemas/BigDecimal"
+        description:
+          type: "string"
+        createdAt:
+          $ref: "#/components/schemas/Instant"
+        status:
+          type: "string"
+          enum:
+            - "IN_PROCESS"
+            - "SUCCESS"
+            - "FAILED"
+    WalletInfoResponse:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        balance:
+          $ref: "#/components/schemas/BigDecimal"
+        transactions:
+          $ref: "#/components/schemas/TransactionInfoResponse"
+    CreateItemRequest:
+      type: "object"
+      properties:
+        display_name:
+          type: "string"
+        item_type_id:
+          type: "string"
+          format: "uuid"
+    ItemType:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        cost:
+          $ref: "#/components/schemas/BigDecimal"
+        display_name:
+          type: "string"
+        max_rent_time_minutes:
+          type: "integer"
+          format: "int32"
+    LockPassport:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        lockedItems:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Item"
+    Item:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        displayName:
+          type: "string"
+        type:
+          $ref: "#/components/schemas/ItemType"
+        lock:
+          $ref: "#/components/schemas/LockPassport"
+    Resource:
+      type: "object"
+      properties: { }
+    UpdateItemRequest:
+      type: "object"
+      properties:
+        new_display_name:
+          type: "string"
+    Rent:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        plannedStart:
+          $ref: "#/components/schemas/Instant"
+        plannedEnd:
+          $ref: "#/components/schemas/Instant"
+        item:
+          $ref: "#/components/schemas/Item"
+        factEnd:
+          $ref: "#/components/schemas/Instant"
+        factStart:
+          $ref: "#/components/schemas/Instant"
+        renter:
+          $ref: "#/components/schemas/HumanUserPassport"
+    Transaction:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        amount:
+          $ref: "#/components/schemas/BigDecimal"
+        name:
+          type: "string"
+        description:
+          type: "string"
+        createdAt:
+          $ref: "#/components/schemas/Instant"
+        wallet:
+          $ref: "#/components/schemas/Wallet"
+        status:
+          type: "string"
+          enum:
+            - "IN_PROCESS"
+            - "SUCCESS"
+            - "FAILED"
+    Wallet:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        owner:
+          $ref: "#/components/schemas/HumanUserPassport"
+        balance:
+          $ref: "#/components/schemas/BigDecimal"
+        transactions:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Transaction"
+    Role:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+        name:
+          type: "string"
+        users:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/HumanUserPassport"
+    HumanUserPassport:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        yandexId:
+          type: "integer"
+          format: "int64"
+        firstName:
+          type: "string"
+        lastName:
+          type: "string"
+        isBanned:
+          type: "boolean"
+        email:
+          type: "string"
+        rents:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Rent"
+        wallet:
+          $ref: "#/components/schemas/Wallet"
+        roles:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Role"
+    GetShortRentResponse:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        renter:
+          $ref: "#/components/schemas/HumanUserPassport"
+        start_time:
+          $ref: "#/components/schemas/Instant"
+        end_time:
+          $ref: "#/components/schemas/Instant"
+    GetItemResponse:
+      type: "object"
+      properties:
+        item_id:
+          type: "string"
+          format: "uuid"
+        type_id:
+          type: "string"
+          format: "uuid"
+        display_name:
+          type: "string"
+        rent_info:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/GetShortRentResponse"
+    CreateItemTypeRequest:
+      type: "object"
+      properties:
+        cost:
+          $ref: "#/components/schemas/BigDecimal"
+        display_name:
+          type: "string"
+        max_rent_time_minutes:
+          type: "integer"
+          format: "int32"
+        is_photo_confirmation_required:
+          type: "boolean"
+    UpdateItemTypeRequest:
+      type: "object"
+      properties:
+        new_display_name:
+          type: "string"
+        new_cost:
+          $ref: "#/components/schemas/BigDecimal"
+        is_photo_confirmation_required:
+          type: "boolean"
+        max_rent_time_minutes:
+          type: "integer"
+          format: "int32"
+    UpdateRentRequest:
+      type: "object"
+      properties:
+        new_time_start:
+          $ref: "#/components/schemas/Instant"
+        new_time_end:
+          $ref: "#/components/schemas/Instant"
+    GetHumanUserResponse:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        firstName:
+          type: "string"
+        lastName:
+          type: "string"
+        email:
+          type: "string"
+    RentDTO:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        item:
+          $ref: "#/components/schemas/GetItemResponse"
+        renter:
+          $ref: "#/components/schemas/GetHumanUserResponse"
+        start:
+          $ref: "#/components/schemas/Instant"
+        end:
+          $ref: "#/components/schemas/Instant"
+        fact_start:
+          $ref: "#/components/schemas/Instant"
+        fact_end:
+          $ref: "#/components/schemas/Instant"
+    CreateRentRequest:
+      type: "object"
+      properties:
+        item_id:
+          type: "string"
+          format: "uuid"
+        start_time:
+          $ref: "#/components/schemas/Instant"
+        end_time:
+          $ref: "#/components/schemas/Instant"
+    KeyGenResultResponse:
+      type: "object"
+      properties:
+        key:
+          type: "string"
+    ActivateKeyRequest:
+      type: "object"
+      properties:
+        key:
+          type: "string"

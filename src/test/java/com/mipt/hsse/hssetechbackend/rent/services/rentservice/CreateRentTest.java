@@ -69,8 +69,8 @@ class CreateRentTest extends DatabaseSuite {
     Instant startTime = Instant.now().plus(1, ChronoUnit.DAYS);
     Instant endTime = Instant.now().plus(1, ChronoUnit.DAYS).plus(30, ChronoUnit.MINUTES);
     CreateRentRequest createRentRequest =
-        new CreateRentRequest(user.getId(), item.getId(), startTime, endTime);
-    rentService.createRent(createRentRequest);
+        new CreateRentRequest(item.getId(), startTime, endTime);
+    rentService.createRent(user.getId(), createRentRequest);
 
     verify(rentRepository).save(any());
   }
@@ -80,10 +80,10 @@ class CreateRentTest extends DatabaseSuite {
     Instant startTime = Instant.now().plus(1, ChronoUnit.DAYS);
     Instant endTime = Instant.now().plus(1, ChronoUnit.DAYS).minus(10, ChronoUnit.MINUTES);
     CreateRentRequest createRentRequest =
-        new CreateRentRequest(user.getId(), item.getId(), startTime, endTime);
+        new CreateRentRequest(item.getId(), startTime, endTime);
 
     assertThrows(
-        VerificationFailedException.class, () -> rentService.createRent(createRentRequest));
+        VerificationFailedException.class, () -> rentService.createRent(user.getId(), createRentRequest));
   }
 
   @Test
@@ -91,10 +91,10 @@ class CreateRentTest extends DatabaseSuite {
     Instant startTime = Instant.now().plus(1, ChronoUnit.DAYS);
     Instant endTime = Instant.now().plus(1, ChronoUnit.DAYS).plus(5, ChronoUnit.SECONDS);
     CreateRentRequest createRentRequest =
-        new CreateRentRequest(user.getId(), item.getId(), startTime, endTime);
+        new CreateRentRequest(item.getId(), startTime, endTime);
 
     assertThrows(
-        VerificationFailedException.class, () -> rentService.createRent(createRentRequest));
+        VerificationFailedException.class, () -> rentService.createRent(user.getId(), createRentRequest));
   }
 
   @Test
@@ -104,10 +104,10 @@ class CreateRentTest extends DatabaseSuite {
     Instant startTime = Instant.now().plus(1, ChronoUnit.DAYS);
     Instant endTime = Instant.now().plus(100, ChronoUnit.DAYS);
     CreateRentRequest createRentRequest =
-        new CreateRentRequest(user.getId(), item.getId(), startTime, endTime);
+        new CreateRentRequest(item.getId(), startTime, endTime);
 
     assertThrows(
-        VerificationFailedException.class, () -> rentService.createRent(createRentRequest));
+        VerificationFailedException.class, () -> rentService.createRent(user.getId(), createRentRequest));
   }
 
   @Test
@@ -117,8 +117,8 @@ class CreateRentTest extends DatabaseSuite {
     Instant startTime = Instant.now().plus(1, ChronoUnit.DAYS);
     Instant endTime = Instant.now().plus(1, ChronoUnit.DAYS).plus(60, ChronoUnit.MINUTES);
     CreateRentRequest createRentRequest =
-        new CreateRentRequest(user.getId(), item.getId(), startTime, endTime);
-    rentService.createRent(createRentRequest);
+        new CreateRentRequest(item.getId(), startTime, endTime);
+    rentService.createRent(user.getId(), createRentRequest);
 
     verify(rentRepository).save(any());
   }
@@ -130,8 +130,8 @@ class CreateRentTest extends DatabaseSuite {
     Instant startTime = Instant.now().plus(1, ChronoUnit.DAYS);
     Instant endTime = Instant.now().plus(1, ChronoUnit.DAYS).plus(60, ChronoUnit.MINUTES);
     CreateRentRequest createRentRequest =
-        new CreateRentRequest(user.getId(), item.getId(), startTime, endTime);
+        new CreateRentRequest(item.getId(), startTime, endTime);
 
-    assertThrows(RentProcessingException.class, () -> rentService.createRent(createRentRequest));
+    assertThrows(RentProcessingException.class, () -> rentService.createRent(user.getId(), createRentRequest));
   }
 }

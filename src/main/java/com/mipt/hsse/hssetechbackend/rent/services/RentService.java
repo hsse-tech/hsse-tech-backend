@@ -55,7 +55,7 @@ public class RentService {
   }
 
   @Transactional
-  public Rent createRent(CreateRentRequest request) {
+  public Rent createRent(UUID userId, CreateRentRequest request) {
     Item item =
         itemRepository
             .findById(request.itemId())
@@ -63,8 +63,8 @@ public class RentService {
 
     HumanUserPassport renter =
         userRepository
-            .findById(request.userId())
-            .orElseThrow(() -> new EntityNotFoundException(HumanUserPassport.class, request.userId()));
+            .findById(userId)
+            .orElseThrow(() -> new EntityNotFoundException(HumanUserPassport.class, userId));
 
     Rent rent = new Rent(request.startTime(), request.endTime(), renter, item);
 

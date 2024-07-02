@@ -5,12 +5,14 @@ import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.mipt.hsse.hssetechbackend.data.entities.Item;
 import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
+import com.mipt.hsse.hssetechbackend.data.entities.LockPassport;
 import com.mipt.hsse.hssetechbackend.data.entities.Rent;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemTypeRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaRentRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepository.PhotoType;
+import com.mipt.hsse.hssetechbackend.lock.services.LockServiceBase;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
 import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
@@ -32,16 +34,19 @@ public class ItemService {
   private final JpaItemTypeRepository itemTypeRepository;
   private final JpaRentRepository rentRepository;
   private final PhotoRepository photoRepository;
+  private final LockServiceBase lockService;
 
   public ItemService(
       JpaItemRepository itemRepository,
       JpaItemTypeRepository itemTypeRepository,
       JpaRentRepository rentRepository,
-      PhotoRepository photoRepository) {
+      PhotoRepository photoRepository,
+      LockServiceBase lockService) {
     this.itemRepository = itemRepository;
     this.itemTypeRepository = itemTypeRepository;
     this.rentRepository = rentRepository;
     this.photoRepository = photoRepository;
+    this.lockService = lockService;
   }
 
   public Item createItem(CreateItemRequest request) {
@@ -79,29 +84,20 @@ public class ItemService {
   }
 
   public List<Rent> getFutureRentsOfItem(UUID itemId) {
-    return rentRepository.findAllFutureRentsOfItem(
-        getItem(itemId).orElseThrow(EntityNotFoundException::new));
+    return rentRepository.findAllFutureRentsOfItem(itemId);
   }
 
   public boolean existsById(UUID itemId) {
     return itemRepository.existsById(itemId);
   }
 
-  public Optional<UUID> getLockForItem(UUID itemId) {
-    throw new UnsupportedOperationException();
-  }
-
   public void provideAccessToItem(UUID itemId) {
-    UUID lockId = getLockForItem(itemId).orElseThrow(EntityNotFoundException::new);
+    Item item = getItem(itemId).orElseThrow(() -> new EntityNotFoundException(Item.class, itemId));
+    LockPassport lock = item.getLock();
 
-    // TODO: Lock service is not implemented yet
-    throw new UnsupportedOperationException("Lock service is not implemented yet");
+    if (lock == null) throw new EntityNotFoundException(LockPassport.class, itemId);
 
-    //    if (!lockService.existsById(lockId))
-    //      throw new EntityNotFoundException("The lock that is assigned to this item does not
-    // exist");
-    //
-    //    lockService.requireOpenById(lockId);
+    lockService.openLock(lock.getId());
   }
 
   public byte[] getQrCodeForItem(UUID itemId, int width, int height)
@@ -119,7 +115,7 @@ public class ItemService {
   public List<Item> getAllItems() {
     return itemRepository.findAll();
   }
-  
+
   public void saveItemPhoto(UUID itemId, byte[] photoBytes) {
     if (!itemRepository.existsById(itemId)) {
       throw new EntityNotFoundException(Item.class, itemId);
