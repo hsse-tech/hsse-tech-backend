@@ -16,33 +16,28 @@ CREATE TABLE item_type
     is_photo_required_on_finish BOOLEAN          DEFAULT FALSE
 );
 
+CREATE TABLE lock_passport
+(
+    original_id UUID PRIMARY KEY,
+    is_open     BOOLEAN NOT NULL
+);
+
 CREATE TABLE item
 (
     id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     display_name TEXT NOT NULL,
-    type_id      UUID NOT NULL REFERENCES item_type (id) ON DELETE CASCADE
-);
-
-CREATE TABLE "user"
-(
-    id        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_type TEXT NOT NULL
+    type_id      UUID NOT NULL REFERENCES item_type (id) ON DELETE CASCADE,
+    lock_id      uuid          REFERENCES lock_passport (original_id)
 );
 
 CREATE TABLE human_user_passport
 (
     yandex_id   BIGINT  NOT NULL UNIQUE,
-    original_id UUID PRIMARY KEY REFERENCES "user" (id) ON DELETE CASCADE,
+    original_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     first_name  TEXT    NOT NULL,
     last_name   TEXT    NOT NULL,
     email       email   NOT NULL,
     is_banned   BOOLEAN NOT NULL DEFAULT FALSE
-);
-
-CREATE TABLE lock_passport
-(
-    original_id UUID PRIMARY KEY REFERENCES "user" (id),
-    item_id     UUID NULL REFERENCES item (id) UNIQUE
 );
 
 CREATE TABLE rent
@@ -80,9 +75,22 @@ CREATE TABLE role
     name TEXT NOT NULL UNIQUE
 );
 
-CREATE TABLE user_role
+CREATE TABLE passport_role
 (
-    user_id UUID REFERENCES "user" (id),
+    user_id UUID REFERENCES "human_user_passport" (original_id),
     role_id SERIAL REFERENCES role (id),
     CONSTRAINT pk PRIMARY KEY (user_id, role_id)
 );
+
+CREATE FUNCTION create_wallet() RETURNS TRIGGER
+AS $$
+    BEGIN
+        INSERT INTO wallet (id, owner_yandex_id, balance) VALUES (gen_random_uuid(), NEW.yandex_id, 0);
+        RETURN NEW;
+        END;
+    $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER on_user_created_wallet_create
+    AFTER INSERT ON human_user_passport
+    FOR EACH ROW
+    EXECUTE FUNCTION create_wallet();

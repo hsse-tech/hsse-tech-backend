@@ -6,7 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -20,12 +22,8 @@ import java.util.UUID;
 public class HumanUserPassport {
   @Id
   @Column(name = "original_id", nullable = false)
+  @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
-
-  @MapsId
-  @OneToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "original_id", nullable = false)
-  private User user;
 
   @Column(name = "yandex_id", nullable = false)
   private Long yandexId;
@@ -48,11 +46,24 @@ public class HumanUserPassport {
   @OneToOne(mappedBy = "owner")
   private Wallet wallet;
 
-  public HumanUserPassport(Long yandexId, String firstName, String lastName, String email, User user) {
+  @ManyToMany
+  @JoinTable(name = "passport_role",
+          joinColumns = @JoinColumn(name = "user_id"),
+          inverseJoinColumns = @JoinColumn(name = "role_id"))
+  private Set<Role> roles = new LinkedHashSet<>();
+
+  public HumanUserPassport(Long yandexId, String firstName, String lastName, String email) {
     this.yandexId = yandexId;
     this.firstName = firstName;
     this.lastName = lastName;
     this.email = email;
-    this.user = user;
+  }
+
+  public boolean hasRole(Role role) {
+    return hasRole(role.getName());
+  }
+
+  public boolean hasRole(String roleName) {
+    return roles.stream().anyMatch(r -> r.getName().equals(roleName));
   }
 }

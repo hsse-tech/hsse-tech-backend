@@ -1,6 +1,7 @@
 package com.mipt.hsse.hssetechbackend.rent.services;
 
-import com.mipt.hsse.hssetechbackend.auxiliary.VerificationResult;
+import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
+import com.mipt.hsse.hssetechbackend.utils.VerificationResult;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemRepository;
@@ -54,7 +55,7 @@ public class RentService {
   }
 
   @Transactional
-  public Rent createRent(CreateRentRequest request) {
+  public Rent createRent(UUID userId, CreateRentRequest request) {
     Item item =
         itemRepository
             .findById(request.itemId())
@@ -62,8 +63,8 @@ public class RentService {
 
     HumanUserPassport renter =
         userRepository
-            .findById(request.userId())
-            .orElseThrow(() -> new EntityNotFoundException(User.class, request.userId()));
+            .findById(userId)
+            .orElseThrow(() -> new EntityNotFoundException(HumanUserPassport.class, userId));
 
     Rent rent = new Rent(request.startTime(), request.endTime(), renter, item);
 
@@ -110,7 +111,7 @@ public class RentService {
 
   public void startRent(UUID rentId) {
     Optional<Rent> rentOpt = rentRepository.findById(rentId);
-    Rent rent = rentOpt.orElseThrow(EntityNotFoundException::new);
+    Rent rent = rentOpt.orElseThrow(() -> EntityNotFoundException.rentNotFound(rentId));
 
     verifyRentStart(rent).throwIfInvalid();
 
@@ -121,7 +122,7 @@ public class RentService {
 
   public void endRent(UUID rentId) {
     Optional<Rent> rentOpt = rentRepository.findById(rentId);
-    Rent rent = rentOpt.orElseThrow(EntityNotFoundException::new);
+    Rent rent = rentOpt.orElseThrow(() -> EntityNotFoundException.rentNotFound(rentId));
 
     verifyRentEnd(rent).throwIfInvalid();
 
@@ -144,7 +145,7 @@ public class RentService {
 
   public void confirmRentFinish(UUID rentId, byte[] photoBytes) {
     Optional<Rent> rentOpt = rentRepository.findById(rentId);
-    Rent rent = rentOpt.orElseThrow(EntityNotFoundException::new);
+    Rent rent = rentOpt.orElseThrow(() -> EntityNotFoundException.rentNotFound(rentId));
 
     verifyConfirmRentFinish(rent).throwIfInvalid();
 
@@ -157,7 +158,7 @@ public class RentService {
 
   @Transactional
   public void updateRent(UUID rentId, UpdateRentRequest request) {
-    Rent rent = rentRepository.findById(rentId).orElseThrow(EntityNotFoundException::new);
+    Rent rent = rentRepository.findById(rentId).orElseThrow(() -> EntityNotFoundException.rentNotFound(rentId));
 
     if (rent.getPlannedStart().isBefore(Instant.now())) {
       throw new VerificationFailedException(
@@ -174,7 +175,7 @@ public class RentService {
             rent.getItem(), request.newStartTime(), request.newEndTime());
     if (getIntersectingRents.size() > 1
         || getIntersectingRents.size() == 1
-            && getIntersectingRents.get(0).getId() != rent.getId()) {
+            && getIntersectingRents.getFirst().getId() != rent.getId()) {
       throw new VerificationFailedException(
           "The new time bounds intersect with already existing rent(-s) of the same item");
     }

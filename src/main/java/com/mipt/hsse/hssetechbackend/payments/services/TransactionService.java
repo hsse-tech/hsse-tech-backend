@@ -1,12 +1,11 @@
 package com.mipt.hsse.hssetechbackend.payments.services;
 
+import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.data.entities.ClientTransactionStatus;
 import com.mipt.hsse.hssetechbackend.data.entities.Transaction;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaTransactionRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaWalletRepository;
 import com.mipt.hsse.hssetechbackend.payments.exceptions.TransactionManipulationException;
-import com.mipt.hsse.hssetechbackend.payments.exceptions.TransactionNotFoundException;
-import com.mipt.hsse.hssetechbackend.payments.exceptions.WalletNotFoundException;
 import com.mipt.hsse.hssetechbackend.payments.exceptions.WalletUpdatingException;
 import com.mipt.hsse.hssetechbackend.payments.services.dto.TransactionInfo;
 import org.springframework.stereotype.Service;
@@ -34,7 +33,7 @@ public class TransactionService implements TransactionServiceBase {
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public Transaction createTransaction(TransactionInfo transactionInfo) {
     var wallet = jpaWalletRepository.findById(transactionInfo.walletId())
-            .orElseThrow(() -> new WalletNotFoundException("Wallet not found to assign a new transaction"));
+            .orElseThrow(() -> EntityNotFoundException.walletNotFound(transactionInfo.walletId()));
 
     if (wallet.getBalance().compareTo(transactionInfo.amount()) < 0) {
       throw new WalletUpdatingException("Not enough money");
@@ -53,7 +52,7 @@ public class TransactionService implements TransactionServiceBase {
   @Transactional(propagation = Propagation.REQUIRED)
   public void commitTransaction(UUID id) throws TransactionManipulationException {
     var target = jpaTransactionRepository.findById(id)
-            .orElseThrow(TransactionNotFoundException::new);
+            .orElseThrow(() -> EntityNotFoundException.transactionNotFound(id));
 
     if (target.getStatus() != ClientTransactionStatus.IN_PROCESS) {
       throw new TransactionManipulationException();
@@ -70,7 +69,7 @@ public class TransactionService implements TransactionServiceBase {
   @Transactional(propagation = Propagation.REQUIRED)
   public void failTransaction(UUID id) throws TransactionManipulationException {
     var targetTransaction = jpaTransactionRepository.findById(id)
-            .orElseThrow(TransactionNotFoundException::new);
+            .orElseThrow(() -> EntityNotFoundException.transactionNotFound(id));
 
     if (targetTransaction.getStatus() != ClientTransactionStatus.IN_PROCESS) {
       throw new TransactionManipulationException();

@@ -10,7 +10,7 @@ import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepositoryOnDrive;
-import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
+import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.VerificationFailedException;
 import com.mipt.hsse.hssetechbackend.rent.rentprocessing.createrentprocessing.UnoccupiedTimeCreateRentProcessor;
 import com.mipt.hsse.hssetechbackend.rent.services.RentService;
@@ -37,14 +37,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class ConfirmRentFinishTest extends DatabaseSuite {
-  private final User user = new User("test");
   private final HumanUserPassport userPassport =
-      new HumanUserPassport(123L, "Test", "User", "test@phystech.edu", user);
+      new HumanUserPassport(123L, "Test", "User", "test@phystech.edu");
   private final ItemType itemType = new ItemType(BigDecimal.ZERO, "TestItemType", 60, true);
   private final Item item = new Item("TestItem", itemType);
   @Autowired private JpaItemRepository itemRepository;
   @Autowired private JpaItemTypeRepository itemTypeRepository;
-  @Autowired private JpaUserRepository userRepository;
   @Autowired private JpaHumanUserPassportRepository humanUserPassportRepository;
   @MockBean private JpaRentRepository rentRepository;
   @MockBean private PhotoRepository photoRepository;
@@ -53,7 +51,6 @@ class ConfirmRentFinishTest extends DatabaseSuite {
   @BeforeEach
   void save() {
     humanUserPassportRepository.save(userPassport);
-    userRepository.save(user);
     itemTypeRepository.save(itemType);
     itemRepository.save(item);
   }
@@ -62,7 +59,6 @@ class ConfirmRentFinishTest extends DatabaseSuite {
   public void clear() {
     itemTypeRepository.deleteAll();
     itemRepository.deleteAll();
-    userRepository.deleteAll();
     humanUserPassportRepository.deleteAll();
   }
 

@@ -23,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 class JpaRentRepositoryTest extends DatabaseSuite {
   @Autowired private JpaRentRepository rentRepository;
   @Autowired private JpaItemRepository itemRepository;
-  @Autowired private JpaUserRepository userRepository;
   @Autowired private JpaItemTypeRepository itemTypeRepository;
   @Autowired private JpaHumanUserPassportRepository humanRepository;
 
@@ -43,8 +42,7 @@ class JpaRentRepositoryTest extends DatabaseSuite {
   Instant largeRentFrom = Instant.ofEpochSecond(0);
   Instant largeRentTo = Instant.ofEpochSecond(150);
 
-  private final User user = new User("user");
-  private final HumanUserPassport humanUser = new HumanUserPassport(123L, "Test", "User", "test@phystech.edu", user);
+  private final HumanUserPassport humanUser = new HumanUserPassport(123L, "Test", "User", "test@phystech.edu");
   private final ItemType itemType = new ItemType(BigDecimal.ZERO, "name", 200, false);
   private final Item item1 = new Item("item1", itemType);
   private final Item item2 = new Item("item2", itemType);
@@ -63,13 +61,11 @@ class JpaRentRepositoryTest extends DatabaseSuite {
     itemRepository.save(item1);
     itemRepository.save(item2);
     humanRepository.save(humanUser);
-    userRepository.save(user);
   }
 
   @AfterEach
   public void clear() {
     rentRepository.deleteAll();
-    userRepository.deleteAll();
     itemRepository.deleteAll();
     itemTypeRepository.deleteAll();
     humanRepository.deleteAll();

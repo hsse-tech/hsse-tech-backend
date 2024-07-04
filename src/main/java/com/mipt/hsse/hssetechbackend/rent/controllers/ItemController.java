@@ -11,7 +11,7 @@ import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetItemResponse;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetShortRentResponse;
-import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
+import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.rent.services.ItemService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -25,6 +25,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,14 +34,13 @@ import org.springframework.web.bind.annotation.*;
 public class ItemController {
   private final ItemService itemService;
 
-  // TODO: Lock service is not implemented yet
-  // private final LockService lockService;
 
   public ItemController(ItemService itemService) {
     this.itemService = itemService;
   }
 
   @PostMapping
+  @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<Item> createItem(@Valid @RequestBody CreateItemRequest request) {
     Item createdItem = itemService.createItem(request);
     return new ResponseEntity<>(createdItem, HttpStatus.CREATED);
@@ -48,6 +48,7 @@ public class ItemController {
 
   @PostMapping(value = "/{item_id}/photo", consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @ResponseStatus(HttpStatus.OK)
+  @PreAuthorize("hasRole('ADMIN')")
   public void pinItemThumbnailPhoto(
       @PathVariable("item_id") UUID itemId, HttpServletRequest photoServletRequest)
       throws IOException {
@@ -64,6 +65,7 @@ public class ItemController {
 
   @PatchMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
+  @PreAuthorize("hasRole('ADMIN')")
   public void updateItem(
       @PathVariable("id") UUID itemId, @Valid @RequestBody UpdateItemRequest request) {
       itemService.updateItem(itemId, request);
@@ -74,7 +76,7 @@ public class ItemController {
       @PathVariable("itemId") UUID itemId,
       @RequestParam(value = "loadRentInfo", defaultValue = "false") boolean loadRentInfo) {
     Optional<Item> itemOpt = itemService.getItem(itemId);
-    Item item = itemOpt.orElseThrow(EntityNotFoundException::new);
+    Item item = itemOpt.orElseThrow(() -> EntityNotFoundException.itemNotFound(itemId));
 
     GetItemResponse response;
     if (loadRentInfo) {
@@ -114,17 +116,18 @@ public class ItemController {
 
   @PostMapping("/{item_id}/try-open")
   public void provideAccessToItemIfAllowed(@PathVariable("item_id") UUID itemId) {
-    if (!itemService.existsById(itemId)) throw new EntityNotFoundException();
+    if (!itemService.existsById(itemId)) throw EntityNotFoundException.itemNotFound(itemId);
 
     itemService.provideAccessToItem(itemId);
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @DeleteMapping("/{itemId}")
   public void deleteItem(@PathVariable("itemId") UUID itemId) throws IOException {
     itemService.deleteItem(itemId);
   }
 
-  @ExceptionHandler({EntityNotFoundException.class, PhotoAlreadyExistsException.class, PhotoNotFoundException.class})
+  @ExceptionHandler({PhotoAlreadyExistsException.class, PhotoNotFoundException.class})
   public ResponseEntity<ApiError> exceptionHandler(
       Exception ex) {
     ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, ex.getMessage());

@@ -1,13 +1,11 @@
 package com.mipt.hsse.hssetechbackend.payments.services;
 
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
+import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.data.entities.HumanUserPassport;
-import com.mipt.hsse.hssetechbackend.data.entities.User;
 import com.mipt.hsse.hssetechbackend.data.entities.Wallet;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepository;
-import com.mipt.hsse.hssetechbackend.data.repositories.JpaUserRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaWalletRepository;
-import com.mipt.hsse.hssetechbackend.payments.exceptions.WalletNotFoundException;
 import com.mipt.hsse.hssetechbackend.payments.exceptions.WalletUpdatingException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,9 +28,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @Import({WalletService.class})
 public class WalletServiceSettingBalanceTest extends DatabaseSuite {
   @Autowired
-  private JpaUserRepository userRepository;
-
-  @Autowired
   private JpaWalletRepository walletRepository;
 
   @Autowired
@@ -45,23 +40,16 @@ public class WalletServiceSettingBalanceTest extends DatabaseSuite {
 
   @BeforeEach
   public void setUp() {
-    var testUser = new User("test");
-    var testUserPassport = new HumanUserPassport(123L, "Test", "User", "test@phystech.edu", testUser);
-    testWallet = new Wallet();
-
-    testWallet.setOwner(testUserPassport);
-    testWallet.setBalance(BigDecimal.ZERO);
-    testUserPassport.setUser(testUser);
-
+    var testUserPassport = new HumanUserPassport(123L, "Test", "User", "test@phystech.edu");
     passportRepository.save(testUserPassport);
-    userRepository.save(testUser);
+    testWallet = walletRepository.findByOwnerId(testUserPassport.getId());
+    testWallet.setBalance(BigDecimal.valueOf(0));
     walletRepository.save(testWallet);
   }
 
   @AfterEach
   public void clear() {
     passportRepository.deleteAll();
-    userRepository.deleteAll();
     walletRepository.deleteAll();
   }
 
@@ -82,6 +70,6 @@ public class WalletServiceSettingBalanceTest extends DatabaseSuite {
 
   @Test
   public void testChangingBalanceWalletNotFound() {
-    assertThrows(WalletNotFoundException.class, () -> walletService.changeWalletBalanceOn(UUID.randomUUID(), BigDecimal.ZERO));
+    assertThrows(EntityNotFoundException.class, () -> walletService.changeWalletBalanceOn(UUID.randomUUID(), BigDecimal.ZERO));
   }
 }

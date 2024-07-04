@@ -10,9 +10,11 @@ import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoAlreadyExistsException;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepository;
+import com.mipt.hsse.hssetechbackend.lock.exceptions.ItemToLockCouplingException;
+import com.mipt.hsse.hssetechbackend.lock.services.LockService;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
-import com.mipt.hsse.hssetechbackend.rent.exceptions.EntityNotFoundException;
+import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
@@ -32,7 +34,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @DataJpaTest
-@Import(ItemService.class)
+@Import({ItemService.class, LockService.class})
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class ItemServiceTest extends DatabaseSuite {
@@ -40,10 +42,11 @@ class ItemServiceTest extends DatabaseSuite {
   @Autowired private ItemService itemService;
   @Autowired private JpaItemTypeRepository itemTypeRepository;
   @Autowired private JpaItemRepository itemRepository;
-  @Autowired private JpaUserRepository userRepository;
   @Autowired private JpaHumanUserPassportRepository humanUserPassportRepository;
   @Autowired private JpaRentRepository rentRepository;
   @MockBean private PhotoRepository photoRepository;
+  @Autowired
+  private LockService lockService;
 
   @BeforeEach
   void save() {
@@ -108,10 +111,8 @@ class ItemServiceTest extends DatabaseSuite {
   void getFutureRents() {
     final String displayName = "Display name";
 
-    User user = new User("user");
-
     HumanUserPassport humanUserPassport =
-        new HumanUserPassport(123L, "firstName", "lastName", "test@gmail.com", user);
+        new HumanUserPassport(123L, "firstName", "lastName", "test@gmail.com");
     humanUserPassport = humanUserPassportRepository.save(humanUserPassport);
 
     Item item = new Item(displayName, itemType);
@@ -151,11 +152,10 @@ class ItemServiceTest extends DatabaseSuite {
     List<Rent> futureRentsOfItem = itemService.getFutureRentsOfItem(item.getId());
     assertEquals(1, futureRentsOfItem.size());
 
-    Rent retrievedRent = futureRentsOfItem.get(0);
+    Rent retrievedRent = futureRentsOfItem.getFirst();
     assertEquals(rentAfterNow.getId(), retrievedRent.getId());
 
     rentRepository.deleteAll();
-    userRepository.deleteAll();
     itemRepository.deleteAll();
   }
 
@@ -232,5 +232,18 @@ class ItemServiceTest extends DatabaseSuite {
     // Delete item; expected to also delete photo
     itemService.deleteItem(uuid);
     verify(photoRepository).deletePhoto(eq(PhotoRepository.PhotoType.ITEM_THUMBNAIL), eq(uuid));
+  }
+
+  @Test
+  void testProvideAccessToItem() throws ItemToLockCouplingException {
+    var createItemRequest = new CreateItemRequest("item name", itemType.getId());
+    UUID itemId = itemService.createItem(createItemRequest).getId();
+
+    var lock = lockService.createLock();
+    lockService.addItemToLock(lock.getId(), itemId);
+
+    assertFalse(lockService.isLockOpen(lock.getId()));
+    itemService.provideAccessToItem(itemId);
+    assertTrue(lockService.isLockOpen(lock.getId()));
   }
 }
