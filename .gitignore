@@ -34,3 +34,5 @@ build/
 
 ### Miscellaneous ###
 *.log
+
+application-local.properties
