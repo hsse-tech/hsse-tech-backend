@@ -8,7 +8,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 class PhotoRepositoryOnDriveTest {
-  private final PhotoRepository photoRepository = new PhotoRepositoryOnDrive();
+  private final PhotoRepository photoRepository = new PhotoRepositoryOnDrive("photos");
 
   @Test
   public void testCreatePhoto() throws IOException, NoSuchAlgorithmException {
