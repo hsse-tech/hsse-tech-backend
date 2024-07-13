@@ -1,5 +1,10 @@
 name: Pull request test
-on: pull_request
+
+on:
+  push:
+    branches: ["master", "dev"]
+  pull_request:
+    branches: ["master", "dev"]
 
 jobs:
   mvn-verify:
@@ -14,4 +19,3 @@ jobs:
           architecture: x64
       - name: Build Maven
         run: mvn verify
-        
