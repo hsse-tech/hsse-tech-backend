@@ -2,6 +2,7 @@ package com.mipt.hsse.hssetechbackend.oauth.services;
 
 import com.mipt.hsse.hssetechbackend.data.entities.HumanUserPassport;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepository;
+import com.mipt.hsse.hssetechbackend.users.administation.RolesServiceBase;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -15,9 +16,11 @@ public class UserPassportService implements UserPassportServiceBase {
   private static final String YANDEX_ID_ATTR = "id";
 
   private final JpaHumanUserPassportRepository passportRepository;
+  private final RolesServiceBase rolesService;
 
-  public UserPassportService(JpaHumanUserPassportRepository passportRepository) {
+  public UserPassportService(JpaHumanUserPassportRepository passportRepository, RolesServiceBase rolesService) {
     this.passportRepository = passportRepository;
+    this.rolesService = rolesService;
   }
 
   @Override
@@ -27,6 +30,7 @@ public class UserPassportService implements UserPassportServiceBase {
 
     if (targetPassport == null) {
       targetPassport = passportRepository.save(generatePassport(user));
+      rolesService.setUserDefaultRole(targetPassport.getId());
     }
 
     return targetPassport;

@@ -102,7 +102,7 @@ public class RolesService implements RolesServiceBase {
             .orElseThrow(
                 () -> EntityNotFoundException.userNotFound(userId));
 
-    if (targetUser.getRoles().contains(superAdminRole)) {
+    if (targetUser.getRoles().contains(superAdminRole) || targetUser.getRoles().contains(adminRole)) {
       return;
     }
 
@@ -127,5 +127,22 @@ public class RolesService implements RolesServiceBase {
 
     adminRole.removeUser(targetUser);
     roleRepository.save(adminRole);
+  }
+
+  @Override
+  public void setUserDefaultRole(UUID userId) {
+    var miptUserRole = roleRepository.findByName(MIPT_USER_ROLE_NAME);
+    var targetUser =
+            passportRepository
+                    .findById(userId)
+                    .orElseThrow(
+                            () -> EntityNotFoundException.userNotFound(userId));
+
+    if (targetUser.getRoles().contains(miptUserRole)) {
+      return;
+    }
+
+    miptUserRole.addUser(targetUser);
+    roleRepository.save(miptUserRole);
   }
 }
