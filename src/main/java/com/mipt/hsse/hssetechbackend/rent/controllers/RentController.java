@@ -43,24 +43,27 @@ public class RentController {
   }
 
   @DeleteMapping("/{rent_id}")
-  public void deleteRent(@PathVariable("rent_id") UUID rentId) {
+  public ResponseEntity<Void> deleteRent(@PathVariable("rent_id") UUID rentId) {
     rentService.deleteRent(rentId);
+    return ResponseEntity.ok().build();
   }
 
   @PatchMapping("/{rent_id}")
   @ResponseStatus(HttpStatus.OK)
-  public void updateRent(
+  public ResponseEntity<Void> updateRent(
       @PathVariable("rent_id") UUID rentId, @Valid @RequestBody UpdateRentRequest request) {
-      rentService.updateRent(rentId, request);
+    rentService.updateRent(rentId, request);
+    return ResponseEntity.ok().build();
   }
 
   @PostMapping(value = "/{rent_id}/confirm", consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  public void pinPhotoConfirmation(
+  public ResponseEntity<Void> pinPhotoConfirmation(
       @PathVariable("rent_id") UUID rentId, HttpServletRequest photoServletRequest)
       throws IOException {
     byte[] photoBytes = photoServletRequest.getInputStream().readAllBytes();
 
     rentService.confirmRentFinish(rentId, photoBytes);
+    return ResponseEntity.ok().build();
   }
 
   @GetMapping("/{rent_id}/confirm")
@@ -76,14 +79,16 @@ public class RentController {
 
   @ResponseStatus(HttpStatus.OK)
   @PostMapping("{rent_id}/begin")
-  public void startRent(@PathVariable("rent_id") UUID rentId) {
+  public ResponseEntity<Void> startRent(@PathVariable("rent_id") UUID rentId) {
     rentService.startRent(rentId);
+    return ResponseEntity.ok().build();
   }
 
   @PostMapping("{rent_id}/end")
   @ResponseStatus(HttpStatus.OK)
-  public void endRent(@PathVariable("rent_id") UUID rentId) {
+  public ResponseEntity<Void> endRent(@PathVariable("rent_id") UUID rentId) {
     rentService.endRent(rentId);
+    return ResponseEntity.ok().build();
   }
 
   @ExceptionHandler(VerificationFailedException.class)

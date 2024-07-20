@@ -49,12 +49,13 @@ public class ItemController {
   @PostMapping(value = "/{item_id}/photo", consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @ResponseStatus(HttpStatus.OK)
   @PreAuthorize("hasRole('ADMIN')")
-  public void pinItemThumbnailPhoto(
+  public ResponseEntity<Void> pinItemThumbnailPhoto(
       @PathVariable("item_id") UUID itemId, HttpServletRequest photoServletRequest)
       throws IOException {
     byte[] photoBytes = photoServletRequest.getInputStream().readAllBytes();
 
     itemService.saveItemPhoto(itemId, photoBytes);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @GetMapping(value = "/{item_id}/photo")
@@ -66,9 +67,10 @@ public class ItemController {
   @PatchMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @PreAuthorize("hasRole('ADMIN')")
-  public void updateItem(
+  public ResponseEntity<Void> updateItem(
       @PathVariable("id") UUID itemId, @Valid @RequestBody UpdateItemRequest request) {
       itemService.updateItem(itemId, request);
+      return ResponseEntity.ok().build();
   }
 
   @GetMapping("/{itemId}")
@@ -115,16 +117,18 @@ public class ItemController {
   }
 
   @PostMapping("/{item_id}/try-open")
-  public void provideAccessToItemIfAllowed(@PathVariable("item_id") UUID itemId) {
+  public ResponseEntity<Void> provideAccessToItemIfAllowed(@PathVariable("item_id") UUID itemId) {
     if (!itemService.existsById(itemId)) throw EntityNotFoundException.itemNotFound(itemId);
 
     itemService.provideAccessToItem(itemId);
+    return ResponseEntity.ok().build();
   }
 
   @PreAuthorize("hasRole('ADMIN')")
   @DeleteMapping("/{itemId}")
-  public void deleteItem(@PathVariable("itemId") UUID itemId) throws IOException {
+  public ResponseEntity<Void> deleteItem(@PathVariable("itemId") UUID itemId) throws IOException {
     itemService.deleteItem(itemId);
+    return ResponseEntity.ok().build();
   }
 
   @ExceptionHandler({PhotoAlreadyExistsException.class, PhotoNotFoundException.class})

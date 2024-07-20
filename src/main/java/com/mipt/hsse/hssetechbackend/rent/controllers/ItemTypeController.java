@@ -35,16 +35,18 @@ public class ItemTypeController {
   @PatchMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN')")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void updateItemType(
+  public ResponseEntity<Void> updateItemType(
       @PathVariable("id") UUID itemTypeId, @Valid @RequestBody UpdateItemTypeRequest request) {
-      itemTypeService.updateItemType(itemTypeId, request);
+    itemTypeService.updateItemType(itemTypeId, request);
+    return ResponseEntity.ok().build();
   }
 
   @DeleteMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN')")
   @ResponseStatus(HttpStatus.OK)
-  public void deleteItemType(@PathVariable("id") UUID itemTypeId) {
+  public ResponseEntity<Void> deleteItemType(@PathVariable("id") UUID itemTypeId) {
     itemTypeService.deleteItemType(itemTypeId);
+    return ResponseEntity.ok().build();
   }
 
   @GetMapping("/{id}")
