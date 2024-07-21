@@ -1,8 +1,5 @@
 package com.mipt.hsse.hssetechbackend.rent.services;
 
-import com.google.zxing.WriterException;
-import com.google.zxing.client.j2se.MatrixToImageWriter;
-import com.google.zxing.common.BitMatrix;
 import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.data.entities.Item;
 import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
@@ -16,15 +13,11 @@ import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepo
 import com.mipt.hsse.hssetechbackend.lock.services.LockServiceBase;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
-import com.mipt.hsse.hssetechbackend.rent.qrcodegeneration.QrCodeManager;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import javax.imageio.ImageIO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ServerErrorException;
@@ -104,17 +97,17 @@ public class ItemService {
     lockService.openLock(lock.getId());
   }
 
-  public byte[] getQrCodeForItem(UUID itemId, int width, int height)
-      throws WriterException, IOException {
-    String targetLink = String.format("https://%s/rent/%s/status", appDomain, itemId.toString());
-
-    BitMatrix qrCodeMatrix = QrCodeManager.createQR(targetLink, width, height);
-    BufferedImage image = MatrixToImageWriter.toBufferedImage(qrCodeMatrix);
-
-    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-    ImageIO.write(image, "png", byteArrayOutputStream);
-    return byteArrayOutputStream.toByteArray();
-  }
+  //
+  //  public byte[] getQrCodeForItem(UUID itemId, int width, int height)
+  //      throws WriterException, IOException {
+  //    BitMatrix qrCodeMatrix = QrCodeManager.createQR(buildLinkForItemQrCode(itemId), width,
+  // height);
+  //    BufferedImage image = MatrixToImageWriter.toBufferedImage(qrCodeMatrix);
+  //
+  //    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+  //    ImageIO.write(image, "png", byteArrayOutputStream);
+  //    return byteArrayOutputStream.toByteArray();
+  //  }
 
   public List<Item> getAllItems() {
     return itemRepository.findAll();
@@ -144,7 +137,7 @@ public class ItemService {
     }
   }
 
-  public Optional<Rent> getCurrentRentOfItem(UUID itemId) {
-    return Optional.ofNullable(rentRepository.getCurrentRentOfItem(itemId));
-  }
+  //  private String buildLinkForItemQrCode(UUID itemId) {
+  //
+  //  }
 }
