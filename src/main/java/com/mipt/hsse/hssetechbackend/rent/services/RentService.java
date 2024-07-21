@@ -79,9 +79,7 @@ public class RentService {
       }
     }
 
-    rentRepository.save(rent);
-
-    return rent;
+    return rentRepository.save(rent);
   }
 
   @Transactional

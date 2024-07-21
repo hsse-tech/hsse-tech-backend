@@ -69,7 +69,7 @@ public class LockController {
   }
 
   @PostMapping("{id}/open")
-  public ResponseEntity<Void> openLock(@PathVariable("id") UUID lockId, @AuthenticationPrincipal OAuth2User principal) {
+  public ResponseEntity<Void> tryOpenLock(@PathVariable("id") UUID lockId, @AuthenticationPrincipal OAuth2User principal) {
     var userId = OAuth2UserHelper.getUserId(principal);
     if (lockService.canUserOpenLock(userId, lockId)){
       lockService.openLock(lockId);

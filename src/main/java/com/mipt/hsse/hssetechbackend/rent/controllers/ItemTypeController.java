@@ -1,9 +1,11 @@
 package com.mipt.hsse.hssetechbackend.rent.controllers;
 
+import com.mipt.hsse.hssetechbackend.apierrorhandling.ApiError;
 import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemTypeRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemTypeRequest;
 import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
+import com.mipt.hsse.hssetechbackend.rent.exceptions.UniqueConstraintViolationException;
 import com.mipt.hsse.hssetechbackend.rent.services.ItemTypeService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -59,5 +61,11 @@ public class ItemTypeController {
   @GetMapping
   public List<ItemType> getAllItemTypes() {
     return itemTypeService.getAllItemTypes();
+  }
+
+  @ExceptionHandler(UniqueConstraintViolationException.class)
+  public ResponseEntity<ApiError> exceptionHandlerUniqueConstraintViolation(UniqueConstraintViolationException ex) {
+    ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, ex.getMessage());
+    return ResponseEntity.badRequest().body(apiError);
   }
 }
