@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoNotFoundException;
 import com.mipt.hsse.hssetechbackend.oauth.config.SecurityConfig;
@@ -19,14 +20,11 @@ import com.mipt.hsse.hssetechbackend.oauth.services.UserPassportServiceBase;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetItemResponse;
-import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.rent.services.ItemService;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,17 +43,13 @@ class ItemControllerTest {
   private static final String BASE_MAPPING = "/api/renting/item";
   private final ItemType itemType = new ItemType(BigDecimal.ZERO, "Item type name", 60, false);
 
-  @Autowired
-  private MockMvc mockMvc;
+  @Autowired private MockMvc mockMvc;
 
-  @Autowired
-  private ObjectMapper objectMapper;
+  @Autowired private ObjectMapper objectMapper;
 
-  @MockBean
-  private ItemService itemService;
+  @MockBean private ItemService itemService;
 
-  @MockBean
-  private UserPassportServiceBase passportService;
+  @MockBean private UserPassportServiceBase passportService;
 
   @BeforeEach
   void setup() {
@@ -106,12 +100,15 @@ class ItemControllerTest {
     String requestStr = objectMapper.writeValueAsString(request);
 
     mockMvc
-        .perform(post(BASE_MAPPING)
+        .perform(
+            post(BASE_MAPPING)
                 .content(requestStr)
                 .contentType(MediaType.APPLICATION_JSON)
-                .with(oauth2Login().authorities(
-                        new SimpleGrantedAuthority("ROLE_MIPT_USER"),
-                        new SimpleGrantedAuthority("ROLE_ADMIN"))))
+                .with(
+                    oauth2Login()
+                        .authorities(
+                            new SimpleGrantedAuthority("ROLE_MIPT_USER"),
+                            new SimpleGrantedAuthority("ROLE_ADMIN"))))
         .andDo(print())
         .andExpect(status().isBadRequest());
   }
@@ -124,10 +121,14 @@ class ItemControllerTest {
     doNothing().when(itemService).saveItemPhoto(any(), any());
 
     UUID uuid = UUID.randomUUID();
-    mockMvc.perform(post(BASE_MAPPING + "/" + uuid + "/photo")
-                    .content(photoBytes)
-                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .with(oauth2Login().authorities(
+    mockMvc
+        .perform(
+            post(BASE_MAPPING + "/" + uuid + "/photo")
+                .content(photoBytes)
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .with(
+                    oauth2Login()
+                        .authorities(
                             new SimpleGrantedAuthority("ROLE_MIPT_USER"),
                             new SimpleGrantedAuthority("ROLE_ADMIN"))))
         .andDo(print())
@@ -144,13 +145,16 @@ class ItemControllerTest {
     when(itemService.getItemPhoto(any())).thenReturn(photoBytes);
 
     UUID uuid = UUID.randomUUID();
-    var mvcResult = mockMvc.perform(
-            get(BASE_MAPPING + "/" + uuid + "/photo")
-                    .with(oauth2Login().authorities(
-                            new SimpleGrantedAuthority("ROLE_MIPT_USER"))))
-        .andDo(print())
+    var mvcResult =
+        mockMvc
+            .perform(
+                get(BASE_MAPPING + "/" + uuid + "/photo")
+                    .with(oauth2Login().authorities(new SimpleGrantedAuthority("ROLE_MIPT_USER"))))
+            .andDo(print())
             .andExpect(status().isOk())
-            .andReturn().getResponse().getContentAsByteArray();
+            .andReturn()
+            .getResponse()
+            .getContentAsByteArray();
 
     verify(itemService).getItemPhoto(eq(uuid));
     assertArrayEquals(photoBytes, mvcResult);
@@ -161,10 +165,11 @@ class ItemControllerTest {
   void testBadRequestOnGetNonExistingPhoto() throws Exception {
     when(itemService.getItemPhoto(any())).thenThrow(PhotoNotFoundException.class);
 
-    mockMvc.perform(get(BASE_MAPPING + "/" + UUID.randomUUID() + "/photo")
-                      .with(oauth2Login().authorities(
-                              new SimpleGrantedAuthority("ROLE_MIPT_USER"))))
-            .andExpect(status().isBadRequest());
+    mockMvc
+        .perform(
+            get(BASE_MAPPING + "/" + UUID.randomUUID() + "/photo")
+                .with(oauth2Login().authorities(new SimpleGrantedAuthority("ROLE_MIPT_USER"))))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
@@ -173,10 +178,13 @@ class ItemControllerTest {
     UUID uuid = UUID.randomUUID();
 
     mockMvc
-        .perform(delete(BASE_MAPPING + "/{itemId}", uuid.toString())
-                  .with(oauth2Login().authorities(
-                          new SimpleGrantedAuthority("ROLE_MIPT_USER"),
-                          new SimpleGrantedAuthority("ROLE_ADMIN"))))
+        .perform(
+            delete(BASE_MAPPING + "/{itemId}", uuid.toString())
+                .with(
+                    oauth2Login()
+                        .authorities(
+                            new SimpleGrantedAuthority("ROLE_MIPT_USER"),
+                            new SimpleGrantedAuthority("ROLE_ADMIN"))))
         .andDo(print())
         .andExpect(status().isOk());
 
@@ -195,8 +203,7 @@ class ItemControllerTest {
         mockMvc
             .perform(
                 get(BASE_MAPPING + "/{itemId}?loadRentInfo=false", UUID.randomUUID().toString())
-                        .with(oauth2Login().authorities(
-                                new SimpleGrantedAuthority("ROLE_MIPT_USER"))))
+                    .with(oauth2Login().authorities(new SimpleGrantedAuthority("ROLE_MIPT_USER"))))
             .andDo(print())
             .andExpect(status().isOk())
             .andReturn();
@@ -230,9 +237,9 @@ class ItemControllerTest {
 
     MvcResult mvcResult =
         mockMvc
-            .perform(get(BASE_MAPPING + "/{itemId}?loadRentInfo=true", UUID.randomUUID())
-                      .with(oauth2Login().authorities(
-                              new SimpleGrantedAuthority("ROLE_MIPT_USER"))))
+            .perform(
+                get(BASE_MAPPING + "/{itemId}?loadRentInfo=true", UUID.randomUUID())
+                    .with(oauth2Login().authorities(new SimpleGrantedAuthority("ROLE_MIPT_USER"))))
             .andDo(print())
             .andExpect(status().isOk())
             .andReturn();
@@ -251,9 +258,9 @@ class ItemControllerTest {
     when(itemService.getItem(any())).thenReturn(Optional.empty());
 
     mockMvc
-        .perform(get(BASE_MAPPING + "/{itemId}", UUID.randomUUID().toString())
-                .with(oauth2Login().authorities(
-                        new SimpleGrantedAuthority("ROLE_MIPT_USER"))))
+        .perform(
+            get(BASE_MAPPING + "/{itemId}", UUID.randomUUID().toString())
+                .with(oauth2Login().authorities(new SimpleGrantedAuthority("ROLE_MIPT_USER"))))
         .andDo(print())
         .andExpect(status().isBadRequest());
   }
@@ -276,9 +283,11 @@ class ItemControllerTest {
             patch(BASE_MAPPING + "/{id}", uuid.toString())
                 .content(requestStr)
                 .contentType(MediaType.APPLICATION_JSON)
-                .with(oauth2Login().authorities(
-                        new SimpleGrantedAuthority("ROLE_MIPT_USER"),
-                        new SimpleGrantedAuthority("ROLE_ADMIN"))))
+                .with(
+                    oauth2Login()
+                        .authorities(
+                            new SimpleGrantedAuthority("ROLE_MIPT_USER"),
+                            new SimpleGrantedAuthority("ROLE_ADMIN"))))
         .andDo(print())
         .andExpect(status().isNoContent());
 
@@ -298,33 +307,36 @@ class ItemControllerTest {
             patch(BASE_MAPPING + "/{id}", UUID.randomUUID().toString())
                 .content(requestStr)
                 .contentType(MediaType.APPLICATION_JSON)
-                .with(oauth2Login().authorities(
-                        new SimpleGrantedAuthority("ROLE_MIPT_USER"),
-                        new SimpleGrantedAuthority("ROLE_ADMIN"))))
+                .with(
+                    oauth2Login()
+                        .authorities(
+                            new SimpleGrantedAuthority("ROLE_MIPT_USER"),
+                            new SimpleGrantedAuthority("ROLE_ADMIN"))))
         .andDo(print())
         .andExpect(status().isBadRequest());
   }
 
-  @Test
-  @WithMockUser
-  void testCreateQrCodeForItemBooking() throws Exception {
-    var initBytes = new byte[] {0, 1, 2, 3};
-    when(itemService.getQrCodeForItem(any(), anyInt(), anyInt())).thenReturn(initBytes);
-
-    var mvcResult =
-        mockMvc
-            .perform(get(BASE_MAPPING + "/{item_id}/qr", UUID.randomUUID().toString())
-                    .with(oauth2Login().authorities(
-                            new SimpleGrantedAuthority("ROLE_MIPT_USER"))))
-            .andDo(print())
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse();
-
-    byte[] responseBytes = mvcResult.getContentAsByteArray();
-    assertNotNull(responseBytes);
-    assertArrayEquals(initBytes, responseBytes);
-  }
+  //  @Test
+  //  @WithMockUser
+  //  void testCreateQrCodeMockQr() throws Exception {
+  //    var initBytes = new byte[] {0, 1, 2, 3};
+  //    when(itemService.getQrCodeForItem(any(), anyInt(), anyInt())).thenReturn(initBytes);
+  //
+  //    var mvcResult =
+  //        mockMvc
+  //            .perform(
+  //                get(BASE_MAPPING + "/{item_id}/qr", UUID.randomUUID().toString())
+  //                    .with(oauth2Login().authorities(new
+  // SimpleGrantedAuthority("ROLE_MIPT_USER"))))
+  //            .andDo(print())
+  //            .andExpect(status().isOk())
+  //            .andReturn()
+  //            .getResponse();
+  //
+  //    byte[] responseBytes = mvcResult.getContentAsByteArray();
+  //    assertNotNull(responseBytes);
+  //    assertArrayEquals(initBytes, responseBytes);
+  //  }
 
   @Test
   @WithMockUser
@@ -334,10 +346,9 @@ class ItemControllerTest {
     when(itemService.existsById(itemId)).thenReturn(true);
 
     mockMvc
-        .perform(post(BASE_MAPPING + "/{item_id}/try-open", itemId.toString())
-                  .with(oauth2Login()
-                          .authorities(
-                                  new SimpleGrantedAuthority("ROLE_MIPT_USER"))))
+        .perform(
+            post(BASE_MAPPING + "/{item_id}/try-open", itemId.toString())
+                .with(oauth2Login().authorities(new SimpleGrantedAuthority("ROLE_MIPT_USER"))))
         .andDo(print())
         .andExpect(status().isOk());
 
@@ -352,9 +363,9 @@ class ItemControllerTest {
     when(itemService.existsById(itemId)).thenReturn(false);
 
     mockMvc
-        .perform(post(BASE_MAPPING + "/{item_id}/try-open", itemId.toString())
-                  .with(oauth2Login().authorities(
-                          new SimpleGrantedAuthority("ROLE_MIPT_USER"))))
+        .perform(
+            post(BASE_MAPPING + "/{item_id}/try-open", itemId.toString())
+                .with(oauth2Login().authorities(new SimpleGrantedAuthority("ROLE_MIPT_USER"))))
         .andDo(print())
         .andExpect(status().isBadRequest());
 

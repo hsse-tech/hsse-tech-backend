@@ -1,7 +1,7 @@
 package com.mipt.hsse.hssetechbackend.rent.controllers;
 
-import com.google.zxing.WriterException;
 import com.mipt.hsse.hssetechbackend.apierrorhandling.ApiError;
+import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.apierrorhandling.RestExceptionHandler;
 import com.mipt.hsse.hssetechbackend.data.entities.Item;
 import com.mipt.hsse.hssetechbackend.data.entities.Rent;
@@ -11,7 +11,6 @@ import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetItemResponse;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetShortRentResponse;
-import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.rent.services.ItemService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -19,7 +18,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -33,7 +31,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/renting/item")
 public class ItemController {
   private final ItemService itemService;
-
 
   public ItemController(ItemService itemService) {
     this.itemService = itemService;
@@ -68,8 +65,8 @@ public class ItemController {
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<Void> updateItem(
       @PathVariable("id") UUID itemId, @Valid @RequestBody UpdateItemRequest request) {
-      itemService.updateItem(itemId, request);
-      return ResponseEntity.noContent().build();
+    itemService.updateItem(itemId, request);
+    return ResponseEntity.noContent().build();
   }
 
   @GetMapping("/{itemId}")
@@ -99,21 +96,21 @@ public class ItemController {
   @GetMapping()
   public ResponseEntity<List<GetItemResponse>> getAllItems() {
     List<Item> allItems = itemService.getAllItems();
-    List<GetItemResponse> itemsResponses =  allItems.stream().map(GetItemResponse::new).toList();
+    List<GetItemResponse> itemsResponses = allItems.stream().map(GetItemResponse::new).toList();
     return ResponseEntity.ok(itemsResponses);
   }
 
-  @GetMapping(value = "/{item_id}/qr", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  public @ResponseBody Resource getItemBookingQRCode(
-      @PathVariable("item_id") UUID itemId,
-      @Value("${item-qrcode-width}") int WIDTH,
-      @Value("${item-qrcode-height}") int HEIGHT)
-      throws IOException, WriterException {
-
-    byte[] qrCodeBytes = itemService.getQrCodeForItem(itemId, WIDTH, HEIGHT);
-
-    return new ByteArrayResource(qrCodeBytes);
-  }
+  //  @GetMapping(value = "/{item_id}/qr", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  //  public @ResponseBody Resource getItemBookingQRCode(
+  //      @PathVariable("item_id") UUID itemId,
+  //      @Value("${item-qrcode-width}") int WIDTH,
+  //      @Value("${item-qrcode-height}") int HEIGHT)
+  //      throws IOException, WriterException {
+  //
+  //    byte[] qrCodeBytes = itemService.getQrCodeForItem(itemId, WIDTH, HEIGHT);
+  //
+  //    return new ByteArrayResource(qrCodeBytes);
+  //  }
 
   @PostMapping("/{item_id}/try-open")
   public ResponseEntity<Void> provideAccessToItemIfAllowed(@PathVariable("item_id") UUID itemId) {
@@ -131,8 +128,7 @@ public class ItemController {
   }
 
   @ExceptionHandler({PhotoAlreadyExistsException.class, PhotoNotFoundException.class})
-  public ResponseEntity<ApiError> exceptionHandler(
-      Exception ex) {
+  public ResponseEntity<ApiError> exceptionHandler(Exception ex) {
     ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, ex.getMessage());
     return RestExceptionHandler.buildResponseEntity(apiError);
   }

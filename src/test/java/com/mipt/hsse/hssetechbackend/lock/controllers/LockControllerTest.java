@@ -199,7 +199,7 @@ class LockControllerTest {
 
   @Test
   @WithMockUser
-  void testOpenLockEndpoint() throws Exception {
+  void testTryOpenLockEndpoint() throws Exception {
     UUID lockId = UUID.randomUUID();
     UUID userId = OAuth2UserHelper.getUserId(commonUserPrincipal);
 
@@ -218,7 +218,7 @@ class LockControllerTest {
 
   @Test
   @WithMockUser
-  void testOpenLockEndpointForbidden() throws Exception {
+  void testTryOpenLockEndpointForbidden() throws Exception {
     UUID lockId = UUID.randomUUID();
     UUID userId = OAuth2UserHelper.getUserId(commonUserPrincipal);
 

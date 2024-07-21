@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
+import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoAlreadyExistsException;
@@ -14,7 +15,6 @@ import com.mipt.hsse.hssetechbackend.lock.exceptions.ItemToLockCouplingException
 import com.mipt.hsse.hssetechbackend.lock.services.LockService;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
-import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
@@ -45,8 +45,7 @@ class ItemServiceTest extends DatabaseSuite {
   @Autowired private JpaHumanUserPassportRepository humanUserPassportRepository;
   @Autowired private JpaRentRepository rentRepository;
   @MockBean private PhotoRepository photoRepository;
-  @Autowired
-  private LockService lockService;
+  @Autowired private LockService lockService;
 
   @BeforeEach
   void save() {
@@ -74,29 +73,31 @@ class ItemServiceTest extends DatabaseSuite {
 
   @Test
   void testSetItemThumbnailPhoto() throws Exception {
-    byte[] photoBytes = new byte[]{1, 2, 3};
+    byte[] photoBytes = new byte[] {1, 2, 3};
     Item item = new Item("test name", itemType);
     UUID uuid = itemRepository.save(item).getId();
 
     itemService.saveItemPhoto(uuid, photoBytes);
 
-    verify(photoRepository).save(eq(PhotoRepository.PhotoType.ITEM_THUMBNAIL), eq(uuid), aryEq(photoBytes));
+    verify(photoRepository)
+        .save(eq(PhotoRepository.PhotoType.ITEM_THUMBNAIL), eq(uuid), aryEq(photoBytes));
   }
 
   @Test
   void testSetItemPhotoThumbnailAlreadyExisting() throws Exception {
-    byte[] photoBytes = new byte[]{1, 2, 3};
+    byte[] photoBytes = new byte[] {1, 2, 3};
     Item item = new Item("test name", itemType);
     UUID uuid = itemRepository.save(item).getId();
 
     doThrow(PhotoAlreadyExistsException.class).when(photoRepository).save(any(), any(), any());
 
-    assertThrows(PhotoAlreadyExistsException.class, () -> itemService.saveItemPhoto(uuid, photoBytes));
+    assertThrows(
+        PhotoAlreadyExistsException.class, () -> itemService.saveItemPhoto(uuid, photoBytes));
   }
 
   @Test
   void testGetItemThumbnailPhoto() throws Exception {
-    byte[] photoBytes = new byte[]{1, 2, 3};
+    byte[] photoBytes = new byte[] {1, 2, 3};
 
     when(photoRepository.findPhoto(any(), any())).thenReturn(photoBytes);
 
@@ -227,7 +228,8 @@ class ItemServiceTest extends DatabaseSuite {
     // Pin photo
     byte[] photo = new byte[] {1, 2, 3};
     itemService.saveItemPhoto(uuid, photo);
-    verify(photoRepository).save(eq(PhotoRepository.PhotoType.ITEM_THUMBNAIL), eq(uuid), aryEq(photo));
+    verify(photoRepository)
+        .save(eq(PhotoRepository.PhotoType.ITEM_THUMBNAIL), eq(uuid), aryEq(photo));
 
     // Delete item; expected to also delete photo
     itemService.deleteItem(uuid);
