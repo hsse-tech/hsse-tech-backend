@@ -65,12 +65,11 @@ public class ItemController {
   }
 
   @PatchMapping("/{id}")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<Void> updateItem(
       @PathVariable("id") UUID itemId, @Valid @RequestBody UpdateItemRequest request) {
       itemService.updateItem(itemId, request);
-      return ResponseEntity.ok().build();
+      return ResponseEntity.noContent().build();
   }
 
   @GetMapping("/{itemId}")

@@ -37,10 +37,9 @@ public class LockController {
 
   @DeleteMapping("{id}")
   @PreAuthorize("hasRole('ADMIN')")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
   public ResponseEntity<Void> deleteLock(@PathVariable("id") UUID id) {
     lockService.deleteLock(id);
-    return ResponseEntity.ok().build();
+    return ResponseEntity.noContent().build();
   }
 
   @PatchMapping("{lock_id}/add_item/{item_id}")

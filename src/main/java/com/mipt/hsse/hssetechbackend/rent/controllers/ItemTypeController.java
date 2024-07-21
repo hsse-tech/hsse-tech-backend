@@ -34,11 +34,10 @@ public class ItemTypeController {
 
   @PatchMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN')")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
   public ResponseEntity<Void> updateItemType(
       @PathVariable("id") UUID itemTypeId, @Valid @RequestBody UpdateItemTypeRequest request) {
     itemTypeService.updateItemType(itemTypeId, request);
-    return ResponseEntity.ok().build();
+    return ResponseEntity.noContent().build();
   }
 
   @DeleteMapping("/{id}")
