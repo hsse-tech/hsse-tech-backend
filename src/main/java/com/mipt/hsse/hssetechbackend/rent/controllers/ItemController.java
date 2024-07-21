@@ -1,29 +1,36 @@
 package com.mipt.hsse.hssetechbackend.rent.controllers;
 
+import com.google.zxing.WriterException;
 import com.mipt.hsse.hssetechbackend.apierrorhandling.ApiError;
 import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.apierrorhandling.RestExceptionHandler;
+import com.mipt.hsse.hssetechbackend.data.entities.HumanUserPassport;
 import com.mipt.hsse.hssetechbackend.data.entities.Item;
 import com.mipt.hsse.hssetechbackend.data.entities.Rent;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoAlreadyExistsException;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoNotFoundException;
+import com.mipt.hsse.hssetechbackend.oauth.services.OAuth2UserHelper;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetItemResponse;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetShortRentResponse;
 import com.mipt.hsse.hssetechbackend.rent.services.ItemService;
+import com.mipt.hsse.hssetechbackend.users.administation.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,9 +38,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/renting/item")
 public class ItemController {
   private final ItemService itemService;
+  private final UserService userService;
 
-  public ItemController(ItemService itemService) {
+  public ItemController(ItemService itemService, UserService userService) {
     this.itemService = itemService;
+    this.userService = userService;
   }
 
   @PostMapping
@@ -100,20 +109,51 @@ public class ItemController {
     return ResponseEntity.ok(itemsResponses);
   }
 
-  //  @GetMapping(value = "/{item_id}/qr", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  //  public @ResponseBody Resource getItemBookingQRCode(
-  //      @PathVariable("item_id") UUID itemId,
-  //      @Value("${item-qrcode-width}") int WIDTH,
-  //      @Value("${item-qrcode-height}") int HEIGHT)
-  //      throws IOException, WriterException {
-  //
-  //    byte[] qrCodeBytes = itemService.getQrCodeForItem(itemId, WIDTH, HEIGHT);
-  //
-  //    return new ByteArrayResource(qrCodeBytes);
-  //  }
+  @GetMapping(value = "/{item_id}/qr", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  public @ResponseBody Resource getItemBookingQRCode(
+      @PathVariable("item_id") UUID itemId,
+      @Value("${item-qrcode-width}") int WIDTH,
+      @Value("${item-qrcode-height}") int HEIGHT)
+      throws IOException, WriterException {
+
+    byte[] qrCodeBytes = itemService.getQrCodeForItem(itemId, WIDTH, HEIGHT);
+
+    return new ByteArrayResource(qrCodeBytes);
+  }
+
+  @GetMapping("/{item_id}/current")
+  public ResponseEntity<Rent> getCurrentRentOfItemByCurrentUser(
+      @AuthenticationPrincipal OAuth2User userAuth,
+      @PathVariable("item_id") UUID itemId,
+      @RequestParam(value = "ignoreOwner", required = false) Optional<Boolean> ignoreOwnerOpt) {
+    if (!itemService.existsById(itemId)) throw EntityNotFoundException.itemNotFound(itemId);
+
+    UUID userId = OAuth2UserHelper.getUserId(userAuth);
+    HumanUserPassport user = userService.getUserById(userId);
+    boolean ignoreOwner = ignoreOwnerOpt.orElse(false);
+
+    // Only the ADMIN can set ignoreOwner=True
+    if (ignoreOwner && !user.hasRole("ADMIN"))
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+
+    Optional<Rent> rentOpt = itemService.getCurrentRentOfItem(itemId);
+
+    if (rentOpt.isEmpty()) {
+      return ResponseEntity.notFound().build();
+    }
+    else {
+      Rent rent = rentOpt.get();
+      if (rent.getRenter().getId() == user.getId() || ignoreOwner) {
+        return ResponseEntity.ok(rent);
+      }
+      else {
+        return ResponseEntity.badRequest().build();
+      }
+    }
+  }
 
   @PostMapping("/{item_id}/try-open")
-  public ResponseEntity<Void> provideAccessToItemIfAllowed(@PathVariable("item_id") UUID itemId) {
+  public ResponseEntity<Void> provideAccessToItem(@PathVariable("item_id") UUID itemId) {
     if (!itemService.existsById(itemId)) throw EntityNotFoundException.itemNotFound(itemId);
 
     itemService.provideAccessToItem(itemId);
