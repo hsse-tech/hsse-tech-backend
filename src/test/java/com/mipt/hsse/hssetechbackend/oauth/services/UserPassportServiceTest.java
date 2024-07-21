@@ -3,11 +3,13 @@ package com.mipt.hsse.hssetechbackend.oauth.services;
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
 import com.mipt.hsse.hssetechbackend.data.entities.HumanUserPassport;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepository;
+import com.mipt.hsse.hssetechbackend.users.administation.RolesService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -27,6 +29,8 @@ class UserPassportServiceTest extends DatabaseSuite {
   @Autowired private JpaHumanUserPassportRepository passportRepository;
 
   @Autowired private UserPassportService passportService;
+
+  @MockBean private RolesService rolesService;
 
   @AfterEach
   public void clear() {
