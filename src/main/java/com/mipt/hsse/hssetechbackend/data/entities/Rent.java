@@ -28,7 +28,7 @@ public class Rent {
   @Column(name = "\"to\"", nullable = false)
   private Instant plannedEnd;
 
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @ManyToOne(optional = false)
   @JoinColumn(name = "item_id", nullable = false)
   private Item item;
 
