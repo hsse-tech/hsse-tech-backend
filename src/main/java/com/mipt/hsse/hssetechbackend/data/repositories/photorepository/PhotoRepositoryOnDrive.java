@@ -15,7 +15,7 @@ public class PhotoRepositoryOnDrive implements PhotoRepository {
   private static final int PATH_PART_LENGTH = 8;
   private final String basePath;
 
-  public PhotoRepositoryOnDrive(@Value("${photos-path ?: 'photos'}") String basePath) {
+  public PhotoRepositoryOnDrive(@Value("${photos-path:photos}") String basePath) {
     this.basePath = basePath;
   }
 
