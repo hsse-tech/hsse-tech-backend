@@ -25,6 +25,8 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+
+import com.mipt.hsse.hssetechbackend.users.administation.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +40,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 @WebMvcTest(ItemController.class)
-@Import({SecurityConfig.class, MiptOAuth2UserService.class})
+@Import({SecurityConfig.class, UserService.class, MiptOAuth2UserService.class})
 class ItemControllerTest {
   private static final String BASE_MAPPING = "/api/renting/item";
   private final ItemType itemType = new ItemType(BigDecimal.ZERO, "Item type name", 60, false);
@@ -48,6 +50,8 @@ class ItemControllerTest {
   @Autowired private ObjectMapper objectMapper;
 
   @MockBean private ItemService itemService;
+
+  @MockBean private UserService userService;
 
   @MockBean private UserPassportServiceBase passportService;
 
