@@ -23,12 +23,13 @@ import com.mipt.hsse.hssetechbackend.rent.controllers.responses.RentDTO;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.CreateRentProcessingException;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.VerificationFailedException;
 import com.mipt.hsse.hssetechbackend.rent.services.RentService;
-import java.io.IOException;
-import java.io.InputStream;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+
+import com.mipt.hsse.hssetechbackend.testutils.ResourceExtractor;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,7 +43,6 @@ import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.util.StreamUtils;
 
 @WebMvcTest(RentController.class)
 @Import({SecurityConfig.class, MiptOAuth2UserService.class})
@@ -219,51 +219,11 @@ class RentControllerTest {
     assertEquals(errorText, exception.getMessage());
   }
 
-  //  @Test
-  //  @WithMockUser
-  //  void testPinPhotoConfirmationEndpointValidPng() throws Exception {
-  //    UUID uuid = UUID.randomUUID();
-  //    byte[] pngSignature = PngUtility.getPngSignature();
-  //    byte[] imageBytes = new byte[] {1, 2, 3, 4};
-  //
-  //    byte[] pngBytes = new byte[pngSignature.length + imageBytes.length];
-  //    System.arraycopy(pngSignature, 0, pngBytes, 0, pngSignature.length);
-  //    System.arraycopy(imageBytes, 0, pngBytes, pngSignature.length, imageBytes.length);
-  //
-  //    mockMvc.perform(
-  //        post(BASE_MAPPING + "/{rentId}/confirm", uuid)
-  //            .content(pngBytes)
-  //            .contentType(MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  //            .with(oauth2Login().oauth2User(commonUserPrincipal))).andExpect(status().isOk());
-  //
-  //    verify(rentService).confirmRentFinish(eq(uuid), aryEq(pngBytes));
-  //  }
-  //
-  //  @Test
-  //  @WithMockUser
-  //  void testPinPhotoConfirmationEndpointWrongFileType() throws Exception {
-  //    UUID uuid = UUID.randomUUID();
-  //    byte[] notPngSignature = new byte[] {1, 2, 3, 4};
-  //    byte[] imageBytes = new byte[] {1, 2, 3, 4};
-  //
-  //    byte[] pngBytes = new byte[notPngSignature.length + imageBytes.length];
-  //    System.arraycopy(notPngSignature, 0, pngBytes, 0, notPngSignature.length);
-  //    System.arraycopy(imageBytes, 0, pngBytes, notPngSignature.length, imageBytes.length);
-  //
-  //    mockMvc.perform(
-  //        post(BASE_MAPPING + "/{rentId}/confirm", uuid)
-  //            .content(pngBytes)
-  //            .contentType(MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  //
-  // .with(oauth2Login().oauth2User(commonUserPrincipal))).andExpect(status().isBadRequest());
-  //
-  //  }
-
   @Test
   @WithMockUser
   void testPinPhotoConfirmationEndpointValidPng() throws Exception {
     UUID uuid = UUID.randomUUID();
-    byte[] pngBytes = getResourceAsBytes("/test.png");
+    byte[] pngBytes = ResourceExtractor.getResourceAsBytes("/test.png");
 
     mockMvc
         .perform(
@@ -281,7 +241,7 @@ class RentControllerTest {
   @WithMockUser
   void testPinPhotoConfirmationEndpointInvalidTypeJpg() throws Exception {
     UUID uuid = UUID.randomUUID();
-    byte[] pngBytes = getResourceAsBytes("/test.jpg");
+    byte[] pngBytes = ResourceExtractor.getResourceAsBytes("/test.jpg");
 
     mockMvc
         .perform(
@@ -291,12 +251,6 @@ class RentControllerTest {
                 .with(oauth2Login().oauth2User(commonUserPrincipal)))
         .andExpect(status().isBadRequest())
         .andDo(print());
-  }
-
-  private byte[] getResourceAsBytes(String resourcePath) throws IOException {
-    try (InputStream inputStream = getClass().getResourceAsStream(resourcePath)) {
-      return StreamUtils.copyToByteArray(inputStream);
-    }
   }
 
   @Test

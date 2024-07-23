@@ -21,6 +21,7 @@ import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetItemResponse;
 import com.mipt.hsse.hssetechbackend.rent.services.ItemService;
+import com.mipt.hsse.hssetechbackend.testutils.ResourceExtractor;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -115,16 +116,14 @@ class ItemControllerTest {
 
   @Test
   @WithMockUser
-  void pinThumbnailPhotoToItem() throws Exception {
-    byte[] photoBytes = new byte[] {1, 2, 3};
-
-    doNothing().when(itemService).saveItemPhoto(any(), any());
-
+  void testPinItemThumbnailValid() throws Exception {
     UUID uuid = UUID.randomUUID();
+    byte[] pngBytes = ResourceExtractor.getResourceAsBytes("/test.png");
+
     mockMvc
         .perform(
             post(BASE_MAPPING + "/" + uuid + "/photo")
-                .content(photoBytes)
+                .content(pngBytes)
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .with(
                     oauth2Login()
@@ -134,15 +133,35 @@ class ItemControllerTest {
         .andDo(print())
         .andExpect(status().isOk());
 
-    verify(itemService).saveItemPhoto(eq(uuid), aryEq(photoBytes));
+    verify(itemService).saveItemPhoto(eq(uuid), aryEq(pngBytes));
   }
 
   @Test
   @WithMockUser
-  void getItemThumbnailPhoto() throws Exception {
-    byte[] photoBytes = new byte[] {1, 2, 3};
+  void testPinThumbnailPhotoInvalidTypeJpg() throws Exception {
+    UUID uuid = UUID.randomUUID();
+    byte[] pngBytes = ResourceExtractor.getResourceAsBytes("/test.jpg");
 
-    when(itemService.getItemPhoto(any())).thenReturn(photoBytes);
+    mockMvc
+        .perform(
+            post(BASE_MAPPING + "/" + uuid + "/photo")
+                .content(pngBytes)
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .with(
+                    oauth2Login()
+                        .authorities(
+                            new SimpleGrantedAuthority("ROLE_MIPT_USER"),
+                            new SimpleGrantedAuthority("ROLE_ADMIN"))))
+        .andDo(print())
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser
+  void testGetThumbnailPhoto() throws Exception {
+    byte[] pngBytes = ResourceExtractor.getResourceAsBytes("/test.jpg");
+
+    when(itemService.getItemPhoto(any())).thenReturn(pngBytes);
 
     UUID uuid = UUID.randomUUID();
     var mvcResult =
@@ -157,7 +176,7 @@ class ItemControllerTest {
             .getContentAsByteArray();
 
     verify(itemService).getItemPhoto(eq(uuid));
-    assertArrayEquals(photoBytes, mvcResult);
+    assertArrayEquals(pngBytes, mvcResult);
   }
 
   @Test

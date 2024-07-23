@@ -12,6 +12,7 @@ import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetItemResponse;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetShortRentResponse;
 import com.mipt.hsse.hssetechbackend.rent.services.ItemService;
+import com.mipt.hsse.hssetechbackend.utils.PngUtility;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.io.IOException;
@@ -20,6 +21,7 @@ import java.util.Optional;
 import java.util.UUID;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -51,14 +53,23 @@ public class ItemController {
       throws IOException {
     byte[] photoBytes = photoServletRequest.getInputStream().readAllBytes();
 
+    if (!PngUtility.isPngFormat(photoBytes)) {
+      return ResponseEntity.badRequest().build();
+    }
+
     itemService.saveItemPhoto(itemId, photoBytes);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @GetMapping(value = "/{item_id}/photo")
-  public @ResponseBody Resource getItemThumbnailPhoto(@PathVariable("item_id") UUID itemId) {
+  public ResponseEntity<Resource> getItemThumbnailPhoto(@PathVariable("item_id") UUID itemId) {
     byte[] photoBytes = itemService.getItemPhoto(itemId);
-    return new ByteArrayResource(photoBytes);
+    var returnResource = new ByteArrayResource(photoBytes);
+
+    return ResponseEntity.ok()
+        .contentType(MediaType.IMAGE_PNG)
+        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"thumbnail.png\"")
+        .body(returnResource);
   }
 
   @PatchMapping("/{id}")
@@ -111,9 +122,10 @@ public class ItemController {
   //
   //    var resource = new ByteArrayResource(qrCodeBytes);
 
-        //  TODO: compare with code in rent
+  //  TODO: compare with code in rent
   //    return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG)
-    //      .headers(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=/"qrcode/"").body(resource);
+  //      .headers(HttpHeaders.CONTENT_DISPOSITION, "attachment;
+  // filename=/"qrcode/"").body(resource);
   //  }
 
   @PostMapping("/{item_id}/try-open")
