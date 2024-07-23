@@ -67,7 +67,7 @@ class UpdateRentTest extends DatabaseSuite {
     final Instant startTime = Instant.now().plus(1, ChronoUnit.MINUTES);
     final Instant endTime = Instant.now().plus(50, ChronoUnit.MINUTES);
     CreateRentRequest createRentRequest =
-        new CreateRentRequest(item.getId(), startTime, endTime);
+        new CreateRentRequest(item.getId(), startTime, endTime, "Test name", "Test description");
     UUID rentId = rentService.createRent(user.getId(), createRentRequest).getId();
 
     // Update rent
@@ -96,7 +96,7 @@ class UpdateRentTest extends DatabaseSuite {
     Instant startTime = Instant.now().minus(1, ChronoUnit.MINUTES);
     Instant endTime = Instant.now().plus(50, ChronoUnit.MINUTES);
     CreateRentRequest createRentRequest =
-        new CreateRentRequest(item.getId(), startTime, endTime);
+        new CreateRentRequest(item.getId(), startTime, endTime, "Test name", "Test description");
     UUID rentId = rentService.createRent(user.getId(), createRentRequest).getId();
 
     // Fail update rent
@@ -112,7 +112,7 @@ class UpdateRentTest extends DatabaseSuite {
     Instant startTime = Instant.now().minus(3, ChronoUnit.HOURS);
     Instant endTime = Instant.now().minus(2, ChronoUnit.HOURS);
     CreateRentRequest createRentRequest =
-        new CreateRentRequest(item.getId(), startTime, endTime);
+        new CreateRentRequest(item.getId(), startTime, endTime, "Test name", "Test description");
     UUID rentId = rentService.createRent(user.getId(), createRentRequest).getId();
 
     // Fail update to passed time
@@ -130,14 +130,14 @@ class UpdateRentTest extends DatabaseSuite {
     Instant startTime = Instant.now().plus(1, ChronoUnit.HOURS);
     Instant endTime = Instant.now().plus(2, ChronoUnit.HOURS);
     CreateRentRequest createRentRequest =
-        new CreateRentRequest(item.getId(), startTime, endTime);
+        new CreateRentRequest(item.getId(), startTime, endTime, "Test name", "Test description");
     UUID rentId = rentService.createRent(user.getId(), createRentRequest).getId();
 
     // Create rent that will intersect with the test one after update
     startTime = Instant.now().plus(1, ChronoUnit.DAYS);
     endTime = Instant.now().plus(1, ChronoUnit.DAYS).plus(1, ChronoUnit.HOURS);
     CreateRentRequest createRentIntersectingRequest =
-        new CreateRentRequest(item.getId(), startTime, endTime);
+        new CreateRentRequest(item.getId(), startTime, endTime, "Test name", "Test description");
     rentService.createRent(user.getId(), createRentIntersectingRequest);
 
     // Fail update test rent onto another one

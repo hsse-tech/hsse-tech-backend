@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: HSSE Tech API
   description: Описание REST API сервиса "HSSE Tech"
-  version: 0.9.0
+  version: 0.9.1
 servers:
   - url: 'https'
 paths:
