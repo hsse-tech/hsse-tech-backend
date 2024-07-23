@@ -101,7 +101,7 @@ public class ItemController {
   }
 
   //  @GetMapping(value = "/{item_id}/qr", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  //  public @ResponseBody Resource getItemBookingQRCode(
+  //  public @ResponseBody ResponseEntity<ByteArrayResource> getItemBookingQRCode(
   //      @PathVariable("item_id") UUID itemId,
   //      @Value("${item-qrcode-width}") int WIDTH,
   //      @Value("${item-qrcode-height}") int HEIGHT)
@@ -109,7 +109,11 @@ public class ItemController {
   //
   //    byte[] qrCodeBytes = itemService.getQrCodeForItem(itemId, WIDTH, HEIGHT);
   //
-  //    return new ByteArrayResource(qrCodeBytes);
+  //    var resource = new ByteArrayResource(qrCodeBytes);
+
+        //  TODO: compare with code in rent
+  //    return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG)
+    //      .headers(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=/"qrcode/"").body(resource);
   //  }
 
   @PostMapping("/{item_id}/try-open")

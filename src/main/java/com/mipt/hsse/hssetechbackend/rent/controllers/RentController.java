@@ -8,6 +8,7 @@ import com.mipt.hsse.hssetechbackend.rent.controllers.requests.*;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.RentDTO;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.*;
 import com.mipt.hsse.hssetechbackend.rent.services.RentService;
+import com.mipt.hsse.hssetechbackend.utils.PngUtility;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.io.IOException;
@@ -62,6 +63,11 @@ public class RentController {
       @PathVariable("rent_id") UUID rentId, HttpServletRequest photoServletRequest)
       throws IOException {
     byte[] photoBytes = photoServletRequest.getInputStream().readAllBytes();
+
+    // Ensure png format
+    if (!PngUtility.isPngFormat(photoBytes)) {
+      return ResponseEntity.badRequest().build();
+    }
 
     rentService.confirmRentFinish(rentId, photoBytes);
     return ResponseEntity.ok().build();
