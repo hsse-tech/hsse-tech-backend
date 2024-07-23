@@ -15,6 +15,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -67,9 +68,13 @@ public class RentController {
   }
 
   @GetMapping("/{rent_id}/confirm")
-  public @ResponseBody Resource getPhotoConfirmation(@PathVariable("rent_id") UUID rentId) {
+  public ResponseEntity<Resource> getPhotoConfirmation(@PathVariable("rent_id") UUID rentId) {
     byte[] photoBytes = rentService.getPhotoForRent(rentId);
-    return new ByteArrayResource(photoBytes);
+    var returnResource = new ByteArrayResource(photoBytes);
+
+    return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG)
+        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"confirmation.png\"")
+        .body(returnResource);
   }
 
   @GetMapping("/{rent_id}")
