@@ -92,7 +92,7 @@ class RentControllerTest {
 
     when(rentService.createRent(any(), any())).thenReturn(new Rent(start, end, userPassport, item));
 
-    CreateRentRequest createRentRequest = new CreateRentRequest(UUID.randomUUID(), start, end);
+    CreateRentRequest createRentRequest = new CreateRentRequest(UUID.randomUUID(), start, end, "Test name", "Test description");
     String requestStr = objectMapper.writeValueAsString(createRentRequest);
 
     var mvcResult =
@@ -122,7 +122,7 @@ class RentControllerTest {
         .thenThrow(new CreateRentProcessingException(errorText));
 
     CreateRentRequest createRentRequest =
-        new CreateRentRequest(UUID.randomUUID(), Instant.now(), Instant.now());
+        new CreateRentRequest(UUID.randomUUID(), Instant.now(), Instant.now(), "Test name", "Test description");
     String requestStr = objectMapper.writeValueAsString(createRentRequest);
 
     var mvcResult =

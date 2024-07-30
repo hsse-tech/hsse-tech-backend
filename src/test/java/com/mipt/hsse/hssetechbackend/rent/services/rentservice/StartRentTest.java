@@ -65,7 +65,7 @@ class StartRentTest extends DatabaseSuite {
     Instant startTime = Instant.now().minus(1, ChronoUnit.MINUTES);
     Instant endTime = Instant.now().plus(50, ChronoUnit.MINUTES);
     CreateRentRequest createRentRequest =
-        new CreateRentRequest(item.getId(), startTime, endTime);
+        new CreateRentRequest(item.getId(), startTime, endTime, "Test name", "Test description");
     UUID rentId = rentService.createRent(user.getId(),createRentRequest).getId();
 
     // Start rent
@@ -90,7 +90,7 @@ class StartRentTest extends DatabaseSuite {
     Instant startTime = Instant.now().minus(1, ChronoUnit.MINUTES);
     Instant endTime = Instant.now().plus(50, ChronoUnit.MINUTES);
     CreateRentRequest createRentRequest =
-        new CreateRentRequest(item.getId(), startTime, endTime);
+        new CreateRentRequest(item.getId(), startTime, endTime, "Test name", "Test description");
     UUID rentId = rentService.createRent(user.getId(),createRentRequest).getId();
 
     // Start rent
@@ -106,7 +106,7 @@ class StartRentTest extends DatabaseSuite {
     Instant startTime = Instant.now().plus(1, ChronoUnit.HOURS);
     Instant endTime = Instant.now().plus(2, ChronoUnit.HOURS);
     CreateRentRequest createRentRequest =
-        new CreateRentRequest(item.getId(), startTime, endTime);
+        new CreateRentRequest(item.getId(), startTime, endTime, "Test name", "Test description");
     UUID rentId = rentService.createRent(user.getId(),createRentRequest).getId();
 
     // Start rent
@@ -119,7 +119,7 @@ class StartRentTest extends DatabaseSuite {
     Instant startTime = Instant.now().minus(3, ChronoUnit.HOURS);
     Instant endTime = Instant.now().minus(2, ChronoUnit.HOURS);
     CreateRentRequest createRentRequest =
-        new CreateRentRequest(item.getId(), startTime, endTime);
+        new CreateRentRequest(item.getId(), startTime, endTime, "Test name", "Test description");
     UUID rentId = rentService.createRent(user.getId(),createRentRequest).getId();
 
     // Start rent

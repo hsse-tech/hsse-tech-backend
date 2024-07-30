@@ -65,7 +65,7 @@ class EndRentTest extends DatabaseSuite {
     Instant startTime = Instant.now().minus(1, ChronoUnit.MINUTES);
     Instant endTime = Instant.now().plus(50, ChronoUnit.MINUTES);
     CreateRentRequest createRentRequest =
-        new CreateRentRequest(item.getId(), startTime, endTime);
+        new CreateRentRequest(item.getId(), startTime, endTime, "Test name", "Test description");
     UUID rentId = rentService.createRent(user.getId(), createRentRequest).getId();
 
     // Start rent
@@ -92,7 +92,7 @@ class EndRentTest extends DatabaseSuite {
     Instant startTime = Instant.now().minus(1, ChronoUnit.MINUTES);
     Instant endTime = Instant.now().plus(50, ChronoUnit.MINUTES);
     CreateRentRequest createRentRequest =
-        new CreateRentRequest(item.getId(), startTime, endTime);
+        new CreateRentRequest(item.getId(), startTime, endTime, "Test name", "Test description");
     UUID rentId = rentService.createRent(user.getId(), createRentRequest).getId();
 
     // Start rent
@@ -109,7 +109,7 @@ class EndRentTest extends DatabaseSuite {
     Instant startTime = Instant.now().minus(5, ChronoUnit.MINUTES);
     Instant endTime = Instant.now().plus(30, ChronoUnit.MINUTES);
     CreateRentRequest createRentRequest =
-        new CreateRentRequest(item.getId(), startTime, endTime);
+        new CreateRentRequest(item.getId(), startTime, endTime, "Test name", "Test description");
     UUID rentId = rentService.createRent(user.getId(), createRentRequest).getId();
 
     // Start rent
@@ -127,7 +127,7 @@ class EndRentTest extends DatabaseSuite {
     Instant startTime = Instant.now().minus(3, ChronoUnit.MINUTES);
     Instant endTime = Instant.now().plus(50, ChronoUnit.MINUTES);
     CreateRentRequest createRentRequest =
-        new CreateRentRequest(itemWithPhoto.getId(), startTime, endTime);
+        new CreateRentRequest(itemWithPhoto.getId(), startTime, endTime, "Test name", "Test description");
     UUID rentId = rentService.createRent(user.getId(), createRentRequest).getId();
 
     rentService.startRent(rentId);

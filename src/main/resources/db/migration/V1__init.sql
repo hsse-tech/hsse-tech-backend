@@ -42,13 +42,15 @@ CREATE TABLE human_user_passport
 
 CREATE TABLE rent
 (
-    id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    "from"     TIMESTAMP NOT NULL,
-    "to"       TIMESTAMP NOT NULL,
-    item_id    UUID      NOT NULL REFERENCES item (id) ON DELETE CASCADE,
-    started_at TIMESTAMP,
-    ended_at   TIMESTAMP,
-    user_id    UUID      NOT NULL REFERENCES human_user_passport (original_id) ON DELETE CASCADE
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    "from"      TIMESTAMP NOT NULL,
+    "to"        TIMESTAMP NOT NULL,
+    item_id     UUID      NOT NULL REFERENCES item (id) ON DELETE CASCADE,
+    started_at  TIMESTAMP,
+    ended_at    TIMESTAMP,
+    user_id     UUID      NOT NULL REFERENCES human_user_passport (original_id) ON DELETE CASCADE,
+    "name"      TEXT NOT NULL,
+    description TEXT NULL
 );
 
 CREATE TABLE wallet
