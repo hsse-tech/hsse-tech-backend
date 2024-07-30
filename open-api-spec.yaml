@@ -817,6 +817,10 @@ components:
           $ref: "#/components/schemas/Instant"
         end_time:
           $ref: "#/components/schemas/Instant"
+        name:
+          type: "string"
+        description:
+          type: "string"
     KeyGenResultResponse:
       type: "object"
       properties:
