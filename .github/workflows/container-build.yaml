@@ -19,5 +19,5 @@ jobs:
         uses: docker/build-push-action@v5.1.0
         with:
           file: ./Dockerfile
-          tags: hsse-tech/hsse-tech-backend:${{GITHUB_REF/refs\/tags\//}}
+          tags: hsse-tech/hsse-tech-backend:$GITHUB_REF_NAME
           
