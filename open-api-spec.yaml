@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: HSSE Tech API
   description: Описание REST API сервиса "HSSE Tech"
-  version: 0.9.0
+  version: 0.9.1
 servers:
   - url: 'https'
 paths:
@@ -817,6 +817,10 @@ components:
           $ref: "#/components/schemas/Instant"
         end_time:
           $ref: "#/components/schemas/Instant"
+        name:
+          type: "string"
+        description:
+          type: "string"
     KeyGenResultResponse:
       type: "object"
       properties:

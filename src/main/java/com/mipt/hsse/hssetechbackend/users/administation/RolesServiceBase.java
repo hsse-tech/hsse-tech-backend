@@ -35,4 +35,9 @@ public interface RolesServiceBase {
      * Убирает роль админа
      */
     void removeAdmin(UUID userId);
+
+    /**
+     * Добавляет роль по умол
+     */
+    void setUserDefaultRole(UUID userId);
 }

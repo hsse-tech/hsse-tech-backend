@@ -8,6 +8,7 @@ import com.mipt.hsse.hssetechbackend.rent.controllers.requests.*;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.RentDTO;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.*;
 import com.mipt.hsse.hssetechbackend.rent.services.RentService;
+import com.mipt.hsse.hssetechbackend.utils.PngUtility;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.io.IOException;
@@ -15,6 +16,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -43,30 +45,42 @@ public class RentController {
   }
 
   @DeleteMapping("/{rent_id}")
-  public void deleteRent(@PathVariable("rent_id") UUID rentId) {
+  public ResponseEntity<Void> deleteRent(@PathVariable("rent_id") UUID rentId) {
     rentService.deleteRent(rentId);
+    return ResponseEntity.ok().build();
   }
 
   @PatchMapping("/{rent_id}")
   @ResponseStatus(HttpStatus.OK)
-  public void updateRent(
+  public ResponseEntity<Void> updateRent(
       @PathVariable("rent_id") UUID rentId, @Valid @RequestBody UpdateRentRequest request) {
-      rentService.updateRent(rentId, request);
+    rentService.updateRent(rentId, request);
+    return ResponseEntity.ok().build();
   }
 
   @PostMapping(value = "/{rent_id}/confirm", consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  public void pinPhotoConfirmation(
+  public ResponseEntity<Void> pinPhotoConfirmation(
       @PathVariable("rent_id") UUID rentId, HttpServletRequest photoServletRequest)
       throws IOException {
     byte[] photoBytes = photoServletRequest.getInputStream().readAllBytes();
 
+    // Ensure png format
+    if (!PngUtility.isPngFormat(photoBytes)) {
+      return ResponseEntity.badRequest().build();
+    }
+
     rentService.confirmRentFinish(rentId, photoBytes);
+    return ResponseEntity.ok().build();
   }
 
   @GetMapping("/{rent_id}/confirm")
-  public @ResponseBody Resource getPhotoConfirmation(@PathVariable("rent_id") UUID rentId) {
+  public ResponseEntity<Resource> getPhotoConfirmation(@PathVariable("rent_id") UUID rentId) {
     byte[] photoBytes = rentService.getPhotoForRent(rentId);
-    return new ByteArrayResource(photoBytes);
+    var returnResource = new ByteArrayResource(photoBytes);
+
+    return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG)
+        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"confirmation.png\"")
+        .body(returnResource);
   }
 
   @GetMapping("/{rent_id}")
@@ -76,14 +90,16 @@ public class RentController {
 
   @ResponseStatus(HttpStatus.OK)
   @PostMapping("{rent_id}/begin")
-  public void startRent(@PathVariable("rent_id") UUID rentId) {
+  public ResponseEntity<Void> startRent(@PathVariable("rent_id") UUID rentId) {
     rentService.startRent(rentId);
+    return ResponseEntity.ok().build();
   }
 
   @PostMapping("{rent_id}/end")
   @ResponseStatus(HttpStatus.OK)
-  public void endRent(@PathVariable("rent_id") UUID rentId) {
+  public ResponseEntity<Void> endRent(@PathVariable("rent_id") UUID rentId) {
     rentService.endRent(rentId);
+    return ResponseEntity.ok().build();
   }
 
   @ExceptionHandler(VerificationFailedException.class)

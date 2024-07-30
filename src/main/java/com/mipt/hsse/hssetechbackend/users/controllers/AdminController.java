@@ -24,13 +24,15 @@ public class AdminController {
   }
 
   @PostMapping("ban/{id}")
-  public void ban(@PathVariable UUID id) {
+  public ResponseEntity<Void> ban(@PathVariable UUID id) {
     userService.banUser(id);
+    return ResponseEntity.ok().build();
   }
 
   @PostMapping("unban/{id}")
-  public void unban(@PathVariable UUID id) {
+  public ResponseEntity<Void> unban(@PathVariable UUID id) {
     userService.unbanUser(id);
+    return ResponseEntity.ok().build();
   }
 
   @GetMapping("users")

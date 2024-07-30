@@ -3,13 +3,13 @@ package com.mipt.hsse.hssetechbackend.rent.services;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
+import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemTypeRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepositoryOnDrive;
-import com.mipt.hsse.hssetechbackend.lock.services.LockService;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemTypeRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemTypeRequest;
-import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
+import com.mipt.hsse.hssetechbackend.rent.exceptions.UniqueConstraintViolationException;
 import java.math.BigDecimal;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,7 +60,7 @@ class ItemTypeServiceTest extends DatabaseSuite {
     itemTypeService.createItemType(request1);
 
     assertThrows(
-        DataIntegrityViolationException.class, () -> itemTypeService.createItemType(request2));
+        UniqueConstraintViolationException.class, () -> itemTypeService.createItemType(request2));
   }
 
   @Test

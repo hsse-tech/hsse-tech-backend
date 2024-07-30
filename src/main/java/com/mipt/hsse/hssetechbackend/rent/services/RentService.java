@@ -66,7 +66,7 @@ public class RentService {
             .findById(userId)
             .orElseThrow(() -> new EntityNotFoundException(HumanUserPassport.class, userId));
 
-    Rent rent = new Rent(request.startTime(), request.endTime(), renter, item);
+    Rent rent = new Rent(request.name(), request.description(), request.startTime(), request.endTime(), renter, item);
 
     verifyRentStartEnd(request.startTime(), request.endTime(), rent).throwIfInvalid();
 
@@ -79,9 +79,7 @@ public class RentService {
       }
     }
 
-    rentRepository.save(rent);
-
-    return rent;
+    return rentRepository.save(rent);
   }
 
   @Transactional

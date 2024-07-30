@@ -23,7 +23,7 @@ public class Item {
   private String displayName;
 
   @NotNull
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @ManyToOne(optional = false)
   @OnDelete(action = OnDeleteAction.CASCADE)
   @JoinColumn(name = "type_id", nullable = false)
   private ItemType type;

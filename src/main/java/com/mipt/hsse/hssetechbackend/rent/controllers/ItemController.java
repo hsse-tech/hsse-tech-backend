@@ -1,7 +1,7 @@
 package com.mipt.hsse.hssetechbackend.rent.controllers;
 
-import com.google.zxing.WriterException;
 import com.mipt.hsse.hssetechbackend.apierrorhandling.ApiError;
+import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.apierrorhandling.RestExceptionHandler;
 import com.mipt.hsse.hssetechbackend.data.entities.Item;
 import com.mipt.hsse.hssetechbackend.data.entities.Rent;
@@ -11,17 +11,17 @@ import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetItemResponse;
 import com.mipt.hsse.hssetechbackend.rent.controllers.responses.GetShortRentResponse;
-import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.rent.services.ItemService;
+import com.mipt.hsse.hssetechbackend.utils.PngUtility;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +33,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/renting/item")
 public class ItemController {
   private final ItemService itemService;
-
 
   public ItemController(ItemService itemService) {
     this.itemService = itemService;
@@ -49,26 +48,36 @@ public class ItemController {
   @PostMapping(value = "/{item_id}/photo", consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @ResponseStatus(HttpStatus.OK)
   @PreAuthorize("hasRole('ADMIN')")
-  public void pinItemThumbnailPhoto(
+  public ResponseEntity<Void> pinItemThumbnailPhoto(
       @PathVariable("item_id") UUID itemId, HttpServletRequest photoServletRequest)
       throws IOException {
     byte[] photoBytes = photoServletRequest.getInputStream().readAllBytes();
 
+    if (!PngUtility.isPngFormat(photoBytes)) {
+      return ResponseEntity.badRequest().build();
+    }
+
     itemService.saveItemPhoto(itemId, photoBytes);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @GetMapping(value = "/{item_id}/photo")
-  public @ResponseBody Resource getItemThumbnailPhoto(@PathVariable("item_id") UUID itemId) {
+  public ResponseEntity<Resource> getItemThumbnailPhoto(@PathVariable("item_id") UUID itemId) {
     byte[] photoBytes = itemService.getItemPhoto(itemId);
-    return new ByteArrayResource(photoBytes);
+    var returnResource = new ByteArrayResource(photoBytes);
+
+    return ResponseEntity.ok()
+        .contentType(MediaType.IMAGE_PNG)
+        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"thumbnail.png\"")
+        .body(returnResource);
   }
 
   @PatchMapping("/{id}")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
   @PreAuthorize("hasRole('ADMIN')")
-  public void updateItem(
+  public ResponseEntity<Void> updateItem(
       @PathVariable("id") UUID itemId, @Valid @RequestBody UpdateItemRequest request) {
-      itemService.updateItem(itemId, request);
+    itemService.updateItem(itemId, request);
+    return ResponseEntity.noContent().build();
   }
 
   @GetMapping("/{itemId}")
@@ -98,38 +107,44 @@ public class ItemController {
   @GetMapping()
   public ResponseEntity<List<GetItemResponse>> getAllItems() {
     List<Item> allItems = itemService.getAllItems();
-    List<GetItemResponse> itemsResponses =  allItems.stream().map(GetItemResponse::new).toList();
+    List<GetItemResponse> itemsResponses = allItems.stream().map(GetItemResponse::new).toList();
     return ResponseEntity.ok(itemsResponses);
   }
 
-  @GetMapping(value = "/{item_id}/qr", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  public @ResponseBody Resource getItemBookingQRCode(
-      @PathVariable("item_id") UUID itemId,
-      @Value("${item-qrcode-width}") int WIDTH,
-      @Value("${item-qrcode-height}") int HEIGHT)
-      throws IOException, WriterException {
+  //  @GetMapping(value = "/{item_id}/qr", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  //  public @ResponseBody ResponseEntity<ByteArrayResource> getItemBookingQRCode(
+  //      @PathVariable("item_id") UUID itemId,
+  //      @Value("${item-qrcode-width}") int WIDTH,
+  //      @Value("${item-qrcode-height}") int HEIGHT)
+  //      throws IOException, WriterException {
+  //
+  //    byte[] qrCodeBytes = itemService.getQrCodeForItem(itemId, WIDTH, HEIGHT);
+  //
+  //    var resource = new ByteArrayResource(qrCodeBytes);
 
-    byte[] qrCodeBytes = itemService.getQrCodeForItem(itemId, WIDTH, HEIGHT);
-
-    return new ByteArrayResource(qrCodeBytes);
-  }
+  //  TODO: compare with code in rent
+  //    return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG)
+  //      .headers(HttpHeaders.CONTENT_DISPOSITION, "attachment;
+  // filename=/"qrcode/"").body(resource);
+  //  }
 
   @PostMapping("/{item_id}/try-open")
-  public void provideAccessToItemIfAllowed(@PathVariable("item_id") UUID itemId) {
+  public ResponseEntity<Void> provideAccessToItemIfAllowed(@PathVariable("item_id") UUID itemId) {
     if (!itemService.existsById(itemId)) throw EntityNotFoundException.itemNotFound(itemId);
 
     itemService.provideAccessToItem(itemId);
+    return ResponseEntity.ok().build();
   }
 
   @PreAuthorize("hasRole('ADMIN')")
   @DeleteMapping("/{itemId}")
-  public void deleteItem(@PathVariable("itemId") UUID itemId) throws IOException {
+  public ResponseEntity<Void> deleteItem(@PathVariable("itemId") UUID itemId) throws IOException {
     itemService.deleteItem(itemId);
+    return ResponseEntity.ok().build();
   }
 
   @ExceptionHandler({PhotoAlreadyExistsException.class, PhotoNotFoundException.class})
-  public ResponseEntity<ApiError> exceptionHandler(
-      Exception ex) {
+  public ResponseEntity<ApiError> exceptionHandler(Exception ex) {
     ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, ex.getMessage());
     return RestExceptionHandler.buildResponseEntity(apiError);
   }

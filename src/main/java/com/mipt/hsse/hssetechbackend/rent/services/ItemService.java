@@ -1,8 +1,6 @@
 package com.mipt.hsse.hssetechbackend.rent.services;
 
-import com.google.zxing.WriterException;
-import com.google.zxing.client.j2se.MatrixToImageWriter;
-import com.google.zxing.common.BitMatrix;
+import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.data.entities.Item;
 import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
 import com.mipt.hsse.hssetechbackend.data.entities.LockPassport;
@@ -15,16 +13,12 @@ import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepo
 import com.mipt.hsse.hssetechbackend.lock.services.LockServiceBase;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
 import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
-import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
-import com.mipt.hsse.hssetechbackend.rent.qrcodegeneration.QrCodeManager;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import javax.imageio.ImageIO;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ServerErrorException;
 
@@ -35,18 +29,21 @@ public class ItemService {
   private final JpaRentRepository rentRepository;
   private final PhotoRepository photoRepository;
   private final LockServiceBase lockService;
+  private final String appDomain;
 
   public ItemService(
       JpaItemRepository itemRepository,
       JpaItemTypeRepository itemTypeRepository,
       JpaRentRepository rentRepository,
       PhotoRepository photoRepository,
-      LockServiceBase lockService) {
+      LockServiceBase lockService,
+      @Value("${app_domain}") String appDomain) {
     this.itemRepository = itemRepository;
     this.itemTypeRepository = itemTypeRepository;
     this.rentRepository = rentRepository;
     this.photoRepository = photoRepository;
     this.lockService = lockService;
+    this.appDomain = appDomain;
   }
 
   public Item createItem(CreateItemRequest request) {
@@ -100,17 +97,17 @@ public class ItemService {
     lockService.openLock(lock.getId());
   }
 
-  public byte[] getQrCodeForItem(UUID itemId, int width, int height)
-      throws WriterException, IOException {
-    // TODO: When we have domain, it should be put in here
-    BitMatrix qrCodeMatrix =
-        QrCodeManager.createQR("https://{DOMAIN}/rent/" + itemId, height, width);
-    BufferedImage image = MatrixToImageWriter.toBufferedImage(qrCodeMatrix);
-
-    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-    ImageIO.write(image, "png", byteArrayOutputStream);
-    return byteArrayOutputStream.toByteArray();
-  }
+  //
+  //  public byte[] getQrCodeForItem(UUID itemId, int width, int height)
+  //      throws WriterException, IOException {
+  //    BitMatrix qrCodeMatrix = QrCodeManager.createQR(buildLinkForItemQrCode(itemId), width,
+  // height);
+  //    BufferedImage image = MatrixToImageWriter.toBufferedImage(qrCodeMatrix);
+  //
+  //    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+  //    ImageIO.write(image, "png", byteArrayOutputStream);
+  //    return byteArrayOutputStream.toByteArray();
+  //  }
 
   public List<Item> getAllItems() {
     return itemRepository.findAll();
@@ -139,4 +136,8 @@ public class ItemService {
       throw new ServerErrorException("Unexpected IO error while saving photo", e);
     }
   }
+
+  //  private String buildLinkForItemQrCode(UUID itemId) {
+  //
+  //  }
 }

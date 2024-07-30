@@ -37,9 +37,9 @@ public class LockController {
 
   @DeleteMapping("{id}")
   @PreAuthorize("hasRole('ADMIN')")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void deleteLock(@PathVariable("id") UUID id) {
+  public ResponseEntity<Void> deleteLock(@PathVariable("id") UUID id) {
     lockService.deleteLock(id);
+    return ResponseEntity.noContent().build();
   }
 
   @PatchMapping("{lock_id}/add_item/{item_id}")
@@ -69,7 +69,7 @@ public class LockController {
   }
 
   @PostMapping("{id}/open")
-  public ResponseEntity<Void> openLock(@PathVariable("id") UUID lockId, @AuthenticationPrincipal OAuth2User principal) {
+  public ResponseEntity<Void> tryOpenLock(@PathVariable("id") UUID lockId, @AuthenticationPrincipal OAuth2User principal) {
     var userId = OAuth2UserHelper.getUserId(principal);
     if (lockService.canUserOpenLock(userId, lockId)){
       lockService.openLock(lockId);

@@ -13,9 +13,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+import static org.springframework.http.HttpStatus.OK;
+
 @Controller
 @RequestMapping("/api/sa")
-@PreAuthorize("hasRole('SUPER_ADMIN')")
 public class SuperAdminController {
   private final RolesServiceBase rolesService;
 
@@ -23,24 +24,32 @@ public class SuperAdminController {
     this.rolesService = rolesService;
   }
 
+  @ResponseStatus(OK)
   @PostMapping("/admins/{id}")
-  public void setAdmin(@PathVariable UUID id) {
+  @PreAuthorize("hasRole('SUPER_ADMIN')")
+  public ResponseEntity<Void> setAdmin(@PathVariable UUID id) {
     rolesService.setUserAdmin(id);
+    return ResponseEntity.ok().build();
   }
 
   @DeleteMapping("/admins/{id}")
-  public void removeAdmin(@PathVariable UUID id) {
+  @PreAuthorize("hasRole('SUPER_ADMIN')")
+  public ResponseEntity<Void> removeAdmin(@PathVariable UUID id) {
     rolesService.removeAdmin(id);
+    return ResponseEntity.ok().build();
   }
 
   @PostMapping("/keygen")
+  @PreAuthorize("hasRole('SUPER_ADMIN')")
   public ResponseEntity<KeyGenResultResponse> keyGen() {
     return ResponseEntity.ok(
         new KeyGenResultResponse(rolesService.generateSuperAdminActivationKey()));
   }
 
   @PostMapping("activate-key")
-  public void activateKey(@AuthenticationPrincipal OAuth2User user, @RequestBody ActivateKeyRequest activateKeyRequest) {
+  @PreAuthorize("hasRole('MIPT_USER')")
+  public ResponseEntity<Void> activateKey(@AuthenticationPrincipal OAuth2User user, @RequestBody ActivateKeyRequest activateKeyRequest) {
     rolesService.activateSuperAdmin(OAuth2UserHelper.getUserId(user), activateKeyRequest.key());
+    return ResponseEntity.ok().build();
   }
 }

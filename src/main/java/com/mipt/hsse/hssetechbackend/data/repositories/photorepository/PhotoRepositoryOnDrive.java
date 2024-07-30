@@ -5,17 +5,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class PhotoRepositoryOnDrive implements PhotoRepository {
   private static final int UUID_LENGTH = 32;
   private static final int PATH_PART_LENGTH = 8;
-  private static String BASE_PATH;
+  private final String basePath;
 
-  static {
-    BASE_PATH = System.getenv("PHOTOS_PATH");
-    if (BASE_PATH == null) BASE_PATH = "photos";
+  public PhotoRepositoryOnDrive(@Value("${photos-path:photos}") String basePath) {
+    this.basePath = basePath;
   }
 
   @Override
@@ -58,7 +59,7 @@ public class PhotoRepositoryOnDrive implements PhotoRepository {
 
   private Path getFilePathForPhoto(PhotoType photoType, UUID id) {
     String photoTypeDirectory = photoType.getFolderName();
-    Path filePath = Path.of(BASE_PATH, photoTypeDirectory);
+    Path filePath = Path.of(basePath, photoTypeDirectory);
 
     // Add a sequence of folders representing the UUID split into short parts
     String[] parts = splitUUID(id);

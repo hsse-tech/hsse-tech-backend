@@ -28,7 +28,7 @@ public class Rent {
   @Column(name = "\"to\"", nullable = false)
   private Instant plannedEnd;
 
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @ManyToOne(optional = false)
   @JoinColumn(name = "item_id", nullable = false)
   private Item item;
 
@@ -38,12 +38,25 @@ public class Rent {
   @Column(name = "started_at")
   private Instant factStart;
 
+  @Column(name = "name")
+  private String name;
+
+  @Column(name = "description")
+  private String description;
+
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @OnDelete(action = OnDeleteAction.CASCADE)
   @JoinColumn(name = "user_id", nullable = false)
   private HumanUserPassport renter;
 
-  public Rent(Instant plannedStart, Instant plannedEnd, HumanUserPassport renter, Item item) {
+  public Rent(String name,
+              String description,
+              Instant plannedStart,
+              Instant plannedEnd,
+              HumanUserPassport renter,
+              Item item) {
+    this.name = name;
+    this.description = description;
     this.plannedStart = plannedStart;
     this.plannedEnd = plannedEnd;
     this.item = item;
@@ -51,12 +64,21 @@ public class Rent {
   }
 
   public Rent(
+      String name,
+      String description,
       Instant plannedStart,
       Instant plannedEnd,
       HumanUserPassport renter,
       Item item,
       Instant factEnd) {
-    this(plannedStart, plannedEnd, renter, item);
+    this(name, description, plannedStart, plannedEnd, renter, item);
     this.factEnd = factEnd;
+  }
+
+  public Rent(Instant plannedStart,
+              Instant plannedEnd,
+              HumanUserPassport renter,
+              Item item) {
+    this("Аренда", null, plannedStart, plannedEnd, renter, item);
   }
 }
