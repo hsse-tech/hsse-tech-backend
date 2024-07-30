@@ -7,14 +7,6 @@ jobs:
   docker_build_and_push:
     runs-on: ubuntu-latest
     steps:
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          architecture: x64
-      - name: Maven Verify
-        run: mvn verify
       - name: Docker Login
         uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d
         with:
