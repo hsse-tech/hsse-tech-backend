@@ -1,9 +1,13 @@
 package com.mipt.hsse.hssetechbackend.oauth.services;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
 import com.mipt.hsse.hssetechbackend.data.entities.HumanUserPassport;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepository;
 import com.mipt.hsse.hssetechbackend.users.administation.RolesService;
+import java.util.ArrayList;
+import java.util.HashMap;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,15 +17,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import static org.junit.jupiter.api.Assertions.*;
-
 @DataJpaTest
+@TestPropertySource("classpath:application-test.properties")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @Import(UserPassportService.class)

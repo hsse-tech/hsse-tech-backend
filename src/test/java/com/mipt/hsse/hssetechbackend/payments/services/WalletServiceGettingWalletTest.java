@@ -8,10 +8,8 @@ import com.mipt.hsse.hssetechbackend.data.entities.HumanUserPassport;
 import com.mipt.hsse.hssetechbackend.data.entities.Wallet;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaWalletRepository;
-
 import java.math.BigDecimal;
 import java.util.UUID;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,10 +17,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @DataJpaTest
+@TestPropertySource("classpath:application-test.properties")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @Import(WalletService.class)

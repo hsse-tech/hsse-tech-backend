@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.oauth.config.SecurityConfig;
 import com.mipt.hsse.hssetechbackend.oauth.services.MiptOAuth2UserService;
@@ -16,8 +17,6 @@ import com.mipt.hsse.hssetechbackend.payments.controllers.requests.TopUpBalanceR
 import com.mipt.hsse.hssetechbackend.payments.providers.TopUpBalanceProviderBase;
 import com.mipt.hsse.hssetechbackend.payments.providers.TopUpSession;
 import com.mipt.hsse.hssetechbackend.payments.services.WalletServiceBase;
-
-import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -26,9 +25,11 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.*;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(PaymentsController.class)
+@TestPropertySource("classpath:application-test.properties")
 @Import({SecurityConfig.class, MiptOAuth2UserService.class})
 class PaymentsControllerTest {
   @MockBean
