@@ -1,5 +1,9 @@
 package com.mipt.hsse.hssetechbackend.payments.providers.events;
 
+import static com.mipt.hsse.hssetechbackend.BigDecimalHelper.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepository;
@@ -8,6 +12,7 @@ import com.mipt.hsse.hssetechbackend.data.repositories.JpaWalletRepository;
 import com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.events.TinkoffTopUpAcquiringEventsListener;
 import com.mipt.hsse.hssetechbackend.payments.services.TransactionService;
 import com.mipt.hsse.hssetechbackend.payments.services.WalletService;
+import java.math.BigDecimal;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,16 +20,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-
-import static com.mipt.hsse.hssetechbackend.BigDecimalHelper.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-
 @DataJpaTest
+@TestPropertySource("classpath:application-test.properties")
 @Import({TinkoffTopUpAcquiringEventsListener.class, TransactionService.class, WalletService.class})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)

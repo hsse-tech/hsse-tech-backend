@@ -1,5 +1,11 @@
 package com.mipt.hsse.hssetechbackend.payments.providers;
 
+import static com.mipt.hsse.hssetechbackend.BigDecimalHelper.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
 import com.mipt.hsse.hssetechbackend.data.entities.ClientTransactionStatus;
 import com.mipt.hsse.hssetechbackend.data.entities.HumanUserPassport;
@@ -9,6 +15,7 @@ import com.mipt.hsse.hssetechbackend.data.repositories.JpaTransactionRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaWalletRepository;
 import com.mipt.hsse.hssetechbackend.payments.services.TransactionService;
 import com.mipt.hsse.hssetechbackend.payments.services.WalletService;
+import java.math.BigDecimal;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,18 +24,12 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-
-import static com.mipt.hsse.hssetechbackend.BigDecimalHelper.*;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @DataJpaTest
+@TestPropertySource("classpath:application-test.properties")
 @Import({TopUpBalanceProvider.class, TransactionService.class, WalletService.class})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)

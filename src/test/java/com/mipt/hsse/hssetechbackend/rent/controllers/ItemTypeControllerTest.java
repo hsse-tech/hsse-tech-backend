@@ -30,10 +30,12 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 @WebMvcTest(ItemTypeController.class)
+@TestPropertySource("classpath:application-test.properties")
 @Import({SecurityConfig.class, MiptOAuth2UserService.class})
 class ItemTypeControllerTest {
   private static final String BASE_MAPPING = "/api/renting/item-type";

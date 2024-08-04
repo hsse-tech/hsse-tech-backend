@@ -30,9 +30,11 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(LockController.class)
+@TestPropertySource("classpath:application-test.properties")
 @Import({SecurityConfig.class, MiptOAuth2UserService.class})
 class LockControllerTest {
   private static final String BASE_MAPPING = "/api/locks";

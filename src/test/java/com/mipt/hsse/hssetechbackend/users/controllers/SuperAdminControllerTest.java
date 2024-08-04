@@ -1,25 +1,5 @@
 package com.mipt.hsse.hssetechbackend.users.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mipt.hsse.hssetechbackend.oauth.config.SecurityConfig;
-import com.mipt.hsse.hssetechbackend.oauth.services.MiptOAuth2UserService;
-import com.mipt.hsse.hssetechbackend.oauth.services.OAuth2UserHelper;
-import com.mipt.hsse.hssetechbackend.oauth.services.UserPassportServiceBase;
-import com.mipt.hsse.hssetechbackend.users.administation.RolesServiceBase;
-import com.mipt.hsse.hssetechbackend.users.controllers.requests.ActivateKeyRequest;
-import com.mipt.hsse.hssetechbackend.users.controllers.responses.KeyGenResultResponse;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
-import org.springframework.http.MediaType;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.UUID;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -28,7 +8,28 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mipt.hsse.hssetechbackend.oauth.config.SecurityConfig;
+import com.mipt.hsse.hssetechbackend.oauth.services.MiptOAuth2UserService;
+import com.mipt.hsse.hssetechbackend.oauth.services.OAuth2UserHelper;
+import com.mipt.hsse.hssetechbackend.oauth.services.UserPassportServiceBase;
+import com.mipt.hsse.hssetechbackend.users.administation.RolesServiceBase;
+import com.mipt.hsse.hssetechbackend.users.controllers.requests.ActivateKeyRequest;
+import com.mipt.hsse.hssetechbackend.users.controllers.responses.KeyGenResultResponse;
+import java.util.UUID;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.web.servlet.MockMvc;
+
 @WebMvcTest(SuperAdminController.class)
+@TestPropertySource("classpath:application-test.properties")
 @Import({SecurityConfig.class, MiptOAuth2UserService.class})
 class SuperAdminControllerTest {
   @Autowired private MockMvc mockMvc;
