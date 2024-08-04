@@ -35,7 +35,7 @@ jobs:
         with:
           host: ${{ secrets.DEPLOY_DEV_HOST }}
           username: ${{ secrets.DEPLOY_DEV_USERNAME }}
-          key: ${{ secrets.DEPLOY_DEV_KEY }}
+          password: ${{ secrets.DEPLOY_DEV_KEY }}
           port: 22
           source: "./docker-compose.dev.yml"
           target: "~/web/dev/"
@@ -45,7 +45,7 @@ jobs:
         with:
           host: ${{ secrets.DEPLOY_DEV_HOST }}
           username: ${{ secrets.DEPLOY_DEV_USERNAME }}
-          key: ${{ secrets.DEPLOY_DEV_KEY }}
+          password: ${{ secrets.DEPLOY_DEV_KEY }}
           port: 22
           script: |
             cd ~/web/dev
