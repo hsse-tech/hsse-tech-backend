@@ -51,7 +51,7 @@ jobs:
         with:
           host: ${{ secrets.DEPLOY_PROD_HOST }}
           username: ${{ secrets.DEPLOY_PROD_USERNAME }}
-          password: ${{ secrets.DEPLOY_PROD_KEY }}
+          password: ${{ secrets.DEPLOY_PROD_PASSWORD }}
           port: 22
           script: |
             cd ~/web/prod
