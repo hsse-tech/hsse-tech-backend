@@ -31,7 +31,7 @@ jobs:
           tags: ghcr.io/hsse-tech/hsse-tech-backend-dev:${{steps.date.outputs.date}}
 
       - name: Copy compose file to remote
-        uses: appleboy/ssh-action@v0.1.5
+        uses: appleboy/scp-action@v0.1.5
         with:
           host: ${{ secrets.DEPLOY_DEV_HOST }}
           username: ${{ secrets.DEPLOY_DEV_USERNAME }}
