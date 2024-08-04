@@ -9,6 +9,6 @@ services:
     env_file: "prod.env"
 
 networks:
-  hsse-tech-internal-dev:
+  hsse-tech-internal-prod:
     name: hsse-tech-internal-prod
     external: true
