@@ -1,0 +1,14 @@
+services:
+  backend:
+    image: ghcr.io/hsse-tech/hsse-tech-backend-prod
+    container_name: hsse-tech-backend-prod
+    networks:
+      - hsse-tech-internal-prod
+    ports:
+      - "8080:8080"
+    env_file: "prod.env"
+
+networks:
+  hsse-tech-internal-dev:
+    name: hsse-tech-internal-prod
+    external: true

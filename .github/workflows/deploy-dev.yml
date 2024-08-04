@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: Development deployment
 
 on:
   push:
@@ -28,6 +28,7 @@ jobs:
         with:
           push: true
           tags: 'ghcr.io/hsse-tech/hsse-tech-backend-dev:${{env.TAG}}, ghcr.io/hsse-tech/hsse-tech-backend-dev:latest'
+
   deploy:
     runs-on: ubuntu-latest  
     needs: build
@@ -39,7 +40,7 @@ jobs:
         with:
           host: ${{ secrets.DEPLOY_DEV_HOST }}
           username: ${{ secrets.DEPLOY_DEV_USERNAME }}
-          password: ${{ secrets.DEPLOY_DEV_KEY }}
+          password: ${{ secrets.DEPLOY_DEV_PASSWORD }}
           port: 22
           source: docker-compose.dev.yaml
           target: ~/web/dev
