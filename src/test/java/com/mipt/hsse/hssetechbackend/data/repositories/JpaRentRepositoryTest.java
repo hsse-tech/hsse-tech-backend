@@ -4,20 +4,20 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
-
 import java.math.BigDecimal;
 import java.time.Instant;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @DataJpaTest
+@TestPropertySource("classpath:application-test.properties")
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class JpaRentRepositoryTest extends DatabaseSuite {

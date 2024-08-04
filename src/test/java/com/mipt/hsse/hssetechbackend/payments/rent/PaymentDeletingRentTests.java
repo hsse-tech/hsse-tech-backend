@@ -1,11 +1,16 @@
 package com.mipt.hsse.hssetechbackend.payments.rent;
 
+import static com.mipt.hsse.hssetechbackend.BigDecimalHelper.*;
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.*;
 import com.mipt.hsse.hssetechbackend.payments.services.TransactionService;
 import com.mipt.hsse.hssetechbackend.payments.services.WalletService;
 import com.mipt.hsse.hssetechbackend.rent.rentprocessing.deleterentprocessing.DeleteRentProcessData;
+import java.math.BigDecimal;
+import java.time.Instant;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,16 +18,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.time.Instant;
-
-import static com.mipt.hsse.hssetechbackend.BigDecimalHelper.*;
-import static org.junit.jupiter.api.Assertions.*;
-
 @DataJpaTest
+@TestPropertySource("classpath:application-test.properties")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @Import({PaymentDeleteRentProcessor.class, TransactionService.class, WalletService.class})

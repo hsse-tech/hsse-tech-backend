@@ -6,11 +6,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
+import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepositoryOnDrive;
-import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.VerificationFailedException;
 import com.mipt.hsse.hssetechbackend.rent.rentprocessing.createrentprocessing.UnoccupiedTimeCreateRentProcessor;
 import com.mipt.hsse.hssetechbackend.rent.services.RentService;
@@ -29,10 +29,12 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @DataJpaTest
+@TestPropertySource("classpath:application-test.properties")
 @Import({RentService.class, PhotoRepositoryOnDrive.class, UnoccupiedTimeCreateRentProcessor.class})
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)

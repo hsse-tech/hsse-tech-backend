@@ -1,12 +1,11 @@
 package com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.signing;
 
 import com.mipt.hsse.hssetechbackend.payments.providers.tinkoff.entities.requests.TinkoffRequestBase;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 @Service
 public class RequestsSigner implements RequestsSignerBase {
@@ -14,7 +13,7 @@ public class RequestsSigner implements RequestsSignerBase {
   private final TinkoffPropsSerializer propsSerializer;
 
   public RequestsSigner(
-          @Value("#{environment.getProperty('TINKOFF_TERMINAL_KEY')}") String terminalKey,
+          @Value("${tinkoff.sign-key}") String terminalKey,
           TinkoffPropsSerializer propsSerializer) {
     this.terminalKey = terminalKey;
     this.propsSerializer = propsSerializer;
