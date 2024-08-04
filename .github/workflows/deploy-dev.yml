@@ -37,8 +37,8 @@ jobs:
           username: ${{ secrets.DEPLOY_DEV_USERNAME }}
           password: ${{ secrets.DEPLOY_DEV_KEY }}
           port: 22
-          source: "docker-compose.dev.yml"
-          target: "~/web/dev/"
+          source: docker-compose.dev.yml
+          target: ~/web/dev/
 
       - name: Run app
         uses: appleboy/ssh-action@v0.1.5
