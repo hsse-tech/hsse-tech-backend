@@ -11,8 +11,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Current version
-      run: echo "NOW=$(date +%s)" >> $GITHUB_ENV
+    - name: Get current date
+      id: date
+      run: echo "::set-output name=date::$(date +%s)"
     - uses: actions/checkout@v4
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
@@ -20,4 +21,4 @@ jobs:
       uses: docker/build-push-action@v6
       with:
         push: true
-        tags: ghcr.io/hsse-tech/hsse-tech-backend-dev:$NOW
+        tags: ghcr.io/hsse-tech/hsse-tech-backend-dev:${{steps.date.outputs.date}}
