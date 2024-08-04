@@ -20,4 +20,4 @@ jobs:
       uses: docker/build-push-action@v6
       with:
         push: true
-        tags: ghcr.io/hsse-tech/hsse-tech-backend-dev:${{NOW}}
+        tags: ghcr.io/hsse-tech/hsse-tech-backend-dev:$NOW
