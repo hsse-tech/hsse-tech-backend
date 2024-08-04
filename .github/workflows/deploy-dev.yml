@@ -42,8 +42,8 @@ jobs:
           username: ${{ secrets.DEPLOY_DEV_USERNAME }}
           password: ${{ secrets.DEPLOY_DEV_KEY }}
           port: 22
-          source: docker-compose.dev.yml
-          target: web/dev
+          source: docker-compose.dev.yaml
+          target: ~/web/dev
 
       - name: Run app
         uses: appleboy/ssh-action@v0.1.5
@@ -54,5 +54,5 @@ jobs:
           port: 22
           script: |
             cd ~/web/dev
-            docker compose -f ./docker-compose.dev.yml pull
-            docker compose -f ./docker-compose.dev.yml up -d
+            docker compose -f ./docker-compose.dev.yaml pull
+            docker compose -f ./docker-compose.dev.yaml up -d
