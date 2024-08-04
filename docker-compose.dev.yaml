@@ -7,3 +7,8 @@ services:
     ports:
       - "8090:8080"
     env_file: "~/dev.env"
+
+networks:
+    hsse-tech-internal-dev:
+      name: hsse-tech-internal-dev
+      external: true
