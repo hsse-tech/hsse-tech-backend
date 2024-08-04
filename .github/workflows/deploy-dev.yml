@@ -13,6 +13,13 @@ jobs:
         run: echo "::set-output name=date::$(date +%s)"
 
       - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v2
+        with:
+          name: distfiles
+          path: distfiles
+
+      - name: Ls
+        run: ls
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -37,7 +44,7 @@ jobs:
           username: ${{ secrets.DEPLOY_DEV_USERNAME }}
           password: ${{ secrets.DEPLOY_DEV_KEY }}
           port: 22
-          source: ./docker-compose.dev.yml
+          source: distfiles/docker-compose.dev.yml
           target: ~/web/dev/
 
       - name: Run app
