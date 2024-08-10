@@ -8,10 +8,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mipt.hsse.hssetechbackend.controllers.lock.LockController;
+import com.mipt.hsse.hssetechbackend.controllers.lock.responses.CreateLockResponse;
 import com.mipt.hsse.hssetechbackend.data.entities.Item;
 import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
 import com.mipt.hsse.hssetechbackend.data.entities.LockPassport;
-import com.mipt.hsse.hssetechbackend.lock.controllers.responses.CreateLockResponse;
 import com.mipt.hsse.hssetechbackend.lock.exceptions.ItemToLockCouplingException;
 import com.mipt.hsse.hssetechbackend.lock.services.LockServiceBase;
 import com.mipt.hsse.hssetechbackend.oauth.config.SecurityConfig;

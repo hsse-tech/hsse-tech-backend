@@ -4,11 +4,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
 import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
+import com.mipt.hsse.hssetechbackend.controllers.rent.requests.CreateItemTypeRequest;
+import com.mipt.hsse.hssetechbackend.controllers.rent.requests.UpdateItemTypeRequest;
 import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemTypeRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepositoryOnDrive;
-import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemTypeRequest;
-import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemTypeRequest;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.UniqueConstraintViolationException;
 import java.math.BigDecimal;
 import java.util.UUID;
