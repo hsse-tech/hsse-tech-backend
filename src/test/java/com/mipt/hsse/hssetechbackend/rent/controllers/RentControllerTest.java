@@ -12,24 +12,23 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.mipt.hsse.hssetechbackend.apierrorhandling.ApiError;
+import com.mipt.hsse.hssetechbackend.controllers.rent.RentController;
+import com.mipt.hsse.hssetechbackend.controllers.rent.requests.CreateRentRequest;
+import com.mipt.hsse.hssetechbackend.controllers.rent.requests.UpdateRentRequest;
+import com.mipt.hsse.hssetechbackend.controllers.rent.responses.RentDTO;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.oauth.config.SecurityConfig;
 import com.mipt.hsse.hssetechbackend.oauth.services.MiptOAuth2UserService;
 import com.mipt.hsse.hssetechbackend.oauth.services.OAuth2UserHelper;
 import com.mipt.hsse.hssetechbackend.oauth.services.UserPassportServiceBase;
-import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateRentRequest;
-import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateRentRequest;
-import com.mipt.hsse.hssetechbackend.rent.controllers.responses.RentDTO;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.CreateRentProcessingException;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.VerificationFailedException;
 import com.mipt.hsse.hssetechbackend.rent.services.RentService;
-
+import com.mipt.hsse.hssetechbackend.testutils.ResourceExtractor;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-
-import com.mipt.hsse.hssetechbackend.testutils.ResourceExtractor;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

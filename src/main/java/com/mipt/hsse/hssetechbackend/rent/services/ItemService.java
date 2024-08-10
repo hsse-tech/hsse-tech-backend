@@ -1,6 +1,8 @@
 package com.mipt.hsse.hssetechbackend.rent.services;
 
 import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
+import com.mipt.hsse.hssetechbackend.controllers.rent.requests.CreateItemRequest;
+import com.mipt.hsse.hssetechbackend.controllers.rent.requests.UpdateItemRequest;
 import com.mipt.hsse.hssetechbackend.data.entities.Item;
 import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
 import com.mipt.hsse.hssetechbackend.data.entities.LockPassport;
@@ -11,8 +13,6 @@ import com.mipt.hsse.hssetechbackend.data.repositories.JpaRentRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepository.PhotoType;
 import com.mipt.hsse.hssetechbackend.lock.services.LockServiceBase;
-import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
-import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;

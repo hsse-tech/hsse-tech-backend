@@ -11,12 +11,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
+import com.mipt.hsse.hssetechbackend.controllers.rent.ItemTypeController;
+import com.mipt.hsse.hssetechbackend.controllers.rent.requests.CreateItemTypeRequest;
+import com.mipt.hsse.hssetechbackend.controllers.rent.requests.UpdateItemTypeRequest;
 import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
 import com.mipt.hsse.hssetechbackend.oauth.config.SecurityConfig;
 import com.mipt.hsse.hssetechbackend.oauth.services.MiptOAuth2UserService;
 import com.mipt.hsse.hssetechbackend.oauth.services.UserPassportServiceBase;
-import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemTypeRequest;
-import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemTypeRequest;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.UniqueConstraintViolationException;
 import com.mipt.hsse.hssetechbackend.rent.services.ItemTypeService;
 import java.math.BigDecimal;
