@@ -3,6 +3,7 @@ package com.mipt.hsse.hssetechbackend.data.repositories.photorepository;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
@@ -71,6 +72,23 @@ class PhotoRepositoryOnDriveTest {
 
     photoRepository.deletePhoto(PhotoRepository.PhotoType.ITEM_THUMBNAIL, uuid);
     assertFalse(photoRepository.existsPhoto(PhotoRepository.PhotoType.ITEM_THUMBNAIL, uuid));
+  }
+
+  @Test
+  public void testDeletesFolderAfterDeletePhoto(
+      @Value("${photos.paths.item-thumbnail}") String folderPath)
+      throws IOException, NoSuchAlgorithmException {
+    UUID uuid = UUID.randomUUID();
+
+    photoRepository.save(PhotoRepository.PhotoType.ITEM_THUMBNAIL, uuid, new byte[] {1, 2, 3});
+    photoRepository.deletePhoto(PhotoRepository.PhotoType.ITEM_THUMBNAIL, uuid);
+
+    Path path = photoRepository.getFilePathForPhoto(PhotoRepository.PhotoType.ITEM_THUMBNAIL, uuid);
+    Path originalPath = Path.of(folderPath);
+    while (path != null && !path.equals(originalPath)) {
+      assertFalse(Files.exists(path));
+      path = path.getParent();
+    }
   }
 
   @Test

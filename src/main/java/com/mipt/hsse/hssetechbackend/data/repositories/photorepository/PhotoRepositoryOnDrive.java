@@ -5,6 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Repository;
 
@@ -13,10 +15,11 @@ import org.springframework.stereotype.Repository;
 public class PhotoRepositoryOnDrive implements PhotoRepository {
   private static final int UUID_LENGTH = 32;
   private static final int PATH_PART_LENGTH = 8;
+  private static final Logger LOGGER = LoggerFactory.getLogger(PhotoRepositoryOnDrive.class);
 
   private final PhotoTypePathConfiguration pathConfiguration;
 
-  PhotoRepositoryOnDrive(PhotoTypePathConfiguration pathConfiguration) {
+  public PhotoRepositoryOnDrive(PhotoTypePathConfiguration pathConfiguration) {
     this.pathConfiguration = pathConfiguration;
   }
 
@@ -56,6 +59,22 @@ public class PhotoRepositoryOnDrive implements PhotoRepository {
 
     if (Files.exists(path)) {
       Files.delete(path);
+    }
+
+    // Clear empty directories up to the original folder
+    Path parentPath = path.getParent();
+    Path originalPath = pathConfiguration.getFolderForType(photoType);
+    while (parentPath != null && !parentPath.equals(originalPath)) {
+      try (var stream = Files.list(parentPath)) {
+        // If the directory is empty, it is removed
+        if (stream.findAny().isEmpty()) Files.delete(parentPath);
+        else break;
+      } catch (IOException e) {
+        LOGGER.warn("Failed to list contents of directory: {}", parentPath, e);
+        break;
+      }
+
+      parentPath = parentPath.getParent(); // Move up to the parent directory
     }
   }
 
