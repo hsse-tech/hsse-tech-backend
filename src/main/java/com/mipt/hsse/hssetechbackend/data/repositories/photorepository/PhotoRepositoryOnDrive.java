@@ -5,18 +5,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
-
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Repository;
 
 @Repository
+@Configuration
 public class PhotoRepositoryOnDrive implements PhotoRepository {
   private static final int UUID_LENGTH = 32;
   private static final int PATH_PART_LENGTH = 8;
-  private final String basePath;
 
-  public PhotoRepositoryOnDrive(@Value("${photos-path:photos}") String basePath) {
-    this.basePath = basePath;
+  private final PhotoTypePathConfiguration pathConfiguration;
+
+  PhotoRepositoryOnDrive(PhotoTypePathConfiguration pathConfiguration) {
+    this.pathConfiguration = pathConfiguration;
   }
 
   @Override
@@ -37,7 +38,8 @@ public class PhotoRepositoryOnDrive implements PhotoRepository {
   }
 
   @Override
-  public void save(PhotoType photoType, UUID id, byte[] photoBytes) throws IOException, NoSuchAlgorithmException {
+  public void save(PhotoType photoType, UUID id, byte[] photoBytes)
+      throws IOException, NoSuchAlgorithmException {
     Path path = getFilePathForPhoto(photoType, id);
 
     if (Files.exists(path)) {
@@ -57,9 +59,9 @@ public class PhotoRepositoryOnDrive implements PhotoRepository {
     }
   }
 
-  private Path getFilePathForPhoto(PhotoType photoType, UUID id) {
-    String photoTypeDirectory = photoType.getFolderName();
-    Path filePath = Path.of(basePath, photoTypeDirectory);
+  @Override
+  public Path getFilePathForPhoto(PhotoType photoType, UUID id) {
+    Path filePath = pathConfiguration.getFolderForType(photoType);
 
     // Add a sequence of folders representing the UUID split into short parts
     String[] parts = splitUUID(id);
@@ -71,7 +73,8 @@ public class PhotoRepositoryOnDrive implements PhotoRepository {
   }
 
   /**
-   * Splits the 32-letter UUID into parts each, probably, except for the last one, consisting of {@link PhotoRepositoryOnDrive#PATH_PART_LENGTH} letters
+   * Splits the 32-letter UUID into parts each, probably, except for the last one, consisting of
+   * {@link PhotoRepositoryOnDrive#PATH_PART_LENGTH} letters
    */
   private String[] splitUUID(UUID uuid) {
     String uuidString = uuid.toString();
@@ -80,7 +83,8 @@ public class PhotoRepositoryOnDrive implements PhotoRepository {
     String[] parts = new String[(int) Math.ceil(1f * UUID_LENGTH / PATH_PART_LENGTH)];
     for (int i = 0; i < parts.length; i++) {
       parts[i] =
-          uuidString.substring(PATH_PART_LENGTH * i, Math.min(uuidString.length(), PATH_PART_LENGTH * (i + 1)));
+          uuidString.substring(
+              PATH_PART_LENGTH * i, Math.min(uuidString.length(), PATH_PART_LENGTH * (i + 1)));
     }
     return parts;
   }

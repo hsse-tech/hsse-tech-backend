@@ -11,6 +11,7 @@ import com.mipt.hsse.hssetechbackend.data.entities.Item;
 import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
 import com.mipt.hsse.hssetechbackend.data.repositories.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepositoryOnDrive;
+import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoTypePathConfiguration;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.RentProcessingException;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.VerificationFailedException;
 import com.mipt.hsse.hssetechbackend.rent.rentprocessing.createrentprocessing.UnoccupiedTimeCreateRentProcessor;
@@ -35,7 +36,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Import({
   RentService.class,
   PhotoRepositoryOnDrive.class,
-  UnoccupiedTimeCreateRentProcessor.class
+  UnoccupiedTimeCreateRentProcessor.class,
+  PhotoTypePathConfiguration.class
 })
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -85,7 +87,8 @@ class CreateRentTest extends DatabaseSuite {
         new CreateRentRequest(item.getId(), startTime, endTime, "Test name", null);
 
     assertThrows(
-        VerificationFailedException.class, () -> rentService.createRent(user.getId(), createRentRequest));
+        VerificationFailedException.class,
+        () -> rentService.createRent(user.getId(), createRentRequest));
   }
 
   @Test
@@ -96,7 +99,8 @@ class CreateRentTest extends DatabaseSuite {
         new CreateRentRequest(item.getId(), startTime, endTime, "Test name", null);
 
     assertThrows(
-        VerificationFailedException.class, () -> rentService.createRent(user.getId(), createRentRequest));
+        VerificationFailedException.class,
+        () -> rentService.createRent(user.getId(), createRentRequest));
   }
 
   @Test
@@ -109,7 +113,8 @@ class CreateRentTest extends DatabaseSuite {
         new CreateRentRequest(item.getId(), startTime, endTime, "Test name", null);
 
     assertThrows(
-        VerificationFailedException.class, () -> rentService.createRent(user.getId(), createRentRequest));
+        VerificationFailedException.class,
+        () -> rentService.createRent(user.getId(), createRentRequest));
   }
 
   @Test
@@ -134,6 +139,8 @@ class CreateRentTest extends DatabaseSuite {
     CreateRentRequest createRentRequest =
         new CreateRentRequest(item.getId(), startTime, endTime, "Test name", null);
 
-    assertThrows(RentProcessingException.class, () -> rentService.createRent(user.getId(), createRentRequest));
+    assertThrows(
+        RentProcessingException.class,
+        () -> rentService.createRent(user.getId(), createRentRequest));
   }
 }

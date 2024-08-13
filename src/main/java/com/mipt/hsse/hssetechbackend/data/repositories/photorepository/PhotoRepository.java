@@ -1,28 +1,28 @@
 package com.mipt.hsse.hssetechbackend.data.repositories.photorepository;
 
 
+import org.springframework.stereotype.Repository;
+
 import java.io.IOException;
+import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
-import lombok.Getter;
 
+@Repository
 public interface PhotoRepository {
-  @Getter
-  enum PhotoType {
-    RENT_CONFIRMATION("rent-confirmation"),
-    ITEM_THUMBNAIL("item-thumbnail");
+  Path getFilePathForPhoto(PhotoType photoType, UUID id);
 
-    private final String folderName;
-    PhotoType(String folderName) {
-      this.folderName = folderName;
-    }
+  enum PhotoType {
+    RENT_CONFIRMATION,
+    ITEM_THUMBNAIL
   }
 
   boolean existsPhoto(PhotoType photoType, UUID id);
 
   byte[] findPhoto(PhotoType photoType, UUID rentId) throws IOException;
 
-  void save(PhotoType photoType, UUID rentId, byte[] photoBytes) throws IOException, NoSuchAlgorithmException;
+  void save(PhotoType photoType, UUID rentId, byte[] photoBytes)
+      throws IOException, NoSuchAlgorithmException;
 
   void deletePhoto(PhotoType photoType, UUID id) throws IOException;
 }

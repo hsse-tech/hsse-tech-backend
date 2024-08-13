@@ -8,6 +8,7 @@ import com.mipt.hsse.hssetechbackend.controllers.rent.requests.CreateRentRequest
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepositoryOnDrive;
+import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoTypePathConfiguration;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.VerificationFailedException;
 import com.mipt.hsse.hssetechbackend.rent.rentprocessing.createrentprocessing.UnoccupiedTimeCreateRentProcessor;
 import com.mipt.hsse.hssetechbackend.rent.services.RentService;
@@ -31,7 +32,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Import({
   RentService.class,
   PhotoRepositoryOnDrive.class,
-  UnoccupiedTimeCreateRentProcessor.class
+  UnoccupiedTimeCreateRentProcessor.class,
+  PhotoTypePathConfiguration.class
 })
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -129,7 +131,8 @@ class EndRentTest extends DatabaseSuite {
     Instant startTime = Instant.now().minus(3, ChronoUnit.MINUTES);
     Instant endTime = Instant.now().plus(50, ChronoUnit.MINUTES);
     CreateRentRequest createRentRequest =
-        new CreateRentRequest(itemWithPhoto.getId(), startTime, endTime, "Test name", "Test description");
+        new CreateRentRequest(
+            itemWithPhoto.getId(), startTime, endTime, "Test name", "Test description");
     UUID rentId = rentService.createRent(user.getId(), createRentRequest).getId();
 
     rentService.startRent(rentId);

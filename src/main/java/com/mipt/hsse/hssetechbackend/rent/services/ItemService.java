@@ -18,7 +18,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ServerErrorException;
 
@@ -29,21 +28,18 @@ public class ItemService {
   private final JpaRentRepository rentRepository;
   private final PhotoRepository photoRepository;
   private final LockServiceBase lockService;
-  private final String appDomain;
 
   public ItemService(
       JpaItemRepository itemRepository,
       JpaItemTypeRepository itemTypeRepository,
       JpaRentRepository rentRepository,
       PhotoRepository photoRepository,
-      LockServiceBase lockService,
-      @Value("${app_domain}") String appDomain) {
+      LockServiceBase lockService) {
     this.itemRepository = itemRepository;
     this.itemTypeRepository = itemTypeRepository;
     this.rentRepository = rentRepository;
     this.photoRepository = photoRepository;
     this.lockService = lockService;
-    this.appDomain = appDomain;
   }
 
   public Item createItem(CreateItemRequest request) {
