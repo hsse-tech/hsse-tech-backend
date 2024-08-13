@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 @TestPropertySource("classpath:application-test.properties")
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 class PhotoRepositoryOnDriveTest {
-  @Autowired private PhotoRepository photoRepository;
+  @Autowired private PhotoRepositoryOnDrive photoRepository;
 
   @Test
   public void testGetFilePathForPhoto(

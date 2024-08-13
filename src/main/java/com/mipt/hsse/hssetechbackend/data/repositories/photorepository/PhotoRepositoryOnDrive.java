@@ -78,7 +78,6 @@ public class PhotoRepositoryOnDrive implements PhotoRepository {
     }
   }
 
-  @Override
   public Path getFilePathForPhoto(PhotoType photoType, UUID id) {
     Path filePath = pathConfiguration.getFolderForType(photoType);
 
