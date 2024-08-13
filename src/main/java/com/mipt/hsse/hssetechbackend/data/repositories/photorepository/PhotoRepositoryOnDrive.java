@@ -7,11 +7,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Repository;
 
 @Repository
-@Configuration
 public class PhotoRepositoryOnDrive implements PhotoRepository {
   private static final int UUID_LENGTH = 32;
   private static final int PATH_PART_LENGTH = 8;
@@ -74,7 +72,7 @@ public class PhotoRepositoryOnDrive implements PhotoRepository {
         break;
       }
 
-      parentPath = parentPath.getParent(); // Move up to the parent directory
+      parentPath = parentPath.getParent();
     }
   }
 
