@@ -1,13 +1,9 @@
 package com.mipt.hsse.hssetechbackend.data.repositories.photorepository;
 
-
-import org.springframework.stereotype.Repository;
-
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
-@Repository
 public interface PhotoRepository {
   enum PhotoType {
     RENT_CONFIRMATION,
