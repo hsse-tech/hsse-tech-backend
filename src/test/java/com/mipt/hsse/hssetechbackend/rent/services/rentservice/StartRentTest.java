@@ -28,11 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @DataJpaTest
 @TestPropertySource("classpath:application-test.properties")
-@Import({
-  RentService.class,
-  PhotoRepositoryOnDrive.class,
-  UnoccupiedTimeCreateRentProcessor.class
-})
+@Import({RentService.class, PhotoRepositoryOnDrive.class, UnoccupiedTimeCreateRentProcessor.class})
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class StartRentTest extends DatabaseSuite {
@@ -68,7 +64,7 @@ class StartRentTest extends DatabaseSuite {
     Instant endTime = Instant.now().plus(50, ChronoUnit.MINUTES);
     CreateRentRequest createRentRequest =
         new CreateRentRequest(item.getId(), startTime, endTime, "Test name", "Test description");
-    UUID rentId = rentService.createRent(user.getId(),createRentRequest).getId();
+    UUID rentId = rentService.createRent(user.getId(), createRentRequest).getId();
 
     // Start rent
     Instant before = Instant.now();
@@ -93,7 +89,7 @@ class StartRentTest extends DatabaseSuite {
     Instant endTime = Instant.now().plus(50, ChronoUnit.MINUTES);
     CreateRentRequest createRentRequest =
         new CreateRentRequest(item.getId(), startTime, endTime, "Test name", "Test description");
-    UUID rentId = rentService.createRent(user.getId(),createRentRequest).getId();
+    UUID rentId = rentService.createRent(user.getId(), createRentRequest).getId();
 
     // Start rent
     rentService.startRent(rentId);
@@ -109,7 +105,7 @@ class StartRentTest extends DatabaseSuite {
     Instant endTime = Instant.now().plus(2, ChronoUnit.HOURS);
     CreateRentRequest createRentRequest =
         new CreateRentRequest(item.getId(), startTime, endTime, "Test name", "Test description");
-    UUID rentId = rentService.createRent(user.getId(),createRentRequest).getId();
+    UUID rentId = rentService.createRent(user.getId(), createRentRequest).getId();
 
     // Start rent
     assertThrows(VerificationFailedException.class, () -> rentService.startRent(rentId));
@@ -122,7 +118,7 @@ class StartRentTest extends DatabaseSuite {
     Instant endTime = Instant.now().minus(2, ChronoUnit.HOURS);
     CreateRentRequest createRentRequest =
         new CreateRentRequest(item.getId(), startTime, endTime, "Test name", "Test description");
-    UUID rentId = rentService.createRent(user.getId(),createRentRequest).getId();
+    UUID rentId = rentService.createRent(user.getId(), createRentRequest).getId();
 
     // Start rent
     assertThrows(VerificationFailedException.class, () -> rentService.startRent(rentId));

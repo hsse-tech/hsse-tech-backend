@@ -21,8 +21,4 @@ public class PngUtility {
         return false;
     return true;
   }
-
-  public static byte[] getPngSignature() {
-    return PngFormatSignature;
-  }
 }

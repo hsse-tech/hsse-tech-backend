@@ -32,11 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @DataJpaTest
 @TestPropertySource("classpath:application-test.properties")
-@Import({
-  RentService.class,
-  PhotoRepositoryOnDrive.class,
-  UnoccupiedTimeCreateRentProcessor.class
-})
+@Import({RentService.class, PhotoRepositoryOnDrive.class, UnoccupiedTimeCreateRentProcessor.class})
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class CreateRentTest extends DatabaseSuite {
@@ -85,7 +81,8 @@ class CreateRentTest extends DatabaseSuite {
         new CreateRentRequest(item.getId(), startTime, endTime, "Test name", null);
 
     assertThrows(
-        VerificationFailedException.class, () -> rentService.createRent(user.getId(), createRentRequest));
+        VerificationFailedException.class,
+        () -> rentService.createRent(user.getId(), createRentRequest));
   }
 
   @Test
@@ -96,7 +93,8 @@ class CreateRentTest extends DatabaseSuite {
         new CreateRentRequest(item.getId(), startTime, endTime, "Test name", null);
 
     assertThrows(
-        VerificationFailedException.class, () -> rentService.createRent(user.getId(), createRentRequest));
+        VerificationFailedException.class,
+        () -> rentService.createRent(user.getId(), createRentRequest));
   }
 
   @Test
@@ -109,7 +107,8 @@ class CreateRentTest extends DatabaseSuite {
         new CreateRentRequest(item.getId(), startTime, endTime, "Test name", null);
 
     assertThrows(
-        VerificationFailedException.class, () -> rentService.createRent(user.getId(), createRentRequest));
+        VerificationFailedException.class,
+        () -> rentService.createRent(user.getId(), createRentRequest));
   }
 
   @Test
@@ -134,6 +133,8 @@ class CreateRentTest extends DatabaseSuite {
     CreateRentRequest createRentRequest =
         new CreateRentRequest(item.getId(), startTime, endTime, "Test name", null);
 
-    assertThrows(RentProcessingException.class, () -> rentService.createRent(user.getId(), createRentRequest));
+    assertThrows(
+        RentProcessingException.class,
+        () -> rentService.createRent(user.getId(), createRentRequest));
   }
 }

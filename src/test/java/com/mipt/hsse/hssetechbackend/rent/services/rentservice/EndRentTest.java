@@ -28,11 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @DataJpaTest
 @TestPropertySource("classpath:application-test.properties")
-@Import({
-  RentService.class,
-  PhotoRepositoryOnDrive.class,
-  UnoccupiedTimeCreateRentProcessor.class
-})
+@Import({RentService.class, PhotoRepositoryOnDrive.class, UnoccupiedTimeCreateRentProcessor.class})
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class EndRentTest extends DatabaseSuite {
@@ -129,7 +125,8 @@ class EndRentTest extends DatabaseSuite {
     Instant startTime = Instant.now().minus(3, ChronoUnit.MINUTES);
     Instant endTime = Instant.now().plus(50, ChronoUnit.MINUTES);
     CreateRentRequest createRentRequest =
-        new CreateRentRequest(itemWithPhoto.getId(), startTime, endTime, "Test name", "Test description");
+        new CreateRentRequest(
+            itemWithPhoto.getId(), startTime, endTime, "Test name", "Test description");
     UUID rentId = rentService.createRent(user.getId(), createRentRequest).getId();
 
     rentService.startRent(rentId);

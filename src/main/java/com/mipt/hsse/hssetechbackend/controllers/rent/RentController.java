@@ -76,9 +76,11 @@ public class RentController {
   @GetMapping("/{rent_id}/confirm")
   public ResponseEntity<Resource> getPhotoConfirmation(@PathVariable("rent_id") UUID rentId) {
     byte[] photoBytes = rentService.getPhotoForRent(rentId);
-    var returnResource = new ByteArrayResource(photoBytes);
+    if (photoBytes == null) return ResponseEntity.notFound().build();
 
-    return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG)
+    var returnResource = new ByteArrayResource(photoBytes);
+    return ResponseEntity.ok()
+        .contentType(MediaType.IMAGE_PNG)
         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"confirmation.png\"")
         .body(returnResource);
   }
@@ -110,8 +112,7 @@ public class RentController {
   }
 
   @ExceptionHandler({CreateRentProcessingException.class, DeleteRentProcessingException.class})
-  protected ResponseEntity<ApiError> handleRentProcessingException(
-      RentProcessingException ex) {
+  protected ResponseEntity<ApiError> handleRentProcessingException(RentProcessingException ex) {
     ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, ex.getMessage());
     return RestExceptionHandler.buildResponseEntity(apiError);
   }
