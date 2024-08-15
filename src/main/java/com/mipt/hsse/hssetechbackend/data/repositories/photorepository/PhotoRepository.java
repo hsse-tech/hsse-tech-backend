@@ -6,8 +6,19 @@ import java.util.UUID;
 
 public interface PhotoRepository {
   enum PhotoType {
-    RENT_CONFIRMATION,
-    ITEM_THUMBNAIL
+    RENT_CONFIRMATION("Rent confirmation"),
+    ITEM_THUMBNAIL("Item thumbnail");
+
+    private final String stringRepresentation;
+
+    PhotoType(String stringRepresentation) {
+      this.stringRepresentation = stringRepresentation;
+    }
+
+    @Override
+    public String toString() {
+      return stringRepresentation;
+    }
   }
 
   boolean existsPhoto(PhotoType photoType, UUID id);

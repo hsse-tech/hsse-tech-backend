@@ -11,7 +11,6 @@ import com.mipt.hsse.hssetechbackend.data.entities.Item;
 import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
 import com.mipt.hsse.hssetechbackend.data.repositories.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepositoryOnDrive;
-import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoTypePathConfiguration;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.RentProcessingException;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.VerificationFailedException;
 import com.mipt.hsse.hssetechbackend.rent.rentprocessing.createrentprocessing.UnoccupiedTimeCreateRentProcessor;
@@ -33,12 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @DataJpaTest
 @TestPropertySource("classpath:application-test.properties")
-@Import({
-  RentService.class,
-  PhotoRepositoryOnDrive.class,
-  UnoccupiedTimeCreateRentProcessor.class,
-  PhotoTypePathConfiguration.class
-})
+@Import({RentService.class, PhotoRepositoryOnDrive.class, UnoccupiedTimeCreateRentProcessor.class})
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class CreateRentTest extends DatabaseSuite {

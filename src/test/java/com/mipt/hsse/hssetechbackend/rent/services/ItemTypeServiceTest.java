@@ -9,7 +9,6 @@ import com.mipt.hsse.hssetechbackend.controllers.rent.requests.UpdateItemTypeReq
 import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemTypeRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepositoryOnDrive;
-import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoTypePathConfiguration;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.UniqueConstraintViolationException;
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -26,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @DataJpaTest
 @TestPropertySource("classpath:application-test.properties")
-@Import({ItemTypeService.class, PhotoRepositoryOnDrive.class, PhotoTypePathConfiguration.class})
+@Import({ItemTypeService.class, PhotoRepositoryOnDrive.class})
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class ItemTypeServiceTest extends DatabaseSuite {

@@ -5,31 +5,34 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
+/**
+ * Implements storing photos on a local drive.
+ *
+ * @implNote For performance reasons, the photos are distributed into a 3-level-deep folder
+ *     structure. The first level of separation is by photo type. The second and the third levels
+ *     are by the 1-2 and 3-4 symbols in the hexadecimal 36-symbols-long representation of the image
+ *     UUID.
+ */
 @Repository
 public class PhotoRepositoryOnDrive implements PhotoRepository {
-  private static final int UUID_LENGTH = 32;
-  private static final int PATH_PART_LENGTH = 8;
-  private static final Logger LOGGER = LoggerFactory.getLogger(PhotoRepositoryOnDrive.class);
+  private final String photosPath;
 
-  private final PhotoTypePathConfiguration pathConfiguration;
-
-  public PhotoRepositoryOnDrive(PhotoTypePathConfiguration pathConfiguration) {
-    this.pathConfiguration = pathConfiguration;
+  public PhotoRepositoryOnDrive(@Value("${photos.path}") String photosPath) {
+    this.photosPath = photosPath;
   }
 
   @Override
   public boolean existsPhoto(PhotoType photoType, UUID id) {
-    Path path = getFilePathForPhoto(photoType, id);
+    Path path = getPhotoPath(photoType, id);
     return Files.exists(path);
   }
 
   @Override
   public byte[] findPhoto(PhotoType photoType, UUID id) throws IOException {
-    Path path = getFilePathForPhoto(photoType, id);
+    Path path = getPhotoPath(photoType, id);
 
     if (!Files.exists(path)) {
       throw new PhotoNotFoundException();
@@ -41,7 +44,7 @@ public class PhotoRepositoryOnDrive implements PhotoRepository {
   @Override
   public void save(PhotoType photoType, UUID id, byte[] photoBytes)
       throws IOException, NoSuchAlgorithmException {
-    Path path = getFilePathForPhoto(photoType, id);
+    Path path = getPhotoPath(photoType, id);
 
     if (Files.exists(path)) {
       Files.delete(path);
@@ -53,55 +56,26 @@ public class PhotoRepositoryOnDrive implements PhotoRepository {
 
   @Override
   public void deletePhoto(PhotoType photoType, UUID id) throws IOException {
-    Path path = getFilePathForPhoto(photoType, id);
+    Path path = getPhotoPath(photoType, id);
 
     if (Files.exists(path)) {
       Files.delete(path);
     }
-
-    // Clear empty directories up to the original folder
-    Path parentPath = path.getParent();
-    Path originalPath = pathConfiguration.getFolderForType(photoType);
-    while (parentPath != null && !parentPath.equals(originalPath)) {
-      try (var stream = Files.list(parentPath)) {
-        // If the directory is empty, it is removed
-        if (stream.findAny().isEmpty()) Files.delete(parentPath);
-        else break;
-      } catch (IOException e) {
-        LOGGER.warn("Failed to list contents of directory: {}", parentPath, e);
-        break;
-      }
-
-      parentPath = parentPath.getParent();
-    }
   }
 
-  public Path getFilePathForPhoto(PhotoType photoType, UUID id) {
-    Path filePath = pathConfiguration.getFolderForType(photoType);
+  public Path getPhotoPath(PhotoType photoType, UUID id) {
+    Path filePath = Path.of(photosPath, photoType.toString());
 
-    // Add a sequence of folders representing the UUID split into short parts
-    String[] parts = splitUUID(id);
+    String firstTwoSymbols = id.toString().substring(0, 2);
+    String secondTwoSymbols = id.toString().substring(2, 4);
+
+    String[] parts = new String[] {firstTwoSymbols, secondTwoSymbols};
     for (String part : parts) {
       filePath = filePath.resolve(part);
     }
 
+    filePath = filePath.resolve(id + ".png");
+
     return filePath;
-  }
-
-  /**
-   * Splits the 32-letter UUID into parts each, probably, except for the last one, consisting of
-   * {@link PhotoRepositoryOnDrive#PATH_PART_LENGTH} letters
-   */
-  private String[] splitUUID(UUID uuid) {
-    String uuidString = uuid.toString();
-    uuidString = uuidString.replace("-", "");
-
-    String[] parts = new String[(int) Math.ceil(1f * UUID_LENGTH / PATH_PART_LENGTH)];
-    for (int i = 0; i < parts.length; i++) {
-      parts[i] =
-          uuidString.substring(
-              PATH_PART_LENGTH * i, Math.min(uuidString.length(), PATH_PART_LENGTH * (i + 1)));
-    }
-    return parts;
   }
 }
