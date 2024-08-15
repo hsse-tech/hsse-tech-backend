@@ -8,12 +8,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
+import com.mipt.hsse.hssetechbackend.controllers.payments.PaymentsController;
+import com.mipt.hsse.hssetechbackend.controllers.payments.requests.TopUpBalanceRequest;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.oauth.config.SecurityConfig;
 import com.mipt.hsse.hssetechbackend.oauth.services.MiptOAuth2UserService;
 import com.mipt.hsse.hssetechbackend.oauth.services.OAuth2UserHelper;
 import com.mipt.hsse.hssetechbackend.oauth.services.UserPassportServiceBase;
-import com.mipt.hsse.hssetechbackend.payments.controllers.requests.TopUpBalanceRequest;
 import com.mipt.hsse.hssetechbackend.payments.providers.TopUpBalanceProviderBase;
 import com.mipt.hsse.hssetechbackend.payments.providers.TopUpSession;
 import com.mipt.hsse.hssetechbackend.payments.services.WalletServiceBase;

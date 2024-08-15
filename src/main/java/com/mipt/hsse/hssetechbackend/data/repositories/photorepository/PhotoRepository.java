@@ -1,28 +1,29 @@
 package com.mipt.hsse.hssetechbackend.data.repositories.photorepository;
 
-
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
-import lombok.Getter;
 
 public interface PhotoRepository {
-  @Getter
   enum PhotoType {
-    RENT_CONFIRMATION("rent-confirmation"),
-    ITEM_THUMBNAIL("item-thumbnail");
+    RENT_CONFIRMATION("Rent confirmation"),
+    ITEM_THUMBNAIL("Item thumbnail");
 
-    private final String folderName;
-    PhotoType(String folderName) {
-      this.folderName = folderName;
+    private final String stringRepresentation;
+
+    PhotoType(String stringRepresentation) {
+      this.stringRepresentation = stringRepresentation;
+    }
+
+    @Override
+    public String toString() {
+      return stringRepresentation;
     }
   }
 
   boolean existsPhoto(PhotoType photoType, UUID id);
 
-  byte[] findPhoto(PhotoType photoType, UUID rentId) throws IOException;
+  byte[] findPhoto(PhotoType photoType, UUID rentId);
 
-  void save(PhotoType photoType, UUID rentId, byte[] photoBytes) throws IOException, NoSuchAlgorithmException;
+  void save(PhotoType photoType, UUID rentId, byte[] photoBytes);
 
-  void deletePhoto(PhotoType photoType, UUID id) throws IOException;
+  void deletePhoto(PhotoType photoType, UUID id);
 }

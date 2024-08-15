@@ -6,9 +6,17 @@ services:
       - hsse-tech-internal-prod
     ports:
       - "8080:8080"
+    environment:
+      - PHOTOS_FOLDER_PATH=/media
+    volumes:
+      - photos-prod-vol:/media
     env_file: "prod.env"
 
 networks:
   hsse-tech-internal-prod:
     name: hsse-tech-internal-prod
+    external: true
+
+volumes:
+  photos-prod-vol:
     external: true

@@ -9,13 +9,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mipt.hsse.hssetechbackend.controllers.users.SuperAdminController;
+import com.mipt.hsse.hssetechbackend.controllers.users.requests.ActivateKeyRequest;
+import com.mipt.hsse.hssetechbackend.controllers.users.responses.KeyGenResultResponse;
 import com.mipt.hsse.hssetechbackend.oauth.config.SecurityConfig;
 import com.mipt.hsse.hssetechbackend.oauth.services.MiptOAuth2UserService;
 import com.mipt.hsse.hssetechbackend.oauth.services.OAuth2UserHelper;
 import com.mipt.hsse.hssetechbackend.oauth.services.UserPassportServiceBase;
 import com.mipt.hsse.hssetechbackend.users.administation.RolesServiceBase;
-import com.mipt.hsse.hssetechbackend.users.controllers.requests.ActivateKeyRequest;
-import com.mipt.hsse.hssetechbackend.users.controllers.responses.KeyGenResultResponse;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

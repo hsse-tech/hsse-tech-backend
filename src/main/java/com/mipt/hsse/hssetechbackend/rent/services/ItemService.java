@@ -1,6 +1,8 @@
 package com.mipt.hsse.hssetechbackend.rent.services;
 
 import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
+import com.mipt.hsse.hssetechbackend.controllers.rent.requests.CreateItemRequest;
+import com.mipt.hsse.hssetechbackend.controllers.rent.requests.UpdateItemRequest;
 import com.mipt.hsse.hssetechbackend.data.entities.Item;
 import com.mipt.hsse.hssetechbackend.data.entities.ItemType;
 import com.mipt.hsse.hssetechbackend.data.entities.LockPassport;
@@ -11,16 +13,10 @@ import com.mipt.hsse.hssetechbackend.data.repositories.JpaRentRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepository.PhotoType;
 import com.mipt.hsse.hssetechbackend.lock.services.LockServiceBase;
-import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
-import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ServerErrorException;
 
 @Service
 public class ItemService {
@@ -29,21 +25,18 @@ public class ItemService {
   private final JpaRentRepository rentRepository;
   private final PhotoRepository photoRepository;
   private final LockServiceBase lockService;
-  private final String appDomain;
 
   public ItemService(
       JpaItemRepository itemRepository,
       JpaItemTypeRepository itemTypeRepository,
       JpaRentRepository rentRepository,
       PhotoRepository photoRepository,
-      LockServiceBase lockService,
-      @Value("${app_domain}") String appDomain) {
+      LockServiceBase lockService) {
     this.itemRepository = itemRepository;
     this.itemTypeRepository = itemTypeRepository;
     this.rentRepository = rentRepository;
     this.photoRepository = photoRepository;
     this.lockService = lockService;
-    this.appDomain = appDomain;
   }
 
   public Item createItem(CreateItemRequest request) {
@@ -69,7 +62,7 @@ public class ItemService {
     itemRepository.save(item);
   }
 
-  public void deleteItem(UUID itemId) throws IOException {
+  public void deleteItem(UUID itemId) {
     if (itemRepository.existsById(itemId)) {
       itemRepository.deleteById(itemId);
       photoRepository.deletePhoto(PhotoType.ITEM_THUMBNAIL, itemId);
@@ -97,18 +90,6 @@ public class ItemService {
     lockService.openLock(lock.getId());
   }
 
-  //
-  //  public byte[] getQrCodeForItem(UUID itemId, int width, int height)
-  //      throws WriterException, IOException {
-  //    BitMatrix qrCodeMatrix = QrCodeManager.createQR(buildLinkForItemQrCode(itemId), width,
-  // height);
-  //    BufferedImage image = MatrixToImageWriter.toBufferedImage(qrCodeMatrix);
-  //
-  //    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-  //    ImageIO.write(image, "png", byteArrayOutputStream);
-  //    return byteArrayOutputStream.toByteArray();
-  //  }
-
   public List<Item> getAllItems() {
     return itemRepository.findAll();
   }
@@ -118,11 +99,7 @@ public class ItemService {
       throw new EntityNotFoundException(Item.class, itemId);
     }
 
-    try {
       photoRepository.save(PhotoType.ITEM_THUMBNAIL, itemId, photoBytes);
-    } catch (IOException | NoSuchAlgorithmException | UnsupportedOperationException e) {
-      throw new ServerErrorException("Unexpected IO error while saving photo", e);
-    }
   }
 
   public byte[] getItemPhoto(UUID itemId) {
@@ -130,14 +107,6 @@ public class ItemService {
       throw new EntityNotFoundException(Item.class, itemId);
     }
 
-    try {
       return photoRepository.findPhoto(PhotoType.ITEM_THUMBNAIL, itemId);
-    } catch (IOException e) {
-      throw new ServerErrorException("Unexpected IO error while saving photo", e);
-    }
   }
-
-  //  private String buildLinkForItemQrCode(UUID itemId) {
-  //
-  //  }
 }

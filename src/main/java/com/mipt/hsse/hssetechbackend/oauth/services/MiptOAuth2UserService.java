@@ -1,5 +1,8 @@
 package com.mipt.hsse.hssetechbackend.oauth.services;
 
+import static com.mipt.hsse.hssetechbackend.utils.MapHelper.copyOf;
+
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -10,10 +13,6 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
-
-import java.util.Objects;
-
-import static com.mipt.hsse.hssetechbackend.utils.MapHelper.copyOf;
 
 @Service
 public class MiptOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
@@ -36,7 +35,7 @@ public class MiptOAuth2UserService implements OAuth2UserService<OAuth2UserReques
     try {
       var yandexEmail = Objects.requireNonNull(loaded.getAttribute(EMAIL_ATTR)).toString();
 
-      if (yandexEmail.endsWith(PHYSTECH_SUFFIX)) {
+      if (!yandexEmail.endsWith(PHYSTECH_SUFFIX)) {
         logger.debug("OAuth failed. Reason: invalid email address {}", yandexEmail);
         throw new OAuth2AuthenticationException(
             "Invalid user profile (not \"@phystech.edu\" email suffix)");

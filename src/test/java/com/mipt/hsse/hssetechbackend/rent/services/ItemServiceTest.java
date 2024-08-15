@@ -7,14 +7,14 @@ import static org.mockito.Mockito.*;
 
 import com.mipt.hsse.hssetechbackend.DatabaseSuite;
 import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
+import com.mipt.hsse.hssetechbackend.controllers.rent.requests.CreateItemRequest;
+import com.mipt.hsse.hssetechbackend.controllers.rent.requests.UpdateItemRequest;
 import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoAlreadyExistsException;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepository;
 import com.mipt.hsse.hssetechbackend.lock.exceptions.ItemToLockCouplingException;
 import com.mipt.hsse.hssetechbackend.lock.services.LockService;
-import com.mipt.hsse.hssetechbackend.rent.controllers.requests.CreateItemRequest;
-import com.mipt.hsse.hssetechbackend.rent.controllers.requests.UpdateItemRequest;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;

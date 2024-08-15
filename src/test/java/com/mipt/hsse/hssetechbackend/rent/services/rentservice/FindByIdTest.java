@@ -30,11 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @DataJpaTest
 @TestPropertySource("classpath:application-test.properties")
-@Import({
-  RentService.class,
-  PhotoRepositoryOnDrive.class,
-  UnoccupiedTimeCreateRentProcessor.class
-})
+@Import({RentService.class, PhotoRepositoryOnDrive.class, UnoccupiedTimeCreateRentProcessor.class})
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class FindByIdTest extends DatabaseSuite {
