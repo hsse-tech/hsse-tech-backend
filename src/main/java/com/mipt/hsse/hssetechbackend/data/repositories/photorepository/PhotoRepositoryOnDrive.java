@@ -29,6 +29,9 @@ public class PhotoRepositoryOnDrive implements PhotoRepository {
     return Files.exists(path);
   }
 
+  /**
+   * @throws PhotoNotFoundException photo does not exist
+   */
   @Override
   public byte[] findPhoto(PhotoType photoType, UUID id) {
     Path path = getPhotoPath(photoType, id);
@@ -44,15 +47,18 @@ public class PhotoRepositoryOnDrive implements PhotoRepository {
     }
   }
 
+  /**
+   * @throws PhotoAlreadyExistsException Photo with the same PhotoType and id already exists
+   */
   @Override
   public void save(PhotoType photoType, UUID id, byte[] photoBytes) {
     Path path = getPhotoPath(photoType, id);
 
-    try {
-      if (Files.exists(path)) {
-        Files.delete(path);
-      }
+    if (Files.exists(path)) {
+      throw new PhotoAlreadyExistsException();
+    }
 
+    try {
       Files.createDirectories(path.getParent());
       Files.write(path, photoBytes);
     } catch (IOException e) {

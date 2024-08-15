@@ -7,6 +7,7 @@ import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaHumanUserPassportRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaItemRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.JpaRentRepository;
+import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoNotFoundException;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepository;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepository.PhotoType;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.*;
@@ -16,8 +17,6 @@ import com.mipt.hsse.hssetechbackend.rent.rentprocessing.deleterentprocessing.De
 import com.mipt.hsse.hssetechbackend.rent.rentprocessing.deleterentprocessing.DeleteRentProcessor;
 import com.mipt.hsse.hssetechbackend.utils.VerificationResult;
 import jakarta.transaction.Transactional;
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -25,7 +24,6 @@ import java.util.Optional;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ServerErrorException;
 
 @Service
 public class RentService {
@@ -66,7 +64,14 @@ public class RentService {
             .findById(userId)
             .orElseThrow(() -> new EntityNotFoundException(HumanUserPassport.class, userId));
 
-    Rent rent = new Rent(request.name(), request.description(), request.startTime(), request.endTime(), renter, item);
+    Rent rent =
+        new Rent(
+            request.name(),
+            request.description(),
+            request.startTime(),
+            request.endTime(),
+            renter,
+            item);
 
     verifyRentStartEnd(request.startTime(), request.endTime(), rent).throwIfInvalid();
 
@@ -133,8 +138,8 @@ public class RentService {
     if (rentRepository.existsById(rentId)) {
       try {
         return photoRepository.findPhoto(PhotoType.RENT_CONFIRMATION, rentId);
-      } catch (IOException e) {
-        throw new ServerErrorException("Unexpected IO error while saving photo", e);
+      } catch (PhotoNotFoundException e) {
+        return null;
       }
     } else {
       throw new EntityNotFoundException(Rent.class, rentId);
@@ -147,16 +152,15 @@ public class RentService {
 
     verifyConfirmRentFinish(rent).throwIfInvalid();
 
-    try {
-      photoRepository.save(PhotoType.RENT_CONFIRMATION, rentId, photoBytes);
-    } catch (IOException | NoSuchAlgorithmException | UnsupportedOperationException e) {
-      throw new ServerErrorException("Unexpected IO error while saving photo", e);
-    }
+    photoRepository.save(PhotoType.RENT_CONFIRMATION, rentId, photoBytes);
   }
 
   @Transactional
   public void updateRent(UUID rentId, UpdateRentRequest request) {
-    Rent rent = rentRepository.findById(rentId).orElseThrow(() -> EntityNotFoundException.rentNotFound(rentId));
+    Rent rent =
+        rentRepository
+            .findById(rentId)
+            .orElseThrow(() -> EntityNotFoundException.rentNotFound(rentId));
 
     if (rent.getPlannedStart().isBefore(Instant.now())) {
       throw new VerificationFailedException(

@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
@@ -62,7 +61,7 @@ class PhotoRepositoryOnDriveTest {
   }
 
   @Test
-  public void testCreatePhoto() throws IOException, NoSuchAlgorithmException {
+  public void testCreatePhoto() {
     UUID uuid = UUID.randomUUID();
     byte[] bytes = new byte[] {1, 2, 3};
     photoRepository.save(PhotoRepository.PhotoType.ITEM_THUMBNAIL, uuid, bytes);
@@ -75,26 +74,7 @@ class PhotoRepositoryOnDriveTest {
   }
 
   @Test
-  public void testReplacePhoto() throws IOException, NoSuchAlgorithmException {
-    UUID uuid = UUID.randomUUID();
-
-    // Create the first photo
-    byte[] bytes = new byte[] {1, 2, 3};
-    photoRepository.save(PhotoRepository.PhotoType.ITEM_THUMBNAIL, uuid, bytes);
-    assertTrue(photoRepository.existsPhoto(PhotoRepository.PhotoType.ITEM_THUMBNAIL, uuid));
-
-    // Replace the first photo with another one
-    byte[] otherBytes = new byte[] {4, 5, 6};
-    photoRepository.save(PhotoRepository.PhotoType.ITEM_THUMBNAIL, uuid, otherBytes);
-    assertTrue(photoRepository.existsPhoto(PhotoRepository.PhotoType.ITEM_THUMBNAIL, uuid));
-    assertArrayEquals(
-        otherBytes, photoRepository.findPhoto(PhotoRepository.PhotoType.ITEM_THUMBNAIL, uuid));
-
-    photoRepository.deletePhoto(PhotoRepository.PhotoType.ITEM_THUMBNAIL, uuid);
-  }
-
-  @Test
-  public void testDeletePhoto() throws IOException, NoSuchAlgorithmException {
+  public void testDeletePhoto() {
     UUID uuid = UUID.randomUUID();
 
     photoRepository.save(PhotoRepository.PhotoType.ITEM_THUMBNAIL, uuid, new byte[] {1, 2, 3});
