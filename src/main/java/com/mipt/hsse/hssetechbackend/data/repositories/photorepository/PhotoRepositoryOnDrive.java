@@ -3,7 +3,6 @@ package com.mipt.hsse.hssetechbackend.data.repositories.photorepository;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
@@ -31,35 +30,46 @@ public class PhotoRepositoryOnDrive implements PhotoRepository {
   }
 
   @Override
-  public byte[] findPhoto(PhotoType photoType, UUID id) throws IOException {
+  public byte[] findPhoto(PhotoType photoType, UUID id) {
     Path path = getPhotoPath(photoType, id);
 
     if (!Files.exists(path)) {
       throw new PhotoNotFoundException();
     }
 
-    return Files.readAllBytes(path);
-  }
-
-  @Override
-  public void save(PhotoType photoType, UUID id, byte[] photoBytes)
-      throws IOException, NoSuchAlgorithmException {
-    Path path = getPhotoPath(photoType, id);
-
-    if (Files.exists(path)) {
-      Files.delete(path);
+    try {
+      return Files.readAllBytes(path);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
-
-    Files.createDirectories(path.getParent());
-    Files.write(path, photoBytes);
   }
 
   @Override
-  public void deletePhoto(PhotoType photoType, UUID id) throws IOException {
+  public void save(PhotoType photoType, UUID id, byte[] photoBytes) {
+    Path path = getPhotoPath(photoType, id);
+
+    try {
+      if (Files.exists(path)) {
+        Files.delete(path);
+      }
+
+      Files.createDirectories(path.getParent());
+      Files.write(path, photoBytes);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public void deletePhoto(PhotoType photoType, UUID id) {
     Path path = getPhotoPath(photoType, id);
 
     if (Files.exists(path)) {
-      Files.delete(path);
+      try {
+        Files.delete(path);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
     }
   }
 

@@ -1,7 +1,5 @@
 package com.mipt.hsse.hssetechbackend.data.repositories.photorepository;
 
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
 public interface PhotoRepository {
@@ -23,10 +21,9 @@ public interface PhotoRepository {
 
   boolean existsPhoto(PhotoType photoType, UUID id);
 
-  byte[] findPhoto(PhotoType photoType, UUID rentId) throws IOException;
+  byte[] findPhoto(PhotoType photoType, UUID rentId);
 
-  void save(PhotoType photoType, UUID rentId, byte[] photoBytes)
-      throws IOException, NoSuchAlgorithmException;
+  void save(PhotoType photoType, UUID rentId, byte[] photoBytes);
 
-  void deletePhoto(PhotoType photoType, UUID id) throws IOException;
+  void deletePhoto(PhotoType photoType, UUID id);
 }
