@@ -28,12 +28,7 @@ class PhotoRepositoryOnDriveTest {
   @AfterAll
   public static void deleteTestImagesFolder(@Value("${photos.path}") String photosFolder) {
     try {
-      var contents = new File(photosFolder).listFiles();
-      if (contents != null) {
-        for (var file : contents) {
-          deleteFile(file);
-        }
-      }
+      deleteFile(new File(photosFolder));
     } catch (IOException e) {
       LOGGER.warn("Failed to delete the test images folder after the tests have finished", e);
     }
