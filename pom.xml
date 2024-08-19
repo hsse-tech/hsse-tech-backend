@@ -117,6 +117,18 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-contract-verifier</artifactId>
+            <version>4.1.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>5.5.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -134,6 +146,17 @@
                         --add-opens java.base/java.util=ALL-UNNAMED
                         --add-opens java.base/java.lang=ALL-UNNAMED
                     </argLine>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-contract-maven-plugin</artifactId>
+                <version>4.1.2</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <baseClassForTests>
+                        com.mipt.hsse.hssetechbackend.CloudContractBase
+                    </baseClassForTests>
                 </configuration>
             </plugin>
         </plugins>
