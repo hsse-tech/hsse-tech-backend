@@ -1,6 +1,8 @@
 package com.mipt.hsse.hssetechbackend.oauth.config;
 
 import com.mipt.hsse.hssetechbackend.oauth.services.MiptOAuth2UserService;
+import java.util.List;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -8,6 +10,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -24,5 +29,17 @@ public class SecurityConfig {
                         .userInfoEndpoint(config -> config.userService(userService)))
                 .csrf(AbstractHttpConfigurer::disable)
                 .build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfiguration(@Value("${cors.allowed-origins}") List<String> allowedOrigins) {
+        var config = new CorsConfiguration();
+
+        config.setAllowedOrigins(allowedOrigins);
+
+        var urlSource = new UrlBasedCorsConfigurationSource();
+        urlSource.registerCorsConfiguration("/**", config);
+
+        return urlSource;
     }
 }
