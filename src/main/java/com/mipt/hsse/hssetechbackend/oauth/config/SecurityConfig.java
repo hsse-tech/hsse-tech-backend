@@ -22,7 +22,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http, MiptOAuth2UserService userService) throws Exception {
         return http.authorizeHttpRequests(auth ->
                         auth
-                            .requestMatchers("/api/locks/{id}/is-open").permitAll()
+                            .requestMatchers("/api/locks/{id}/is-open",
+                                            "/swagger-ui.html",
+                                            "/actuator/health").permitAll()
                             .anyRequest().hasAuthority("ROLE_MIPT_USER"))
             .oauth2Login(oauth -> oauth
                         .defaultSuccessUrl("/home", true)
