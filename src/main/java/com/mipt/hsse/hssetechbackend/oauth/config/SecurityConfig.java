@@ -19,7 +19,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 public class SecurityConfig {
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, MiptOAuth2UserService userService) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+                                                   MiptOAuth2UserService userService,
+                                                   @Value("${cors.allowed-origins}") List<String> allowedOrigins) throws Exception {
         return http.authorizeHttpRequests(auth ->
                         auth
                             .requestMatchers("/api/locks/{id}/is-open",
@@ -30,14 +32,16 @@ public class SecurityConfig {
                         .defaultSuccessUrl("/home", true)
                         .userInfoEndpoint(config -> config.userService(userService)))
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(config -> config.configurationSource(corsConfiguration(allowedOrigins)))
                 .build();
     }
 
     @Bean
-    public CorsConfigurationSource corsConfiguration(@Value("${cors.allowed-origins}") List<String> allowedOrigins) {
+    public CorsConfigurationSource corsConfiguration(List<String> allowedOrigins) {
         var config = new CorsConfiguration();
 
         config.setAllowedOrigins(allowedOrigins);
+        config.setAllowedMethods(List.of("*"));
 
         var urlSource = new UrlBasedCorsConfigurationSource();
         urlSource.registerCorsConfiguration("/**", config);
