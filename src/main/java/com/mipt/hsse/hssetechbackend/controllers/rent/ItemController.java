@@ -12,7 +12,7 @@ import com.mipt.hsse.hssetechbackend.data.entities.Rent;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoAlreadyExistsException;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoNotFoundException;
 import com.mipt.hsse.hssetechbackend.rent.services.ItemService;
-import com.mipt.hsse.hssetechbackend.utils.PngUtility;
+import com.mipt.hsse.hssetechbackend.utils.ImageUtility;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.io.IOException;
@@ -52,7 +52,7 @@ public class ItemController {
       throws IOException {
     byte[] photoBytes = photoServletRequest.getInputStream().readAllBytes();
 
-    if (!PngUtility.isPngFormat(photoBytes)) {
+    if (!ImageUtility.isAllowedImageFormat(photoBytes)) {
       return ResponseEntity.badRequest().build();
     }
 
@@ -65,9 +65,13 @@ public class ItemController {
     byte[] photoBytes = itemService.getItemPhoto(itemId);
     var returnResource = new ByteArrayResource(photoBytes);
 
+    final var filename = "thumbnail";
+    var fileExtension = ImageUtility.getFormatExtension(photoBytes);
+    var contentDisposition = "attachment; filename=\"%s.%s\"".formatted(filename, fileExtension);
+
     return ResponseEntity.ok()
         .contentType(MediaType.IMAGE_PNG)
-        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"thumbnail.png\"")
+        .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition)
         .body(returnResource);
   }
 
@@ -137,7 +141,7 @@ public class ItemController {
 
   @PreAuthorize("hasRole('ADMIN')")
   @DeleteMapping("/{itemId}")
-  public ResponseEntity<Void> deleteItem(@PathVariable("itemId") UUID itemId) throws IOException {
+  public ResponseEntity<Void> deleteItem(@PathVariable("itemId") UUID itemId) {
     itemService.deleteItem(itemId);
     return ResponseEntity.ok().build();
   }

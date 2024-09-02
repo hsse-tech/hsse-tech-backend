@@ -41,6 +41,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 @WebMvcTest(ItemController.class)
+@MockBean(UserPassportServiceBase.class)
 @TestPropertySource("classpath:application-test.properties")
 @Import({SecurityConfig.class, MiptOAuth2UserService.class})
 class ItemControllerTest {
@@ -52,8 +53,6 @@ class ItemControllerTest {
   @Autowired private ObjectMapper objectMapper;
 
   @MockBean private ItemService itemService;
-
-  @MockBean private UserPassportServiceBase passportService;
 
   @BeforeEach
   void setup() {
@@ -141,9 +140,9 @@ class ItemControllerTest {
 
   @Test
   @WithMockUser
-  void testPinThumbnailPhotoInvalidTypeJpg() throws Exception {
+  void testPinThumbnailPhotoInvalidType() throws Exception {
     UUID uuid = UUID.randomUUID();
-    byte[] pngBytes = ResourceExtractor.getResourceAsBytes("/test.jpg");
+    byte[] pngBytes = new byte[] {0, 1, 2, 3};
 
     mockMvc
         .perform(

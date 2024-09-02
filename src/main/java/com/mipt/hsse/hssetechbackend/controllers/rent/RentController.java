@@ -9,7 +9,7 @@ import com.mipt.hsse.hssetechbackend.data.entities.Rent;
 import com.mipt.hsse.hssetechbackend.oauth.services.OAuth2UserHelper;
 import com.mipt.hsse.hssetechbackend.rent.exceptions.*;
 import com.mipt.hsse.hssetechbackend.rent.services.RentService;
-import com.mipt.hsse.hssetechbackend.utils.PngUtility;
+import com.mipt.hsse.hssetechbackend.utils.ImageUtility;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.io.IOException;
@@ -64,8 +64,7 @@ public class RentController {
       throws IOException {
     byte[] photoBytes = photoServletRequest.getInputStream().readAllBytes();
 
-    // Ensure png format
-    if (!PngUtility.isPngFormat(photoBytes)) {
+    if (!ImageUtility.isAllowedImageFormat(photoBytes)) {
       return ResponseEntity.badRequest().build();
     }
 
@@ -79,9 +78,14 @@ public class RentController {
     if (photoBytes == null) return ResponseEntity.notFound().build();
 
     var returnResource = new ByteArrayResource(photoBytes);
+
+    final var filename = "confirmation";
+    var fileExtension = ImageUtility.getFormatExtension(photoBytes);
+    var contentDisposition = "attachment; filename=\"%s.%s\"".formatted(filename, fileExtension);
+
     return ResponseEntity.ok()
         .contentType(MediaType.IMAGE_PNG)
-        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"confirmation.png\"")
+        .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition)
         .body(returnResource);
   }
 
