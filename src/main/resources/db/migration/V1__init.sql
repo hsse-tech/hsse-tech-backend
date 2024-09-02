@@ -18,8 +18,7 @@ CREATE TABLE item_type
 
 CREATE TABLE lock_passport
 (
-    original_id UUID PRIMARY KEY,
-    is_open     BOOLEAN NOT NULL
+    original_id UUID PRIMARY KEY
 );
 
 CREATE TABLE item

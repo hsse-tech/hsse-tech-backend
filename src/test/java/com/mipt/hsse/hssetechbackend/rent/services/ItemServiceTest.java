@@ -13,11 +13,8 @@ import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoAlreadyExistsException;
 import com.mipt.hsse.hssetechbackend.data.repositories.photorepository.PhotoRepository;
-import com.mipt.hsse.hssetechbackend.lock.exceptions.ItemToLockCouplingException;
 import com.mipt.hsse.hssetechbackend.lock.services.LockService;
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -47,7 +44,6 @@ class ItemServiceTest extends DatabaseSuite {
   @Autowired private JpaHumanUserPassportRepository humanUserPassportRepository;
   @Autowired private JpaRentRepository rentRepository;
   @MockBean private PhotoRepository photoRepository;
-  @Autowired private LockService lockService;
 
   @BeforeEach
   void save() {
@@ -74,7 +70,7 @@ class ItemServiceTest extends DatabaseSuite {
   }
 
   @Test
-  void testSetItemThumbnailPhoto() throws Exception {
+  void testSetItemThumbnailPhoto() {
     byte[] photoBytes = new byte[] {1, 2, 3};
     Item item = new Item("test name", itemType);
     UUID uuid = itemRepository.save(item).getId();
@@ -86,7 +82,7 @@ class ItemServiceTest extends DatabaseSuite {
   }
 
   @Test
-  void testSetItemPhotoThumbnailAlreadyExisting() throws Exception {
+  void testSetItemPhotoThumbnailAlreadyExisting() {
     byte[] photoBytes = new byte[] {1, 2, 3};
     Item item = new Item("test name", itemType);
     UUID uuid = itemRepository.save(item).getId();
@@ -98,7 +94,7 @@ class ItemServiceTest extends DatabaseSuite {
   }
 
   @Test
-  void testGetItemThumbnailPhoto() throws Exception {
+  void testGetItemThumbnailPhoto() {
     byte[] photoBytes = new byte[] {1, 2, 3};
 
     when(photoRepository.findPhoto(any(), any())).thenReturn(photoBytes);
@@ -211,7 +207,7 @@ class ItemServiceTest extends DatabaseSuite {
   }
 
   @Test
-  void testDeleteItem() throws IOException {
+  void testDeleteItem() {
     final String itemName = "Particular item name";
 
     var createItemRequest = new CreateItemRequest(itemName, itemType.getId());
@@ -223,7 +219,7 @@ class ItemServiceTest extends DatabaseSuite {
   }
 
   @Test
-  void testDeleteImageOnDeleteItem() throws IOException, NoSuchAlgorithmException {
+  void testDeleteImageOnDeleteItem() {
     var createItemRequest = new CreateItemRequest("item name", itemType.getId());
     UUID uuid = itemService.createItem(createItemRequest).getId();
 
@@ -236,18 +232,5 @@ class ItemServiceTest extends DatabaseSuite {
     // Delete item; expected to also delete photo
     itemService.deleteItem(uuid);
     verify(photoRepository).deletePhoto(eq(PhotoRepository.PhotoType.ITEM_THUMBNAIL), eq(uuid));
-  }
-
-  @Test
-  void testProvideAccessToItem() throws ItemToLockCouplingException {
-    var createItemRequest = new CreateItemRequest("item name", itemType.getId());
-    UUID itemId = itemService.createItem(createItemRequest).getId();
-
-    var lock = lockService.createLock();
-    lockService.addItemToLock(lock.getId(), itemId);
-
-    assertFalse(lockService.isLockOpen(lock.getId()));
-    itemService.provideAccessToItem(itemId);
-    assertTrue(lockService.isLockOpen(lock.getId()));
   }
 }

@@ -1,15 +1,12 @@
 package com.mipt.hsse.hssetechbackend.data.entities;
 
 import jakarta.persistence.*;
-
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.boot.model.naming.ImplicitTenantIdColumnNameSource;
 
 @Getter
 @Setter
@@ -24,12 +21,8 @@ public class LockPassport {
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "lock")
   private List<Item> lockedItems;
 
-  @Column(name = "is_open", nullable = false)
-  private boolean isOpen;
-
   public LockPassport() {
     lockedItems = new ArrayList<>();
-    isOpen = false;
   }
 
   public void addItem(Item item) {
@@ -44,5 +37,9 @@ public class LockPassport {
 
   public boolean doesLockItem(Item item) {
     return item.getLock() != null && item.getLock().getId().equals(id);
+  }
+
+  public List<Item> getLockedItems() {
+    return Collections.unmodifiableList(lockedItems);
   }
 }

@@ -65,8 +65,6 @@ class LockServiceTest extends DatabaseSuite {
 
     assertNotNull(createdLock);
     assertNotNull(retrievedLock);
-    assertFalse(createdLock.isOpen());
-    assertFalse(retrievedLock.isOpen());
   }
 
   @Test
@@ -196,21 +194,5 @@ class LockServiceTest extends DatabaseSuite {
 
     // Return false, because the rent (even though it is going now) is owned by another user
     assertFalse(lockService.canUserOpenLock(user.getId(), lock.getId()));
-  }
-
-  @Test
-  void testOpenCloseLock() throws ItemToLockCouplingException {
-    LockPassport lock = lockService.createLock();
-    lockService.addItemToLock(lock.getId(), item.getId());
-
-    assertFalse(lock.isOpen());
-
-    lockService.openLock(lock.getId());
-    LockPassport updatedLock = lockRepository.findById(lock.getId()).orElseThrow();
-    assertTrue(updatedLock.isOpen());
-
-    lockService.closeLock(lock.getId());
-    updatedLock = lockRepository.findById(lock.getId()).orElseThrow();
-    assertFalse(updatedLock.isOpen());
   }
 }
