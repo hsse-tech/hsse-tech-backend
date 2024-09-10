@@ -45,6 +45,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(RentController.class)
+@MockBean(UserPassportServiceBase.class)
 @TestPropertySource("classpath:application-test.properties")
 @Import({SecurityConfig.class, MiptOAuth2UserService.class})
 class RentControllerTest {
@@ -62,8 +63,6 @@ class RentControllerTest {
   @Autowired private ObjectMapper objectMapper;
 
   @MockBean private RentService rentService;
-
-  @MockBean private UserPassportServiceBase passportService;
 
   @BeforeAll
   static void setupTestUser() {
@@ -93,7 +92,8 @@ class RentControllerTest {
 
     when(rentService.createRent(any(), any())).thenReturn(new Rent(start, end, userPassport, item));
 
-    CreateRentRequest createRentRequest = new CreateRentRequest(UUID.randomUUID(), start, end, "Test name", "Test description");
+    CreateRentRequest createRentRequest =
+        new CreateRentRequest(UUID.randomUUID(), start, end, "Test name", "Test description");
     String requestStr = objectMapper.writeValueAsString(createRentRequest);
 
     var mvcResult =
@@ -123,7 +123,8 @@ class RentControllerTest {
         .thenThrow(new CreateRentProcessingException(errorText));
 
     CreateRentRequest createRentRequest =
-        new CreateRentRequest(UUID.randomUUID(), Instant.now(), Instant.now(), "Test name", "Test description");
+        new CreateRentRequest(
+            UUID.randomUUID(), Instant.now(), Instant.now(), "Test name", "Test description");
     String requestStr = objectMapper.writeValueAsString(createRentRequest);
 
     var mvcResult =
@@ -240,9 +241,9 @@ class RentControllerTest {
 
   @Test
   @WithMockUser
-  void testPinPhotoConfirmationEndpointInvalidTypeJpg() throws Exception {
+  void testPinPhotoConfirmationEndpointInvalidType() throws Exception {
     UUID uuid = UUID.randomUUID();
-    byte[] pngBytes = ResourceExtractor.getResourceAsBytes("/test.jpg");
+    byte[] pngBytes = new byte[] {0, 1, 2, 3};
 
     mockMvc
         .perform(
@@ -258,7 +259,7 @@ class RentControllerTest {
   @WithMockUser
   void testGetPhotoConfirmationEndpoint() throws Exception {
     UUID uuid = UUID.randomUUID();
-    byte[] photoBytes = new byte[] {0, 1, 2, 3};
+    byte[] photoBytes = ResourceExtractor.getResourceAsBytes("/test.jpg");
     when(rentService.getPhotoForRent(any())).thenReturn(photoBytes);
 
     byte[] responseBytes =
