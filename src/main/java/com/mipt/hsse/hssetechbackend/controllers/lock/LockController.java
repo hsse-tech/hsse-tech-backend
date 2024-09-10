@@ -5,7 +5,6 @@ import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import com.mipt.hsse.hssetechbackend.apierrorhandling.RestExceptionHandler;
 import com.mipt.hsse.hssetechbackend.controllers.lock.responses.CreateLockResponse;
 import com.mipt.hsse.hssetechbackend.controllers.lock.responses.GetLockResponse;
-import com.mipt.hsse.hssetechbackend.data.entities.Item;
 import com.mipt.hsse.hssetechbackend.data.entities.LockPassport;
 import com.mipt.hsse.hssetechbackend.lock.exceptions.ItemToLockCouplingException;
 import com.mipt.hsse.hssetechbackend.lock.services.LockServiceBase;
@@ -42,9 +41,7 @@ public class LockController {
   public ResponseEntity<GetLockResponse> getLock(@PathVariable("id") UUID id) {
     Optional<LockPassport> lockPassport = lockService.findById(id);
     if (lockPassport.isPresent()) {
-      List<UUID> lockedItemsIds =
-          lockPassport.get().getLockedItems().stream().map(Item::getId).toList();
-      GetLockResponse response = new GetLockResponse(lockPassport.get().getId(), lockedItemsIds);
+      GetLockResponse response = GetLockResponse.fromLock(lockPassport.get());
       return ResponseEntity.ok(response);
     } else {
       return ResponseEntity.notFound().build();
@@ -54,9 +51,8 @@ public class LockController {
   @GetMapping
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<List<GetLockResponse>> getAllLocks() {
-    List<LockPassport> locks = lockService.findAll();
-    List<GetLockResponse> responses = locks.stream().map(GetLockResponse::fromLock).toList();
-    return ResponseEntity.ok(responses);
+    var locks = lockService.findAll().stream().map(GetLockResponse::fromLock).toList();
+    return ResponseEntity.ok(locks);
   }
 
   @DeleteMapping("{id}")
