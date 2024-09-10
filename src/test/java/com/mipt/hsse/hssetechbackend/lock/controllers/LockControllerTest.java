@@ -35,6 +35,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(LockController.class)
+@MockBean(UserPassportServiceBase.class)
 @TestPropertySource("classpath:application-test.properties")
 @Import({SecurityConfig.class, MiptOAuth2UserService.class})
 class LockControllerTest {
@@ -45,8 +46,6 @@ class LockControllerTest {
   @Autowired private ObjectMapper objectMapper;
 
   @MockBean private LockServiceBase lockService;
-
-  @MockBean private UserPassportServiceBase userPassportService;
 
   private static OAuth2User commonUserPrincipal;
   private static OAuth2User adminPrincipal;
@@ -202,7 +201,7 @@ class LockControllerTest {
 
   @Test
   @WithMockUser
-  void testTryOpenLockEndpoint() throws Exception {
+  void testOpenLockEndpoint() throws Exception {
     UUID lockId = UUID.randomUUID();
     UUID userId = OAuth2UserHelper.getUserId(commonUserPrincipal);
 
@@ -221,7 +220,7 @@ class LockControllerTest {
 
   @Test
   @WithMockUser
-  void testTryOpenLockEndpointForbidden() throws Exception {
+  void testOpenLockEndpointForbidden() throws Exception {
     UUID lockId = UUID.randomUUID();
     UUID userId = OAuth2UserHelper.getUserId(commonUserPrincipal);
 
@@ -236,52 +235,52 @@ class LockControllerTest {
 
     verify(lockService, never()).openLock(lockId);
   }
-
-  @Test
-  void testIsLockOpenEndpoint() throws Exception {
-    UUID lockId = UUID.randomUUID();
-
-    when(lockService.isLockOpen(lockId)).thenReturn(true);
-    doNothing().when(lockService).closeLock(lockId);
-
-    var mvcResult =
-        mockMvc
-            .perform(
-                get(BASE_MAPPING + "/{id}/is-open", lockId.toString()))
-            .andDo(print())
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
-
-    Boolean isOpen = objectMapper.readValue(mvcResult, Boolean.class);
-
-    assertTrue(isOpen);
-    verify(lockService).isLockOpen(lockId);
-    verify(lockService).closeLock(lockId);
-  }
-
-  @Test
-  @WithMockUser
-  void testIsLockOpenEndpointClosed() throws Exception {
-    UUID lockId = UUID.randomUUID();
-
-    when(lockService.isLockOpen(lockId)).thenReturn(false);
-
-    var mvcResult =
-        mockMvc
-            .perform(
-                get(BASE_MAPPING + "/{id}/is-open", lockId.toString()))
-            .andDo(print())
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
-
-    Boolean isOpen = objectMapper.readValue(mvcResult, Boolean.class);
-
-    assertFalse(isOpen);
-    verify(lockService).isLockOpen(lockId);
-    verify(lockService, never()).closeLock(lockId);
-  }
+  //
+  //  @Test
+  //  void testIsLockOpenEndpoint() throws Exception {
+  //    UUID lockId = UUID.randomUUID();
+  //
+  //    when(lockService.isLockOpen(lockId)).thenReturn(true);
+  //    doNothing().when(lockService).closeLock(lockId);
+  //
+  //    var mvcResult =
+  //        mockMvc
+  //            .perform(
+  //                get(BASE_MAPPING + "/{id}/is-open", lockId.toString()))
+  //            .andDo(print())
+  //            .andExpect(status().isOk())
+  //            .andReturn()
+  //            .getResponse()
+  //            .getContentAsString();
+  //
+  //    Boolean isOpen = objectMapper.readValue(mvcResult, Boolean.class);
+  //
+  //    assertTrue(isOpen);
+  //    verify(lockService).isLockOpen(lockId);
+  //    verify(lockService).closeLock(lockId);
+  //  }
+  //
+  //  @Test
+  //  @WithMockUser
+  //  void testIsLockOpenEndpointClosed() throws Exception {
+  //    UUID lockId = UUID.randomUUID();
+  //
+  //    when(lockService.isLockOpen(lockId)).thenReturn(false);
+  //
+  //    var mvcResult =
+  //        mockMvc
+  //            .perform(
+  //                get(BASE_MAPPING + "/{id}/is-open", lockId.toString()))
+  //            .andDo(print())
+  //            .andExpect(status().isOk())
+  //            .andReturn()
+  //            .getResponse()
+  //            .getContentAsString();
+  //
+  //    Boolean isOpen = objectMapper.readValue(mvcResult, Boolean.class);
+  //
+  //    assertFalse(isOpen);
+  //    verify(lockService).isLockOpen(lockId);
+  //    verify(lockService, never()).closeLock(lockId);
+  //  }
 }

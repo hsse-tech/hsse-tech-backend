@@ -4,6 +4,9 @@ import com.mipt.hsse.hssetechbackend.data.entities.*;
 import com.mipt.hsse.hssetechbackend.data.repositories.*;
 import com.mipt.hsse.hssetechbackend.lock.exceptions.ItemToLockCouplingException;
 import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
+
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -115,29 +118,16 @@ public class LockService implements LockServiceBase {
 
   @Override
   public void openLock(UUID lockId) {
-    setLockStatus(lockId, true);
+    // Send request on the lock to open
+  }
+  
+  @Override
+  public Optional<LockPassport> findById(UUID id) {
+    return lockRepository.findById(id);
   }
 
   @Override
-  public boolean isLockOpen(UUID lockId) {
-    LockPassport lock =
-        lockRepository
-            .findById(lockId)
-            .orElseThrow(() -> new EntityNotFoundException(LockPassport.class, lockId));
-    return lock.isOpen();
-  }
-
-  @Override
-  public void closeLock(UUID lockId) {
-    setLockStatus(lockId, false);
-  }
-
-  private void setLockStatus(UUID lockId, boolean opened) {
-    LockPassport lock =
-        lockRepository
-            .findById(lockId)
-            .orElseThrow(() -> new EntityNotFoundException(LockPassport.class, lockId));
-    lock.setOpen(opened);
-    lockRepository.save(lock);
+  public List<LockPassport> findAll() {
+    return lockRepository.findAll();
   }
 }
