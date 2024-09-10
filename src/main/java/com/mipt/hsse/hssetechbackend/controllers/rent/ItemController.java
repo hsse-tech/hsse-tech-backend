@@ -68,7 +68,7 @@ public class ItemController {
     byte[] photoBytes = itemService.getItemPhoto(itemId);
     var returnResource = new ByteArrayResource(photoBytes);
 
-    final var filename = "ItemThumbnail: " + itemOpt.get().getDisplayName();
+    var filename = "ItemThumbnail: " + itemOpt.get().getDisplayName();
     var fileExtension = ImageUtility.getFormatExtension(photoBytes);
     var contentDisposition = "attachment; filename=\"%s.%s\"".formatted(filename, fileExtension);
 
