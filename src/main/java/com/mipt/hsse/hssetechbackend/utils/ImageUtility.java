@@ -30,13 +30,11 @@ public class ImageUtility {
   private static ImageFormat getAllowedFormat(byte[] imageBytes) {
     if (imageBytes.length < SIGNATURE_LENGTH) return null;
 
-    byte[] imageSignature = new byte[] {imageBytes[0], imageBytes[1], imageBytes[2], imageBytes[3]};
-
     for (ImageFormat format : ImageFormat.values()) {
       boolean isFormat = true;
       // Compare the first 4 bytes of the image with signatures
       for (int i = 0; i < SIGNATURE_LENGTH; i++) {
-        if (imageSignature[i] != format.signature[i]) {
+        if (imageBytes[i] != format.signature[i]) {
           isFormat = false;
           break;
         }
