@@ -163,9 +163,12 @@ class ItemControllerTest {
   void testGetThumbnailPhoto() throws Exception {
     byte[] pngBytes = ResourceExtractor.getResourceAsBytes("/test.jpg");
 
-    when(itemService.getItemPhoto(any())).thenReturn(pngBytes);
-
     UUID uuid = UUID.randomUUID();
+
+    Item item  = new Item("name", new ItemType(BigDecimal.ZERO, "name", 100, false));
+    when(itemService.getItem(uuid)).thenReturn(Optional.of(item));
+    when(itemService.getItemPhoto(uuid)).thenReturn(pngBytes);
+
     var mvcResult =
         mockMvc
             .perform(
