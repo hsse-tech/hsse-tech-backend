@@ -8,7 +8,6 @@ import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.locks.Lock;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,7 +48,7 @@ public class LockService implements LockServiceBase {
     LockPassport lock =
         lockRepository
             .findById(lockId)
-            .orElseThrow(() -> new EntityNotFoundException(Lock.class, lockId));
+            .orElseThrow(() -> new EntityNotFoundException(LockPassport.class, lockId));
     Item item =
         itemRepository
             .findById(itemId)
@@ -71,7 +70,7 @@ public class LockService implements LockServiceBase {
     LockPassport lock =
         lockRepository
             .findById(lockId)
-            .orElseThrow(() -> new EntityNotFoundException(Lock.class, lockId));
+            .orElseThrow(() -> new EntityNotFoundException(LockPassport.class, lockId));
     Item item =
         itemRepository
             .findById(itemId)
@@ -105,7 +104,7 @@ public class LockService implements LockServiceBase {
     LockPassport lock =
         lockRepository
             .findById(lockId)
-            .orElseThrow(() -> new EntityNotFoundException(Lock.class, lockId));
+            .orElseThrow(() -> new EntityNotFoundException(LockPassport.class, lockId));
 
     for (var itemUnderLock : lock.getLockedItems()) {
       Rent currentRentOfItem = rentRepository.getCurrentRentOfItem(itemUnderLock.getId());
@@ -121,7 +120,7 @@ public class LockService implements LockServiceBase {
   public void openLock(UUID lockId) {
     // Send request on the lock to open
   }
-
+  
   @Override
   public Optional<LockPassport> findById(UUID id) {
     return lockRepository.findById(id);
