@@ -62,10 +62,13 @@ public class ItemController {
 
   @GetMapping(value = "/{item_id}/photo")
   public ResponseEntity<Resource> getItemThumbnailPhoto(@PathVariable("item_id") UUID itemId) {
+    Optional<Item> itemOpt = itemService.getItem(itemId);
+    if (itemOpt.isEmpty()) throw new EntityNotFoundException(Item.class, itemId);
+
     byte[] photoBytes = itemService.getItemPhoto(itemId);
     var returnResource = new ByteArrayResource(photoBytes);
 
-    final var filename = "thumbnail";
+    final var filename = "ItemThumbnail: " + itemOpt.get().getDisplayName();
     var fileExtension = ImageUtility.getFormatExtension(photoBytes);
     var contentDisposition = "attachment; filename=\"%s.%s\"".formatted(filename, fileExtension);
 
