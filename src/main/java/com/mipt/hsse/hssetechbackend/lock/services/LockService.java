@@ -5,7 +5,6 @@ import com.mipt.hsse.hssetechbackend.data.repositories.*;
 import com.mipt.hsse.hssetechbackend.lock.exceptions.ItemToLockCouplingException;
 import com.mipt.hsse.hssetechbackend.apierrorhandling.EntityNotFoundException;
 import java.util.UUID;
-import java.util.concurrent.locks.Lock;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,7 +45,7 @@ public class LockService implements LockServiceBase {
     LockPassport lock =
         lockRepository
             .findById(lockId)
-            .orElseThrow(() -> new EntityNotFoundException(Lock.class, lockId));
+            .orElseThrow(() -> new EntityNotFoundException(LockPassport.class, lockId));
     Item item =
         itemRepository
             .findById(itemId)
@@ -68,7 +67,7 @@ public class LockService implements LockServiceBase {
     LockPassport lock =
         lockRepository
             .findById(lockId)
-            .orElseThrow(() -> new EntityNotFoundException(Lock.class, lockId));
+            .orElseThrow(() -> new EntityNotFoundException(LockPassport.class, lockId));
     Item item =
         itemRepository
             .findById(itemId)
@@ -102,7 +101,7 @@ public class LockService implements LockServiceBase {
     LockPassport lock =
         lockRepository
             .findById(lockId)
-            .orElseThrow(() -> new EntityNotFoundException(Lock.class, lockId));
+            .orElseThrow(() -> new EntityNotFoundException(LockPassport.class, lockId));
 
     for (var itemUnderLock : lock.getLockedItems()) {
       Rent currentRentOfItem = rentRepository.getCurrentRentOfItem(itemUnderLock.getId());
@@ -124,7 +123,7 @@ public class LockService implements LockServiceBase {
     LockPassport lock =
         lockRepository
             .findById(lockId)
-            .orElseThrow(() -> new EntityNotFoundException(Lock.class, lockId));
+            .orElseThrow(() -> new EntityNotFoundException(LockPassport.class, lockId));
     return lock.isOpen();
   }
 
@@ -137,7 +136,7 @@ public class LockService implements LockServiceBase {
     LockPassport lock =
         lockRepository
             .findById(lockId)
-            .orElseThrow(() -> new EntityNotFoundException(Lock.class, lockId));
+            .orElseThrow(() -> new EntityNotFoundException(LockPassport.class, lockId));
     lock.setOpen(opened);
     lockRepository.save(lock);
   }
